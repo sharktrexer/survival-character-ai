@@ -33,7 +33,7 @@ store dictionary of customized stats with associated names
 '''
 PEOPLE = [
     make_peep("Chris", 
-              "", 
+              "Reactive Chef", 
               [
                 4,3,-2,
                 1,-1,2,
@@ -53,7 +53,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Sean", 
-              "Vengeful", 
+              "Vengeful Targeter", 
               [
                 2,1,2,
                 5,1,-2,
@@ -63,7 +63,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Ray", 
-              "Himbo", 
+              "Silly Strongman", 
               [
                 5,5,-3,
                 -2,0,-4,
@@ -73,7 +73,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Lito", 
-              "Manipulator", 
+              "Manipulating Tank", 
               [
                 3,3,2,
                 -3,2,1,
@@ -93,7 +93,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Cindy", 
-              "Shallow", 
+              "Shallow Cleric", 
               [
                 -4,1,3,
                 3,5,-4,
@@ -103,7 +103,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Jayce", 
-              "Entertainer", 
+              "Hedonistic Supporter", 
               [
                 2,2,4,
                 -2,1,2,
@@ -113,7 +113,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Leo", 
-              "Blank Slate", 
+              "Chill Jack of All Trades", 
               [
                 1,2,2,
                 2,3,4,
@@ -123,7 +123,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Jimmy", 
-              "Bully", 
+              "Independant Bully", 
               [
                 4,4,4,
                 1,1,0,
@@ -137,4 +137,4 @@ def print_peeps():
     for p in PEOPLE:
         print(p, "\n")
         
-print_peeps()
+#print_peeps()
