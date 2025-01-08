@@ -33,7 +33,7 @@ store dictionary of customized stats with associated names
 '''
 PEOPLE = [
     make_peep("Chris", 
-              "Perfectionist", 
+              "", 
               [
                 4,3,-2,
                 1,-1,2,
@@ -43,7 +43,7 @@ PEOPLE = [
                 ]),
     
     make_peep("Adan", 
-              "Handsome Rogue", 
+              "Cunning Rogue", 
               [
                 0,2,5,
                 4,2,1,
@@ -52,7 +52,7 @@ PEOPLE = [
                 0,1
                 ]),
     
-    make_peep("Shown", 
+    make_peep("Sean", 
               "Vengeful", 
               [
                 2,1,2,
