@@ -35,29 +35,29 @@ PEOPLE = [
     make_peep("Chris", 
               "Reactive Chef", 
               [
-                4,3,-2,
-                1,-1,2,
-                5,0,1,
-                1,-2,4,
+                4,3,-1,
+                0,-1,2,
+                5,1,1,
+                2,-3,3,
                 -1,3
                 ]),
     
     make_peep("Adan", 
               "Cunning Rogue", 
               [
-                0,2,5,
+                1,2,5,
                 4,2,1,
                 1,1,-2,
-                2,1,0,
+                2,1,1,
                 0,1
                 ]),
     
-    make_peep("Sean", 
+    make_peep("Shown", 
               "Vengeful Targeter", 
               [
                 2,1,2,
-                5,1,-2,
-                4,3,1,
+                5,0,-2,
+                4,3,2,
                 0,-1,1,
                 -1,2
                 ]),
@@ -65,11 +65,11 @@ PEOPLE = [
     make_peep("Ray", 
               "Silly Strongman", 
               [
-                5,5,-3,
+                5,5,-4,
                 -2,0,-4,
                 0,4,3,
                 3,3,5,
-                -3,2
+                -3,3
                 ]),
     
     make_peep("Lito", 
@@ -83,52 +83,52 @@ PEOPLE = [
                 ]),
     
     make_peep("Rebecca", 
-              "Outcast", 
+              "Cowardly Outcast", 
               [
                 -1,-1,1,
                 0,3,1,
                 1,-3,-4,
-                -5,2,5,
-                -4,5
+                -5,2,8,
+                -4,2
                 ]),
     
     make_peep("Cindy", 
               "Shallow Cleric", 
               [
-                -4,1,3,
-                3,5,-4,
+                -4,0,3,
+                2,5,-4,
                 2,3,-4,
                 4,2,0,
-                3,4
+                5,4
                 ]),
     
     make_peep("Jayce", 
               "Hedonistic Supporter", 
               [
-                2,2,4,
+                2,2,3,
                 -2,1,2,
-                2,0,0,
+                2,1,0,
                 3,-2,1,
                 2,3
                 ]),
     
-    make_peep("Leo", 
-              "Chill Jack of All Trades", 
+    make_peep("Neo", 
+              "The Jack of All Trades", 
               [
-                1,2,2,
+                1,2,1,
                 2,3,4,
                 2,-1,-3,
-                1,3,2,
+                1,4,2,
                 1,-1
                 ]),
     
     make_peep("Jimmy", 
               "Independant Bully", 
               [
-                4,4,4,
+                4,4,3,
                 1,1,0,
-                2,3,4,
-                -3,-2,4
+                2,4,4,
+                -3,-2,4,
                 -2,-2
                 ]),
 ]
