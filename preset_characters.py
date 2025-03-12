@@ -73,13 +73,13 @@ PEOPLE = [
                 ]),
     
     make_peep("Lito", 
-              "Manipulating Tank", 
+              "Manipulating Deciever", 
               [
                 3,3,2,
-                -3,2,1,
-                -3,1,1,
-                4,3,3,
-                1,0
+                -3,-2,1,
+                -1,1,1,
+                5,3,3,
+                1,2
                 ]),
     
     make_peep("Rebecca", 
@@ -103,13 +103,13 @@ PEOPLE = [
                 ]),
     
     make_peep("Jayce", 
-              "Hedonistic Supporter", 
+              "Hedonistic Tank", 
               [
-                2,2,3,
-                -2,1,2,
+                1,4,0,
+                -4,-1,2,
                 2,1,0,
-                3,-2,1,
-                2,3
+                4,0,3,
+                1,3
                 ]),
     
     make_peep("Neo", 
