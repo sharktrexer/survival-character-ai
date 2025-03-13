@@ -4,6 +4,11 @@ class Character:
         self.name = name
         self.desc = desc
         self.stats = stats_dict
+        self.avg_stat_diffs = dict()
+        self.avg_diff = 0
+        self.stat_combos = []
         
     def __str__(self):
         return self.name + ": " + "\n" + self.desc + "\n" + str(self.stats)
+ 
+ 
