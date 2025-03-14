@@ -24,7 +24,22 @@ class combo:
         self.l_stat = l_stat
         
     def __str__(self):
-        return self.m_stat + " + " + self.l_stat + " = " + self.peep.name
+        diff = self.peep.stats[self.m_stat] - self.peep.stats[self.l_stat]
+        return (
+                self.m_stat + " - " + self.l_stat + " = " + self.peep.name + "\t\t (" 
+                + str(self.peep.stats[self.m_stat]) + " - " 
+                + str(self.peep.stats[self.l_stat]) + ") [" 
+                + str(diff) + "]"
+                )
+        
+    def str_lesser(self):
+        diff = self.peep.stats[self.l_stat] + self.peep.stats[self.m_stat]
+        return (
+                self.l_stat + " + " + self.m_stat + " = " + self.peep.name + "\t\t (" 
+                + str(self.peep.stats[self.l_stat]) + " + " 
+                + str(self.peep.stats[self.m_stat]) + ") [" 
+                + str(diff) + "]"
+                )
 
 def set_avg_stat_diff():
     for p in PEOPLE:
@@ -117,6 +132,14 @@ def print_general_combos():
         print(combo)
 
 print_general_combos()
+
+def print_combos_by_L_stat():
+    print("\nGeneral combinations by lesser stat:")
+    l_combos = sorted(combos, key=lambda c: c.l_stat)
+    for combo in l_combos:
+        print(combo.str_lesser())
+    
+print_combos_by_L_stat()
 
 def print_distribution():
 
