@@ -246,7 +246,7 @@ def get_highest_stat(peeps: list, stat: str) -> str:
     return sorted_peeps
 
 ''' gets peep with highest difference between most and least desired choice.
-Chooses peep with the highest desired stat if there is a tie
+Chooses peep with the highest desired stat of top 2 if there is a tie
 '''
 def get_highest_diff_peep(sorted_peeps: list, m_stat: str, l_stat: str) -> list:
   top_peep_diff = sorted_peeps[0].stats[m_stat] - sorted_peeps[0].stats[l_stat]
@@ -274,8 +274,6 @@ def get_distribution() -> dict:
                 
                 # Store stat combo in character that would be selected
                 top_peep.stat_combos.append((m_stat, l_stat))
-
-get_distribution()
 
 def print_combos():
     
@@ -309,8 +307,6 @@ def print_combos_by_peep():
                    + str(len(combo.peep.stat_combos)) + ": "))
             cur_name = combo.peep.name
         print(combo.str_simple())
-
-print_combos_by_peep()
 
 ''' Prints character names and how many times they would be selected based on 2 stat choices'''
 def print_distribution():

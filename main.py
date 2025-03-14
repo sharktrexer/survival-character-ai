@@ -1,4 +1,4 @@
-from preset_characters import STAT_NAMES, PEOPLE
+from preset_characters import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
 
 
 
@@ -30,23 +30,8 @@ def main():
         sorted_people = sort_peeps(PEOPLE, most_choice, least_choice)
 
         # tiebreaker:
-        # if 2 have same difference, choose the one with the highest desired stat
-        # TODO: check for a tie!!!
-        top_peep_diff = abs(sorted_people[0].stats[most_choice] - sorted_people[0].stats[least_choice])
-        next_peep_diff = abs(sorted_people[1].stats[most_choice] - sorted_people[1].stats[least_choice])
-        top_people = [sorted_people[0]]
-        
-        if top_peep_diff == next_peep_diff:
-            top_people = get_highest_stat(sorted_people[:2], most_choice)
+        top_peep = get_highest_diff_peep(sorted_people, most_choice, least_choice)
 
-        for peep in sorted_people:
-            print(peep.name)
-
-        print("\n")
-
-        for peep in top_people:
-            print(peep.name)
-
-        print("\nYou got: " + str(top_people[0]))
+        print("\nYou got: " + str(top_peep))
         
 #main()
