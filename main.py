@@ -15,6 +15,17 @@ character_count = {
     "Jimmy" : 0,
 }
 
+combos = []
+
+class combo:
+    def __init__(self, peep, m_stat, l_stat):
+        self.peep = peep
+        self.m_stat = m_stat
+        self.l_stat = l_stat
+        
+    def __str__(self):
+        return self.m_stat + " + " + self.l_stat + " = " + self.peep.name
+
 def set_avg_stat_diff():
     for p in PEOPLE:
         total_avg = 0
@@ -42,10 +53,25 @@ def print_avg_stats():
   
 #print_avg_stats()
 
+def diff_of_stats(peep, m_stat, l_stat):
+    
+    most_stat = peep.stats[m_stat]
+    least_stat = peep.stats[l_stat]
+    
+    larger_stat = most_stat if most_stat > least_stat else least_stat
+    smaller_stat = least_stat if most_stat > least_stat else most_stat
+    
+    if peep.m_stat > 0 and peep.l_stat > 0 or peep.m_stat < 0 and peep.l_stat < 0:
+        return most_stat, abs(smaller_stat) - abs(larger_stat)
+    else:
+        return most_stat, abs(most_stat) + abs(least_stat)
+
 # sort peeps by difference between most and least choice
 def sort_peeps(peeps: list, most_choice: str, least_choice: str) -> list:
     sorted_peeps = sorted(peeps, key=lambda p: -(p.stats[most_choice] - p.stats[least_choice]))
     return sorted_peeps
+#TODO: get 2 lists, 1 sorted by highest wanted stat and 1 sorted by lowest discarded stat
+# Pick character with highest difference of indexes between 2 lists.
 
 # sort peeps with highest stat
 def get_highest_stat(peeps: list, stat: str) -> str:
@@ -58,6 +84,7 @@ def get_distribution(peeps: list) -> dict:
         for l_stat in STAT_NAMES:
             if m_stat != l_stat:
                 sorted_people = sort_peeps(PEOPLE, m_stat, l_stat)
+                # tiebreaker
                 top_peep_diff = sorted_people[0].stats[m_stat] - sorted_people[0].stats[l_stat]
                 next_peep_diff = sorted_people[1].stats[m_stat] - sorted_people[1].stats[l_stat]
                 highest_peep = [sorted_people[0]]
@@ -65,6 +92,9 @@ def get_distribution(peeps: list) -> dict:
                 if top_peep_diff == next_peep_diff:
                     highest_peep = get_highest_stat(sorted_people[:2], m_stat)
                 character_count[highest_peep[0].name] += 1
+                
+                # Store general combo
+                combos.append(combo(highest_peep[0], m_stat, l_stat))
                 
                 # Store stat combo in character that would be selected
                 highest_peep[0].stat_combos.append((m_stat, l_stat))
@@ -79,7 +109,14 @@ def print_combos():
             print(stat[0], stat[1])
         print("\n-----------------------------")
 
-print_combos()
+#print_combos()
+
+def print_general_combos():
+    print("\nGeneral combinations:")
+    for combo in combos:
+        print(combo)
+
+print_general_combos()
 
 def print_distribution():
 
