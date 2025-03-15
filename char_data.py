@@ -158,39 +158,32 @@ combos = []
 
 ''' Class to store combo of peep, desired stat, undesired stat, and runner ups '''
 class combo:
-    def __init__(self, peep, m_stat, l_stat, ):
+    def __init__(self, peep, m_stat, l_stat, runner_ups):
         self.peep = peep
         self.m_stat = m_stat
         self.l_stat = l_stat
+        self.runner_ups = runner_ups
         
     def __str__(self):
-        diff = self.peep.stats[self.m_stat] - self.peep.stats[self.l_stat]
-        return (
-                self.m_stat + " - " + self.l_stat + " = " + self.peep.name + "\t\t (" 
-                + str(self.peep.stats[self.m_stat]) + " - " 
-                + str(self.peep.stats[self.l_stat]) + ") [" 
-                + str(diff) + "]"
+        return (self.peep.str_difference(self.m_stat, self.l_stat) + " | \t\t"
+                + self.runner_ups[0].str_difference(self.m_stat, self.l_stat, is_simple=True) + " | \t"
+                + self.runner_ups[1].str_difference(self.m_stat, self.l_stat, is_simple=True)
                 )
         
     ''' String format for sorting by discarded stat '''
     def str_lesser(self):
-        diff = self.peep.stats[self.l_stat] + self.peep.stats[self.m_stat]
-        return (
-                self.l_stat + " + " + self.m_stat + " = " + self.peep.name + "\t\t (" 
-                + str(self.peep.stats[self.l_stat]) + " + " 
-                + str(self.peep.stats[self.m_stat]) + ") [" 
-                + str(diff) + "]"
+        return (self.peep.str_difference(self.l_stat, self.m_stat, is_reversed=True)  + " | \t\t"
+                + self.runner_ups[0].str_difference(self.m_stat, self.l_stat, is_reversed=True, is_simple=True) 
+                + " | \t"
+                + self.runner_ups[1].str_difference(self.m_stat, self.l_stat, is_reversed=True, is_simple=True)
                 )
         
     ''' String format to exclude peep name'''
     def str_simple(self):
-      diff = self.peep.stats[self.m_stat] - self.peep.stats[self.l_stat]
-      return (
-        self.m_stat + " - " + self.l_stat  + "\t\t (" 
-        + str(self.peep.stats[self.m_stat]) + " - " 
-        + str(self.peep.stats[self.l_stat]) + ") [" 
-        + str(diff) + "]"
-        )
+      return (self.peep.str_difference(self.m_stat, self.l_stat, no_name=True) + " | \t\t"
+                + self.runner_ups[0].str_difference(self.m_stat, self.l_stat, is_simple=True) + " | \t"
+                + self.runner_ups[1].str_difference(self.m_stat, self.l_stat, is_simple=True)
+                )
       
 '''Gets average difference between stats for each character, and their overall average'''
 def set_avg_stat_diff():
@@ -246,17 +239,17 @@ def get_highest_stat(peeps: list, stat: str) -> str:
     return sorted_peeps
 
 ''' gets peep with highest difference between most and least desired choice.
-Chooses peep with the highest desired stat of top 2 if there is a tie
+Chooses peep with the highest desired stat of top 3 if there is a tie
 '''
 def get_highest_diff_peep(sorted_peeps: list, m_stat: str, l_stat: str) -> list:
   top_peep_diff = sorted_peeps[0].stats[m_stat] - sorted_peeps[0].stats[l_stat]
   next_peep_diff = sorted_peeps[1].stats[m_stat] - sorted_peeps[1].stats[l_stat]
-  highest_peep = [sorted_peeps[0]]
+  highest_peeps = sorted_peeps[:3]
   
   if top_peep_diff == next_peep_diff:
-      highest_peep = get_highest_stat(sorted_peeps[:3], m_stat)
+      highest_peeps = get_highest_stat(highest_peeps, m_stat)
       
-  return highest_peep[0]
+  return highest_peeps
 
 ''' calculates character distribution based on 2 chosen stats, 
 and the stat combos that would be selected '''
@@ -266,22 +259,15 @@ def get_distribution() -> dict:
             if m_stat != l_stat:
                 sorted_people = sort_peeps(PEOPLE, m_stat, l_stat)
                 # tiebreaker
-                top_peep = get_highest_diff_peep(sorted_people, m_stat, l_stat)
+                top_peeps = get_highest_diff_peep(sorted_people, m_stat, l_stat)
+                top_peep = top_peeps[0]
                 character_count[top_peep.name] += 1
                 
                 # Store general combo
-                combos.append(combo(top_peep, m_stat, l_stat))
+                combos.append(combo(top_peep, m_stat, l_stat, top_peeps[1:]))
                 
                 # Store stat combo in character that would be selected
                 #top_peep.stat_combos.append((m_stat, l_stat))
-
-def print_combos():
-    
-    for p in PEOPLE:
-        print("\n" + p.name + " " + str(len(p.stat_combos)) + ": ")
-        for stat in p.stat_combos:
-            print(stat[0], stat[1])
-        print("\n-----------------------------")
 
 ''' Prints combos grouped by most stat'''
 def print_combos_by_M_stat():
@@ -303,8 +289,8 @@ def print_combos_by_peep():
     cur_name = ""
     for combo in p_combos:
         if cur_name != combo.peep.name:
-            print(("\n--------------------\n\n<" + combo.peep.name.upper() + "> " 
-                   + str(len(combo.peep.stat_combos)) + ": "))
+            print(("\n--------------------\n\n\t\t<" + combo.peep.name + "> " 
+                   + str(character_count[combo.peep.name]) + ": "))
             cur_name = combo.peep.name
         print(combo.str_simple())
 
