@@ -5,7 +5,7 @@ import typing_extensions as typing
 
 from dotenv import load_dotenv
 
-from preset_characters import STAT_NAMES
+from char_data import STAT_NAMES
 
 load_dotenv()
 

@@ -1,5 +1,4 @@
-from preset_characters import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
-
+from char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
 
 
 # main loop
@@ -34,4 +33,4 @@ def main():
 
         print("\nYou got: " + str(top_peep))
         
-#main()
+main()
