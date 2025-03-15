@@ -31,6 +31,6 @@ def main():
         # tiebreaker:
         top_peep = get_highest_diff_peep(sorted_people, most_choice, least_choice)
 
-        print("\nYou got: " + str(top_peep))
+        print("\nYou got: " + str(top_peep) + "\n")
         
 main()

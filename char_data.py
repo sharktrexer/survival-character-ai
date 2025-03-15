@@ -156,9 +156,9 @@ character_count = {
 # Stores list of combos and their resulting character
 combos = []
 
-''' Class to store combo of peep, m_stat, l_stat '''
+''' Class to store combo of peep, desired stat, undesired stat, and runner ups '''
 class combo:
-    def __init__(self, peep, m_stat, l_stat):
+    def __init__(self, peep, m_stat, l_stat, ):
         self.peep = peep
         self.m_stat = m_stat
         self.l_stat = l_stat
@@ -254,7 +254,7 @@ def get_highest_diff_peep(sorted_peeps: list, m_stat: str, l_stat: str) -> list:
   highest_peep = [sorted_peeps[0]]
   
   if top_peep_diff == next_peep_diff:
-      highest_peep = get_highest_stat(sorted_peeps[:2], m_stat)
+      highest_peep = get_highest_stat(sorted_peeps[:3], m_stat)
       
   return highest_peep[0]
 
@@ -273,7 +273,7 @@ def get_distribution() -> dict:
                 combos.append(combo(top_peep, m_stat, l_stat))
                 
                 # Store stat combo in character that would be selected
-                top_peep.stat_combos.append((m_stat, l_stat))
+                #top_peep.stat_combos.append((m_stat, l_stat))
 
 def print_combos():
     
