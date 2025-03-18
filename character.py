@@ -54,3 +54,15 @@ class Character:
 
     def skirmish(self):
         return self.stats["Strength"] + self.stats["Defense"] + self.stats["Intimidation"]
+    
+    def get_emotional_stats(self):
+        return {stat: self.stats[stat] for stat in 
+                ["Fear", "Intimidation", "Charisma", "Stress", "Hunger", "Creativity"]}
+        
+    def get_physical_stats(self):
+        return {stat: self.stats[stat] for stat in 
+                ["Strength", "Defense", "Evasion", "Dexterity", "Intellect", "Recovery", "Health", "Energy"]}
+        
+    def get_physical_stats2(self):
+        return {stat: self.stats[stat] for stat in 
+                ["Strength", "Defense", "Evasion", "Dexterity", "Intellect", "Recovery"]}
