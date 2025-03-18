@@ -39,3 +39,18 @@ class Character:
                     name + "= (" + str(first_stat) + " " + op + " " 
                     + str(second_stat) + ") [" + str(diff) + "]"
                     )   
+            
+    def initiative(self):
+        return self.stats["Dexterity"] + self.stats["Evasion"]
+
+    def leadership(self):
+        return self.stats["Charisma"] + self.stats["Intimidation"] + self.stats["Fear"]
+
+    def acrobatics(self):
+        return self.stats["Dexterity"] + self.stats["Strength"]
+
+    def perception(self):
+        return self.stats["Intellect"] + self.stats["Evasion"]
+
+    def skirmish(self):
+        return self.stats["Strength"] + self.stats["Defense"] + self.stats["Intimidation"]

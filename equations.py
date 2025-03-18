@@ -1,18 +1,10 @@
 from character import Character
 
-class sub_stats:
-    def initiative(peep: Character):
-        return peep.stats["Dexterity"] + peep.stats["Evasion"]
-
-    def leadership(peep: Character):
-        return peep.stats["Charisma"] + peep.stats["Intimidation"] + peep.stats["Fear"]
-
-    def acrobatics(peep: Character):
-        return peep.stats["Dexterity"] + peep.stats["Strength"]
-
-    def perception(peep: Character):
-        return peep.stats["Intellect"] + peep.stats["Evasion"]
-
-    def skirmish(peep: Character):
-        return peep.stats["Strength"] + peep.stats["Defense"] + peep.stats["Intimidation"]
-    
+def get_cur_init(peep: Character, anchor):
+    rounds_passed = 0 # get from "battle manager"
+    init_growth = ((peep.initiative() - anchor)*rounds_passed) # stored in Character
+    gain_bonus = peep.initiative() + init_growth - anchor >= 2(anchor)
+    # reset round counter
+    if gain_bonus:
+        rounds_passed = 0
+    return gain_bonus
