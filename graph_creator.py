@@ -236,7 +236,7 @@ def create_char_graph(N, data, labels, header, color='r'):
 
     fig, axs = plt.subplots(figsize=(18, 9), nrows=2, ncols=5,   
                             subplot_kw=dict(projection='radar'))
-    fig.subplots_adjust(wspace=0.45, hspace=0.10, top=0.85, bottom=0.05)
+    fig.subplots_adjust(wspace=0.75, hspace=0.05, top=0.85, bottom=0.05)
     
     # Plot each case of character data on separate spider charts
     # loop goes over ever "character"
