@@ -181,7 +181,7 @@ def create_example_charts():
 
     plt.show()
     
-def create_char_graph():
+def create_char_graph_example():
     N = 8
     theta = radar_factory(N)
 
@@ -218,4 +218,46 @@ def create_char_graph():
 
     plt.show()
     
-create_char_graph()
+#create_char_graph_example()
+
+'''
+Example of data format
+    data = [
+        (Character name, [stat values]),
+        (Character name, [stat values]),
+        etc
+        ]
+'''
+def create_char_graph(N, data, labels, header, color='r'):
+    
+    theta = radar_factory(N)
+
+    spoke_labels = labels
+
+    fig, axs = plt.subplots(figsize=(18, 9), nrows=2, ncols=5,   
+                            subplot_kw=dict(projection='radar'))
+    fig.subplots_adjust(wspace=0.45, hspace=0.10, top=0.85, bottom=0.05)
+    
+    # Plot each case of character data on separate spider charts
+    # loop goes over ever "character"
+    for ax, (title, case_data) in zip(axs.flat, data):
+        ax.set_rgrids([-4, -2, 0, 2, 4, 6, 8]) 
+        ax.set_rlim(-4, 8)
+        ax.set_title(title, weight='bold', size='medium', position=(0.5, 1.1),
+                     horizontalalignment='center', verticalalignment='center')
+        
+        # stats
+        ax.plot(theta, case_data, color=color)
+        ax.fill(theta, case_data, facecolor=color, alpha=0.25, label='_nolegend_')
+        ax.set_varlabels(spoke_labels)
+
+    # add legend relative to top-left plot
+    #labels = ('Factor 1', 'Factor 2', 'Factor 3', 'Factor 4', 'Factor 5')
+    #legend = axs[0, 0].legend(labels, loc=(0.9, .95),labelspacing=0.1, fontsize='small')
+
+    # title
+    fig.text(0.5, 0.965, header,
+             horizontalalignment='center', color='black', weight='bold',
+             size='large')
+
+    plt.show()

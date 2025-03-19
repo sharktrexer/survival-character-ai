@@ -45,6 +45,7 @@ def main():
         
 
 char_data.get_distribution()
+
 char_data.print_combos_by_peep()
 #char_data.print_combos_by_M_stat()
 #char_data.print_combos_by_L_stat()

@@ -87,8 +87,8 @@ PEOPLE = [
               {
                 "Strength": -1, "Defense": -1, "Evasion": 1,
                 "Dexterity": 0, "Recovery": 3, "Intellect": 1,
-                "Creativity": 1, "Fear": -3, "Intimidation": -4,
-                "Charisma": -5, "Stress": 2, "Health": 8,
+                "Creativity": 1, "Fear": -4, "Intimidation": -4,
+                "Charisma": -4, "Stress": 2, "Health": 8,
                 "Hunger": -4, "Energy": 2
                 }),
     
