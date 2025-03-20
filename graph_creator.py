@@ -234,7 +234,7 @@ def create_char_graph(N, data, labels, header, color='r'):
 
     spoke_labels = labels
 
-    fig, axs = plt.subplots(figsize=(18, 9), nrows=2, ncols=5,   
+    fig, axs = plt.subplots(figsize=(16, 9), nrows=2, ncols=5,   
                             subplot_kw=dict(projection='radar'))
     fig.subplots_adjust(wspace=0.75, hspace=0.05, top=0.85, bottom=0.05)
     

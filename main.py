@@ -1,6 +1,6 @@
 from char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
 import char_data
-
+import graph_data as gd
 
 # main loop
 def main():
@@ -46,10 +46,14 @@ def main():
 
 char_data.get_distribution()
 
-char_data.print_combos_by_peep()
+#char_data.print_combos_by_peep()
 #char_data.print_combos_by_M_stat()
 #char_data.print_combos_by_L_stat()
 
-char_data.print_distribution()
+#char_data.print_distribution()
 
-main()
+gd.show_spider_graph_all()
+#gd.show_spider_graph_physical()
+#gd.show_spider_graph_emotion()
+
+#main()

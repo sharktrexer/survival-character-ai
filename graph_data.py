@@ -16,5 +16,13 @@ def show_spider_graph_physical():
     color = 'r'
     create_char_graph(len(labels), data, labels, title, color)
     
+def show_spider_graph_all():
+    data = [(p.name, list(p.stats.values())) for p in PEOPLE]
+    labels = list(PEOPLE[0].stats.keys())
+    title = "All Stats of Characters"
+    color = 'g'
+    create_char_graph(len(labels), data, labels, title, color)
+    
 #show_spider_graph_emotion()
-show_spider_graph_physical()
+#show_spider_graph_physical()
+#show_spider_graph_all()
