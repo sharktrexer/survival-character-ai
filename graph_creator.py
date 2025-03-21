@@ -261,3 +261,43 @@ def create_char_graph(N, data, labels, header, color='r'):
              size='large')
 
     plt.show()
+    
+def create_multiple_spider_types(N_lst:list, data_lst:list, labels_lst:list, header:str, colors:list):
+    
+    theta = radar_factory(N_lst[0])
+
+    spoke_labels = labels_lst[0]
+    
+    fig = plt.subplots(figsize=(16, 9), nrows=1, ncols=3,   
+                        subplot_kw=dict(projection='radar'))
+    fig[0].subplots_adjust(wspace=0.75, hspace=0.05, top=0.85, bottom=0.05)
+    
+    # per unique N spider graph
+    for N, (name, case_data), label, color, ax in zip(N_lst, data_lst, labels_lst, colors, fig[1]):
+        
+        theta = radar_factory(N)
+        
+        spoke_labels = label
+        
+        ax = plt.subplots(nrows=1, ncols=1,   
+                        subplot_kw=dict(projection='radar'))
+
+        ax.set_rgrids([-4, -2, 0, 2, 4, 6, 8]) 
+        ax.set_rlim(-4, 8)
+        ax.set_title(name, weight='bold', size='medium', position=(0.5, 1.1),
+                    horizontalalignment='center', verticalalignment='center')
+        
+        # stats
+        ax.plot(theta, case_data, color=color)
+        ax.fill(theta, case_data, facecolor=color, alpha=0.25, label='_nolegend_')
+        ax.set_varlabels(spoke_labels)
+            
+    # title
+    fig.text(0.5, 0.965, header,
+             horizontalalignment='center', color='black', weight='bold',
+             size='large')
+
+    plt.show()
+
+
+    

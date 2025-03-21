@@ -52,8 +52,8 @@ char_data.get_distribution()
 
 #char_data.print_distribution()
 
-gd.show_spider_graph_all()
-#gd.show_spider_graph_physical()
-#gd.show_spider_graph_emotion()
+gd.show_spider_all()
+#gd.show_spider_physical()
+#gd.show_spider_emotion()
 
 #main()
