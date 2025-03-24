@@ -136,6 +136,7 @@ def example_data():
     ]
     return data
 
+''' testing character data '''
 def example_char_data():
     data = [
         ["Strength", "Defense", "Evasion", "Dexterity", "Recovery", "Intellect",  "Health", "Energy"],
@@ -181,6 +182,7 @@ def create_example_charts():
 
     plt.show()
     
+''' Testing example'''
 def create_char_graph_example():
     N = 8
     theta = radar_factory(N)
@@ -192,7 +194,6 @@ def create_char_graph_example():
                             subplot_kw=dict(projection='radar'))
     fig.subplots_adjust(wspace=0.45, hspace=0.20, top=0.85, bottom=0.05)
     
-    colors = ['b', 'r', 'g', 'm', 'y']
     color = 'r'
     # Plot the four cases from the example data on separate Axes
     # loop goes over ever "character"
@@ -221,6 +222,8 @@ def create_char_graph_example():
 #create_char_graph_example()
 
 '''
+Creates and displays multiple spider charts of the same number of vars
+
 Example of data format
     data = [
         (Character name, [stat values]),
@@ -251,18 +254,21 @@ def create_char_graph(N, data, labels, header, color='r'):
         ax.fill(theta, case_data, facecolor=color, alpha=0.25, label='_nolegend_')
         ax.set_varlabels(spoke_labels)
 
-    # add legend relative to top-left plot
-    #labels = ('Factor 1', 'Factor 2', 'Factor 3', 'Factor 4', 'Factor 5')
-    #legend = axs[0, 0].legend(labels, loc=(0.9, .95),labelspacing=0.1, fontsize='small')
-
-    # title
+    # figure title
     fig.text(0.5, 0.965, header,
              horizontalalignment='center', color='black', weight='bold',
              size='large')
 
     plt.show()
-    
-def create_multiple_spider_types(N_lst:list, data_lst:list, labels_lst:list, header:str, colors:list):
+
+''' Creates and displays spider charts of differing number of vars'''    
+def create_multiple_char_spider_types(
+    N_lst:list, 
+    data_lst:list, 
+    labels_lst:list, 
+    header:str, 
+    colors:list
+    ):
     
     # setup radar projection, figure, and temp axes
     theta = radar_factory(N_lst[0])
@@ -271,10 +277,10 @@ def create_multiple_spider_types(N_lst:list, data_lst:list, labels_lst:list, hea
                         subplot_kw=dict(projection='radar'))
     fig.subplots_adjust(wspace=0.75, hspace=0.05, top=0.85, bottom=0.05)
     
-    ax_ind = range(1, len(axs.flat)+1)
+    ax_inds = range(1, len(axs.flat)+1)
     
     # per unique N spider graph
-    for N, (name, case_data), label, color, ax, ind in zip(N_lst, data_lst, labels_lst, colors, axs.flat, ax_ind):
+    for N, (name, case_data), label, color, ax, ind in zip(N_lst, data_lst, labels_lst, colors, axs.flat, ax_inds):
         
         # projection needs to be remade for different N radars
         theta = radar_factory(N)
@@ -295,9 +301,8 @@ def create_multiple_spider_types(N_lst:list, data_lst:list, labels_lst:list, hea
         ax.fill(theta, case_data, facecolor=color, alpha=0.25, label='_nolegend_')
         ax.set_varlabels(spoke_labels)
         
-        #ind += 1
             
-    # title
+    # figure title
     fig.text(0.5, 0.965, header,
              horizontalalignment='center', color='black', weight='bold',
              size='large')
