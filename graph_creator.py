@@ -264,22 +264,26 @@ def create_char_graph(N, data, labels, header, color='r'):
     
 def create_multiple_spider_types(N_lst:list, data_lst:list, labels_lst:list, header:str, colors:list):
     
+    # setup radar projection, figure, and temp axes
     theta = radar_factory(N_lst[0])
     
     fig, axs = plt.subplots(figsize=(16, 9), nrows=1, ncols=3,   
                         subplot_kw=dict(projection='radar'))
     fig.subplots_adjust(wspace=0.75, hspace=0.05, top=0.85, bottom=0.05)
     
-    ind = 1
+    ax_ind = range(1, len(axs.flat)+1)
+    
     # per unique N spider graph
-    for N, (name, case_data), label, color, ax in zip(N_lst, data_lst, labels_lst, colors, axs.flat):
+    for N, (name, case_data), label, color, ax, ind in zip(N_lst, data_lst, labels_lst, colors, axs.flat, ax_ind):
         
+        # projection needs to be remade for different N radars
         theta = radar_factory(N)
         
         spoke_labels = label
         
+        # remove old ax projection to be replaced
         ax.remove()
-        ax = fig.add_subplot(ind, ind, 1, projection='radar')
+        ax = fig.add_subplot(1, 3, ind, projection='radar')
 
         ax.set_rgrids([-4, -2, 0, 2, 4, 6, 8]) 
         ax.set_rlim(-4, 8)
@@ -291,7 +295,7 @@ def create_multiple_spider_types(N_lst:list, data_lst:list, labels_lst:list, hea
         ax.fill(theta, case_data, facecolor=color, alpha=0.25, label='_nolegend_')
         ax.set_varlabels(spoke_labels)
         
-        ind += 1
+        #ind += 1
             
     # title
     fig.text(0.5, 0.965, header,
