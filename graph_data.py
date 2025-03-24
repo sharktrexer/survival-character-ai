@@ -28,7 +28,7 @@ def show_spider_specific(peep_name: str):
     emo = peep.get_emotional_stats()
     phy = peep.get_physical_stats()
     all = peep.stats
-    data = [("Emotional", list(emo)), ("Physical", list(phy)), 
+    data = [("Emotional", list(emo.values())), ("Physical", list(phy.values())), 
             ("All", list(all.values()))] # emotion data, physical data, and all data
     labels = [list(emo.keys()), list(phy.keys()), list(all.keys())] # emotion labels, physical labels, and all labels
     Ns = [len(emo), len(phy), len(all)]
