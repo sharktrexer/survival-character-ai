@@ -2,10 +2,11 @@ from char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
 import char_data
 import graph_data as gd
 
-# main loop
-def main():
+def question_main():
     while True:
 
+        print("\n")
+        
         valid = False
         most_choice = ""
         least_choice = ""
@@ -44,7 +45,45 @@ def main():
         print("\nYou got: " + str(top_peeps[0]) + "\n")
         
 
-char_data.get_distribution()
+# distribute main
+def graph_main():
+    
+    while True:
+        print("\n")
+        
+        valid = False
+        choice = ""
+
+        # input
+        while not valid:
+            choice = input(("Do you want to see spider charts of all character's "
+                            "Emotional, Physical, ALL stats, or a specific character?")).lower()
+            valid = choice in ["emotional", "emo", "phys","physical", "all", "one", "specific"]
+
+        valid = False
+        
+        if choice in ["emotional", "emo"]:
+            gd.show_spider_emotion()
+            continue
+        elif choice in ["phys", "physical"]:
+            gd.show_spider_physical()
+            continue
+        elif choice in ["all"]:
+            gd.show_spider_all()
+            continue
+        
+
+        # get input that is a specific char name
+        while not valid:
+            choice = input("Which char charts do you want to see? " + ", ".join([p.name for p in PEOPLE]) + ": ").lower()
+            valid = [p for p in PEOPLE if p.name.lower() == choice]
+        
+        validated_choice = choice[0].upper() + choice[1:]    
+            
+        gd.show_spider_specific(validated_choice)
+    
+
+# char_data.get_distribution()
 
 #char_data.print_combos_by_peep()
 #char_data.print_combos_by_M_stat()
@@ -52,8 +91,6 @@ char_data.get_distribution()
 
 #char_data.print_distribution()
 
-gd.show_spider_all()
-#gd.show_spider_physical()
-#gd.show_spider_emotion()
-
-#main()
+#question_main()
+graph_main()
+# dist_main()

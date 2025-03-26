@@ -55,4 +55,4 @@ def show_spider_specific(peep_name: str):
 #show_spider_emotion()
 #show_spider_physical()
 #show_spider_all()
-show_spider_specific("Adan")
+#show_spider_specific("Adan")
