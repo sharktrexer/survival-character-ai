@@ -82,15 +82,31 @@ def graph_main():
             
         gd.show_spider_specific(validated_choice)
     
+def dist_main():
+    
+    char_data.get_distribution()   
+    
+    while True:
+        print("\n")
+        
+        valid = False
+        choice = ""
 
-# char_data.get_distribution()
-
-#char_data.print_combos_by_peep()
-#char_data.print_combos_by_M_stat()
-#char_data.print_combos_by_L_stat()
-
-#char_data.print_distribution()
+        # input
+        while not valid:
+            choice = input(("See character distribution by Peep, "
+                            "Desired Choice, or Least Choice? ")).lower()
+            valid = choice in ["peep", "p", "desired", "most", "m", "least", "l"]
+            
+        if choice in ["peep", "p"]:
+            char_data.print_combos_by_peep()
+        elif choice in ["desired", "most", "m"]:
+            char_data.print_combos_by_M_stat()
+        elif choice in ["least", "l"]:
+            char_data.print_combos_by_L_stat() 
+            
+        char_data.print_distribution()
 
 #question_main()
-graph_main()
-# dist_main()
+#graph_main()
+#dist_main()
