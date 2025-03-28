@@ -11,9 +11,12 @@ def question_main():
         most_choice = ""
         least_choice = ""
 
-        # get input that is a valid choice
+        # get input that is a valid choice 
+        # (converted into format that compares to str in STAT_NAMES)
         while not valid:
-            most_choice = input("Of these choices, what do you value the most? " + ", ".join(STAT_NAMES) + ": ")
+            most_choice = input(("Of these choices, what do you value the most? " + 
+                                 ", ".join(STAT_NAMES) + ": ")).lower()
+            most_choice = most_choice[0].upper() + most_choice[1:]   
             valid = most_choice in STAT_NAMES
 
         # get list of stats excluding previously chosen stat
@@ -24,7 +27,9 @@ def question_main():
 
         # input of sacrified stat
         while not valid:
-            least_choice = input("Of these choices, what do you value the least? " + ", ".join(valid_stats) + ": ")
+            least_choice = input(("Of these choices, what do you value the least? " + 
+                                  ", ".join(valid_stats) + ": ")).lower()
+            least_choice = least_choice[0].upper() + least_choice[1:]  
             valid = least_choice in valid_stats
             
         # sort people by chosen stats!! based on difference between them
@@ -45,7 +50,6 @@ def question_main():
         print("\nYou got: " + str(top_peeps[0]) + "\n")
         
 
-# distribute main
 def graph_main():
     
     while True:
@@ -125,6 +129,4 @@ def main():
     elif choice == "d":
         dist_main()
 
-#question_main()
-#graph_main()
-#dist_main()
+if __name__ == "__main__": main()
