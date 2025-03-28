@@ -107,6 +107,24 @@ def dist_main():
             
         char_data.print_distribution()
 
+def main():
+    print("\n")
+        
+    valid = False
+    choice = ""
+
+    # input
+    while not valid:
+        choice = input(("See questions, graphs, or distributions? (q, g, d)")).lower()
+        valid = choice in ["q", "g", "d"]
+        
+    if choice == "q":
+        question_main()
+    elif choice == "g":
+        graph_main()
+    elif choice == "d":
+        dist_main()
+
 #question_main()
 #graph_main()
 #dist_main()
