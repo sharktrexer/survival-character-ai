@@ -63,6 +63,3 @@ class Character:
         return {stat: self.stats[stat] for stat in 
                 ["Strength", "Defense", "Evasion", "Dexterity", "Intellect", "Recovery", "Health", "Energy"]}
         
-    def get_physical_stats2(self):
-        return {stat: self.stats[stat] for stat in 
-                ["Strength", "Defense", "Evasion", "Dexterity", "Intellect", "Recovery"]}

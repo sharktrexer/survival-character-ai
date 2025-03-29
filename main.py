@@ -1,6 +1,6 @@
-from char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
-import char_data
-import graph_data as gd
+from peep.char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
+import peep.char_data as char_data
+import visualization.graph_data as gd
 
 def question_main():
     while True:

@@ -1,4 +1,4 @@
-from character import Character
+from peep.character import Character
 
 # List of all the stat names used by characters
 STAT_NAMES = [
