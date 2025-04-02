@@ -193,7 +193,7 @@ def set_avg_stat_diff():
             avg = 0
             for other_stat in STAT_NAMES:
                 if stat != other_stat:
-                    diff = abs(p.stats[stat] - p.stats[other_stat])
+                    diff = abs(p.stat_aps[stat] - p.stat_aps[other_stat])
                     avg += diff
             avg = round(avg / (len(STAT_NAMES) - 1), 2)
             avg = round(avg, 2)

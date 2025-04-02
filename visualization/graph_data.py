@@ -1,6 +1,6 @@
 from peep.character import Character
 from peep.char_data import PEOPLE
-from graph_creator import create_char_graph, create_multiple_char_spider_types
+from visualization.graph_creator import create_char_graph, create_multiple_char_spider_types
 
 ''' Shows every character's spidar chart of emotional stats '''
 def show_spider_emotion():
@@ -20,8 +20,8 @@ def show_spider_physical():
     
 ''' Shows every character's spidar chart of all stats '''
 def show_spider_all():
-    data = [(p.name, list(p.stats.values())) for p in PEOPLE]
-    labels = list(PEOPLE[0].stats.keys())
+    data = [(p.name, list(p.stat_aps.values())) for p in PEOPLE]
+    labels = list(PEOPLE[0].stat_aps.keys())
     title = "All Stats of Characters"
     color = 'g'
     create_char_graph(len(labels), data, labels, title, color)
@@ -35,7 +35,7 @@ def show_spider_specific(peep_name: str):
     # dicts
     emo = peep.get_emotional_stats()
     phy = peep.get_physical_stats()
-    all = peep.stats
+    all = peep.stat_aps
     
     # values of stats
     data = [("Emotional", list(emo.values())), ("Physical", list(phy.values())), 
