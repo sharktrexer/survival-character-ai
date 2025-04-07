@@ -1,0 +1,86 @@
+
+~~~~~~~~~~~STATS~~~~~~~~~~~~~~
+
+---------------------------------Stat Calcuation---------------------------------
+Creatures have stats with values which will be multiplied by their Aptitude values 
+to get their true stat value
+
+When Apt is positive, each point of apt =
+25% increments (add to value after multiplication)
+
+When negative, each point is =
+12.5% decrements when negative (multiplying by fraction)
+
+:::::::::::::::::::::::::::EX::::::::::::::::::::::::::::
+Apt:      8    4    0      -1       -2       -3       -4
+Mult:     2    1    0     0.875,   0.75,    0.625,    0.5
+Effect:  3x    2x   1x    -12.5%   -25%    -37.5%    -50%
+
+
+---------------------------------Stat Abbreviations---------------------------------
+
+Strength - str = s
+Defense - def = d
+Evasion - eva = e
+Dexterity - dex = dx
+Recovery - rec = r
+Intellect - int = i
+Creativity - cre = c
+Fear - fear = f
+Intimidation - itmd = it
+Charisma - char = ch
+Stress - tres = ss
+Health - hp = h
+Hunger - hun = hu
+Energy - ap = a
+
+~~~~~~~~~~~~BATTLE PEEPS~~~~~~~~~~~~~~~~
+
+-----------------Minimum VALUES-----------------
+The value of a stat can not be less than 1 
+
+
+-----------------DEFAULT VALUES-----------------
+Each character start with a stat value based on their apt as so:
+
+ apt = val
+  8 = 30
+  7 = 27
+  6 = 25
+  5 = 22
+  4 = 20
+  3 = 17
+  2 = 15
+  1 = 12
+  0 = 10
+  -1 = 9
+  -2 = 8
+  -3 = 6
+  -4 = 5
+
+hp
+100 for all, then apt calc
+
+ap
+10 for all, then apt calc
+
+-----------------CREATION---------------
+Manual input through csv:
+
+????> For enemies too or just characters?
+go thru entities.csv
+create each row as a battle peep
+stats are stored in a dictionary, (str, Stat)
+key being column name, value before space is stat value, after space is apt value
+no value after space means apt is 0
+if entirely empty, assume stat is 1 and apt is 0
+
+Enemy Creator:
+>Dictate stats you want to be high or low
+>algorithm will auto make enemy using 18 point max to create enemy aptitudes (similar to our chars)
+Maybe can customize how many apt points are available given enemy difficulty/level
+difficulty being: trash, regular, elite, miniboss, boss
+>then can take apt vals and assign corresponding stat vals multiplied by stage, desired difficulty, 
+or by random range. 
+Perhaps dictate stat vals you want to be high/low for more variation 
+(low stat, high apt or vis versa)

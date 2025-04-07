@@ -1,3 +1,4 @@
+''' Character used for data analysis '''
 class Character:
     
     def __init__(self, name: str, desc: str, stats_dict: dict):

@@ -1,5 +1,5 @@
-from peep.character import Character
-from peep.char_data import PEOPLE
+from peep_data.character import Character
+from peep_data.char_data import PEOPLE
 from visualization.graph_creator import create_char_graph, create_multiple_char_spider_types
 
 ''' Shows every character's spidar chart of emotional stats '''

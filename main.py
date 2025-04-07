@@ -1,5 +1,5 @@
-from peep.char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
-import peep.char_data as char_data
+from peep_data.char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
+import peep_data.char_data as char_data
 import visualization.graph_data as gd
 
 def question_main():

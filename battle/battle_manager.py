@@ -1,5 +1,4 @@
 from battle_peep import BattlePeep
-from equations import do_gain_bonus_AP_from_init
 
 class BattleManager():
     def __init__(self, members:list):
@@ -23,5 +22,18 @@ class BattleManager():
         self.rounds += 1
         
         for peep in self.members:
-            do_gain_bonus_AP_from_init(peep, self.get_anchor_init())
+            self.do_gain_bonus_AP_from_init(peep, self.get_anchor_init())
             peep.turn()
+            
+    def do_gain_bonus_AP_from_init(self, peep: BattlePeep, anchor_init):
+
+        self.get_anchor_init()
+        
+        peep.init_growth = (
+            (peep.initiative() - anchor_init) * peep.init_rounds_passed ) 
+        gain_bonus = peep.initiative() + peep.init_growth - anchor_init >= 2(anchor_init)
+        # let peep know they have bonus
+        if gain_bonus:
+            peep.energy_bonus()
+            
+        return gain_bonus

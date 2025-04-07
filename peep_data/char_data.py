@@ -1,4 +1,4 @@
-from peep.character import Character
+from character import Character
 
 # List of all the stat names used by characters
 STAT_NAMES = [
@@ -30,7 +30,7 @@ def make_peep(name: str, desc: str, stats: dict):
 
 
 # List of preset characters
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PURELY APT ORIENTED~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 PEOPLE = [
     make_peep("Chris", 
               "Reactive Chef", 
@@ -52,7 +52,7 @@ PEOPLE = [
                 "Hunger": 0, "Energy": 1
                 }),
     
-    make_peep("Shown", 
+    make_peep("Sean", 
               "Vengeful Targeter", 
               {
                 "Strength": 2, "Defense": 1, "Evasion": 1,
@@ -143,7 +143,7 @@ def print_peeps():
 character_count = {
     "Chris" : 0,
     "Adan" : 0,
-    "Shown" : 0,
+    "Sean" : 0,
     "Ray" : 0,
     "Lito" : 0,
     "Rebecca" : 0,
@@ -215,8 +215,8 @@ def print_avg_stats():
 ''' In progress func to test other ways of calculating difference '''
 def diff_of_stats(peep, m_stat, l_stat):
     
-    most_stat = peep.stats[m_stat]
-    least_stat = peep.stats[l_stat]
+    most_stat = peep.stat_aps[m_stat]
+    least_stat = peep.stat_aps[l_stat]
     
     larger_stat = most_stat if most_stat > least_stat else least_stat
     smaller_stat = least_stat if most_stat > least_stat else most_stat
@@ -228,22 +228,22 @@ def diff_of_stats(peep, m_stat, l_stat):
 
 ''' sort peeps by difference between most and least choice '''
 def sort_peeps(peeps: list, most_choice: str, least_choice: str) -> list:
-    sorted_peeps = sorted(peeps, key=lambda p: -(p.stats[most_choice] - p.stats[least_choice]))
+    sorted_peeps = sorted(peeps, key=lambda p: -(p.stat_aps[most_choice] - p.stat_aps[least_choice]))
     return sorted_peeps
 #TODO: get 2 lists, 1 sorted by highest wanted stat and 1 sorted by lowest discarded stat
 # Pick character with highest difference of indexes between 2 lists.
 
 ''' sort peeps by highest stat, used as a tiebreaker '''
 def get_highest_stat(peeps: list, stat: str) -> str:
-    sorted_peeps = sorted(peeps, key=lambda p: -p.stats[stat])
+    sorted_peeps = sorted(peeps, key=lambda p: -p.stat_aps[stat])
     return sorted_peeps
 
 ''' gets peep with highest difference between most and least desired choice.
 Chooses peep with the highest desired stat of top 3 if there is a tie
 '''
 def get_highest_diff_peep(sorted_peeps: list, m_stat: str, l_stat: str) -> list:
-  top_peep_diff = sorted_peeps[0].stats[m_stat] - sorted_peeps[0].stats[l_stat]
-  next_peep_diff = sorted_peeps[1].stats[m_stat] - sorted_peeps[1].stats[l_stat]
+  top_peep_diff = sorted_peeps[0].stat_aps[m_stat] - sorted_peeps[0].stat_aps[l_stat]
+  next_peep_diff = sorted_peeps[1].stat_aps[m_stat] - sorted_peeps[1].stat_aps[l_stat]
   highest_peeps = sorted_peeps[:3]
   
   if top_peep_diff == next_peep_diff:
@@ -302,3 +302,5 @@ def print_distribution():
         print(key, character_count[key])
 
     print("\n")
+    
+print_peeps()
