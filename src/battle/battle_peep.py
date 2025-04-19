@@ -1,4 +1,4 @@
-from stats import Stat
+from .stats import Stat
 
 ''' A version of character that is battle oriented '''
 class BattlePeep():
@@ -12,7 +12,7 @@ class BattlePeep():
         return self.name + "\n" + self.stats
         
     def initiative(self):
-        return self.stats["Dexterity"].value + self.stats["Evasion"].value
+        return self.stats["Dexterity"].tv + self.stats["Evasion"].tv
         
     def turn(self):
         self.init_rounds_passed += 1

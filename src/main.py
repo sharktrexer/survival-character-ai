@@ -115,7 +115,7 @@ def dist_main():
 def init_main():
     while True:
         start_round()
-        input = input("Press enter to continue")
+        input("Press enter to continue")
 
 def main():
     print("\n")

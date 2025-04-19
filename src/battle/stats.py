@@ -14,13 +14,13 @@ class Stat:
         # 25% increments when positive (add to value after multiplication)
         if apt >= 0:
             mult = apt * 0.25 
-            self.tv = val + int(val * mult)
+            return val + int(val * mult)
         # 12.5% decrements when negative (multiplying by decimal for division)
         #  -1     -2    -3    -4
         # 0.875, 0.75, 0.625, 0.5
         if apt < 0:
             mult = 1 - (abs(apt) * 0.125)
-            self.tv = int(val * mult)
+            return int(val * mult)
             
 class StatContainer:
     def __init__(self, stats:dict):

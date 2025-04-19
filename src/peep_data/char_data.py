@@ -1,4 +1,4 @@
-from character import Character
+from .character import Character
 
 # List of all the stat names used by characters
 STAT_NAMES = [
@@ -303,4 +303,3 @@ def print_distribution():
 
     print("\n")
     
-print_peeps()

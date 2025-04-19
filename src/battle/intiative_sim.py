@@ -1,5 +1,5 @@
-from battle_manager import BattleManager
-from battle_peep import BattlePeep
+from .battle_manager import BattleManager
+from .battle_peep import BattlePeep
 
 import peep_data.data_reader as dr
 

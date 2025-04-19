@@ -1,7 +1,6 @@
 # Python
 __pycache__
 .venv
-__init__.py
 
 # Secrets
 .env

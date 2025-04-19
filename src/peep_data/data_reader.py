@@ -7,7 +7,7 @@ PATH = os.getcwd() + "\\src\\peep_data\\char_data.csv"
 STAT_NAMES = [
         "Strength", "Defense", "Evasion",   
                 
-        "Dexterity", "Recovery", "Intellect", 
+        "Dexterity", "Recovery", "Intelligence", 
         
         "Creativity", "Fear", "Intimidation",
         
@@ -27,7 +27,6 @@ def read_peep_data():
         # Every row is a character with name and stats
         for char_stats_dict in reader:
             stats_dict = {}
-            stats_dict["Name"] = char_stats_dict["Name"]
             
             # loop thru key/val parts (stat name and apt)
             # column after the stat's aptitude is its value
@@ -35,7 +34,7 @@ def read_peep_data():
             s_apt = ""
             for key, val in char_stats_dict.items(): 
                 # Name already obtained
-                if key == "Name": continue
+                if key == "name": continue
                 # Obtain aptitude value
                 if key in STAT_NAMES:
                     s_name = key
@@ -48,4 +47,4 @@ def read_peep_data():
                     s_apt = ""
                 
                     
-            PEEPS.append(BattlePeep(char_stats_dict["Name"], stats_dict))
+            PEEPS.append(BattlePeep(char_stats_dict["name"], stats_dict))
