@@ -1,9 +1,9 @@
 
 class Stat:
-    def __init__(self, name:str, val:int, ap:int):
+    def __init__(self, name:str, val:int, apt:int):
         self.name = name
         self.value = val
-        self.apt = ap
+        self.apt = apt
         self.tv = self.calc_true_value()
         
     def calc_true_value(self):

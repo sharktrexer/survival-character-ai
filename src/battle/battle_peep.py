@@ -1,3 +1,5 @@
+from stats import Stat
+
 ''' A version of character that is battle oriented '''
 class BattlePeep():
     def __init__(self, name: str,  stats_dict: dict):
@@ -6,8 +8,11 @@ class BattlePeep():
         self.init_growth = 0
         self.init_rounds_passed = 0
         
+    def __str__(self):
+        return self.name + "\n" + self.stats
+        
     def initiative(self):
-        return self.cur_stats["Dexterity"] + self.cur_stats["Evasion"]
+        return self.stats["Dexterity"].value + self.stats["Evasion"].value
         
     def turn(self):
         self.init_rounds_passed += 1
@@ -18,5 +23,5 @@ class BattlePeep():
     def energy_bonus(self):
         self.init_rounds_passed = 0
         self.init_growth = 0
-        print("Gained energy bonus from initiative!")
+        print(self.name + "- Gained energy bonus from initiative!")
         

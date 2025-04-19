@@ -1,4 +1,5 @@
 from peep_data.char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
+from battle.intiative_sim import start_round
 import peep_data.char_data as char_data
 import visualization.graph_data as gd
 
@@ -111,6 +112,11 @@ def dist_main():
             
         char_data.print_distribution()
 
+def init_main():
+    while True:
+        start_round()
+        input = input("Press enter to continue")
+
 def main():
     print("\n")
         
@@ -119,8 +125,8 @@ def main():
 
     # input
     while not valid:
-        choice = input(("See questions, graphs, or distributions? (q, g, d)")).lower()
-        valid = choice in ["q", "g", "d"]
+        choice = input(("See questions, graphs, distributions, or init sim? (q, g, d, i)")).lower()
+        valid = choice in ["q", "g", "d", "i"]
         
     if choice == "q":
         question_main()
@@ -128,5 +134,7 @@ def main():
         graph_main()
     elif choice == "d":
         dist_main()
+    elif choice == "i":
+        init_main()
 
 if __name__ == "__main__": main()
