@@ -4,3 +4,5 @@ __pycache__
 
 # Secrets
 .env
+sheet_credentials.json
+token.json
