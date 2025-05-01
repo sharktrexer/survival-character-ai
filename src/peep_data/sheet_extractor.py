@@ -6,6 +6,7 @@ This is intended only for updating the char_data.csv file
 Thus the imports are not necessary for running the rest of the program for the end-user
 '''
 
+import csv
 import os.path
 
 from google.auth.transport.requests import Request
@@ -25,7 +26,7 @@ RANGE_NAME = "data!A1:AC"
 PATH = os.getcwd() + "\\sheet_credentials.json"
 
 
-def main():
+def fetch_sheet_data():
   """Basic usage of the Sheets API.
   """
   creds = None
@@ -63,12 +64,22 @@ def main():
       print("No data found.")
       return
 
-    for row in values:
-      # Print everything
-      print(row)
+    return values
+
   except HttpError as err:
     print(err)
 
+def create_csv_from_sheet():
+  data = fetch_sheet_data()
+  
+  file_name = "char_data.csv"
+  
+  with open(file_name, 'w', newline='') as csvf:
+    writer = csv.writer(csvf)
+    writer.writerows(data)
+    
+def main():
+  create_csv_from_sheet()
 
 if __name__ == "__main__":
   main()
