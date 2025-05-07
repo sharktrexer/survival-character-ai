@@ -1,7 +1,10 @@
-from peep_data.char_data import STAT_NAMES, PEOPLE, sort_peeps, get_highest_diff_peep
+from peep_data.char_data import STAT_NAMES, SIMPLE_PEOPLE, sort_peeps, get_highest_diff_peep
 from battle.intiative_sim import start_round
+from peep_data.data_reader import read_peep_data
 import peep_data.char_data as char_data
 import visualization.graph_data as gd
+
+read_peep_data()
 
 def question_main():
     while True:
@@ -34,7 +37,7 @@ def question_main():
             valid = least_choice in valid_stats
             
         # sort people by chosen stats!! based on difference between them
-        sorted_people = sort_peeps(PEOPLE, most_choice, least_choice)
+        sorted_people = sort_peeps(SIMPLE_PEOPLE, most_choice, least_choice)
         
         # print sorted people
         print("\nSORTED ")
@@ -80,8 +83,8 @@ def graph_main():
 
         # get input that is a specific char name
         while not valid:
-            choice = input("Which char charts do you want to see? " + ", ".join([p.name for p in PEOPLE]) + ": ").lower()
-            valid = [p for p in PEOPLE if p.name.lower() == choice]
+            choice = input("Which char charts do you want to see? " + ", ".join([p.name for p in SIMPLE_PEOPLE]) + ": ").lower()
+            valid = [p for p in SIMPLE_PEOPLE if p.name.lower() == choice]
         
         validated_choice = choice[0].upper() + choice[1:]    
             
@@ -125,7 +128,7 @@ def main():
 
     # input
     while not valid:
-        choice = input(("See questions, graphs, distributions, or init sim? (q, g, d, i)")).lower()
+        choice = input(("See questions, graphs, distributions, or init sim? (1,2,3, etc...)")).lower()
         valid = choice in ["q", "g", "d", "i"]
         
     if choice == "q":

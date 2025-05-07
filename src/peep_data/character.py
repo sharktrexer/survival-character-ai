@@ -47,5 +47,5 @@ class Character:
         
     def get_physical_stats(self):
         return {stat: self.stat_aps[stat] for stat in 
-                ["Strength", "Defense", "Evasion", "Dexterity", "Intellect", "Recovery", "Health", "Energy"]}
+                ["Strength", "Defense", "Evasion", "Dexterity", "Intelligence", "Recovery", "Health", "Energy"]}
         

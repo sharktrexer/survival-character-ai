@@ -1,17 +1,15 @@
 from .character import Character
+from battle.battle_peep import BattlePeep
+
+from peep_data.data_reader import STAT_NAMES, get_peeps
 
 # List of all the stat names used by characters
-STAT_NAMES = [
-        "Strength", "Defense", "Evasion",   
-                
-        "Dexterity", "Recovery", "Intellect", 
-        
-        "Creativity", "Fear", "Intimidation",
-        
-        "Charisma", "Stress", "Health", 
-        
-        "Hunger", "Energy", 
-    ]
+
+
+CHAR_DESC = ["Nourishing Paladin", "Benevolent Assassin", "Vengeful Tinkerer",
+             "Unserious Wrestler", "Manipulating Incubus", "Uncouth Coward",
+             "Promiscuous Dancer", "Protector of Parties", "Calm Sorcerer",
+             "Domineering Barbarian"]
 
 # Max amount of points that can be distributed amongst character stats
 MAX_STAT_VAL = 18
@@ -28,114 +26,25 @@ def make_peep(name: str, desc: str, stats: dict):
     
     return Character(name, desc, stats)
 
+def get_peeps_as_simple():
+    """
+    Transforms a list of BattlePeep objects into Character objects with only stat aptitudes.
 
-# List of preset characters
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PURELY APT ORIENTED~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-PEOPLE = [
-    make_peep("Chris", 
-              "Reactive Chef", 
-              {
-                "Strength": 4, "Defense": 4, "Evasion":-2,
-                "Dexterity": 0, "Recovery": -1, "Intellect": 3,
-                "Creativity": 5, "Fear": 2, "Intimidation": 2,
-                "Charisma": 2, "Stress": -4, "Health":3,
-                "Hunger": -1, "Energy": 1
-                }),
+    Retrieves peeps from the data reader, converts them into Character instances 
+    with a predefined description and a simplified dictionary of their stats, 
+    and appends them to the PEOPLE list.
+    """
+
+    for i, bp in enumerate(get_peeps()):
+        SIMPLE_PEOPLE.append(make_peep(bp.name, CHAR_DESC[i], 
+                                {stat.name: stat.apt for stat in bp.stats_dict}))
     
-    make_peep("Adan", 
-              "Cunning Rogue", 
-              {
-                "Strength": 1, "Defense": 2, "Evasion": 5,
-                "Dexterity": 4, "Recovery": 3, "Intellect": 1,
-                "Creativity": 0, "Fear": 2, "Intimidation": -2,
-                "Charisma": 2, "Stress": 1, "Health": -2,
-                "Hunger": 0, "Energy": 1
-                }),
-    
-    make_peep("Sean", 
-              "Vengeful Targeter", 
-              {
-                "Strength": 2, "Defense": 1, "Evasion": 1,
-                "Dexterity": 5, "Recovery": 0, "Intellect": -2,
-                "Creativity": 4, "Fear": 3, "Intimidation": 3,
-                "Charisma": 0, "Stress": -1, "Health": 1,
-                "Hunger": -1, "Energy": 2
-                }),
-    
-    make_peep("Ray", 
-              "Silly Strongman", 
-              {
-                "Strength": 5, "Defense": 5, "Evasion": -4,
-                "Dexterity": -2, "Recovery": 0, "Intellect": -4,
-                "Creativity": 1, "Fear": 4, "Intimidation": 3,
-                "Charisma": 3, "Stress": 3, "Health": 5,
-                "Hunger": -3, "Energy": 2
-                }),
-    
-    make_peep("Lito", 
-              "Manipulating Deciever", 
-              {
-                "Strength": 3, "Defense": 3, "Evasion":2,
-                "Dexterity": -3, "Recovery": -3, "Intellect": 1,
-                "Creativity": -1, "Fear": 1, "Intimidation": 1,
-                "Charisma": 5, "Stress": 3, "Health": 3,
-                "Hunger": 1, "Energy": 2
-                }),
-    
-    make_peep("Rebecca", 
-              "Cowardly Outcast", 
-              {
-                "Strength": -1, "Defense": -1, "Evasion": 1,
-                "Dexterity": 0, "Recovery": 3, "Intellect": 1,
-                "Creativity": 1, "Fear": -4, "Intimidation": -4,
-                "Charisma": -4, "Stress": 2, "Health": 8,
-                "Hunger": -4, "Energy": 2
-                }),
-    
-    make_peep("Cindy", 
-              "Shallow Cleric", 
-              {
-                "Strength": -3, "Defense": 0, "Evasion": 3,
-                "Dexterity": 2, "Recovery": 4, "Intellect": -3,
-                "Creativity": 2, "Fear": 3, "Intimidation": -4,
-                "Charisma": 3, "Stress": 2, "Health": 0,
-                "Hunger": 6, "Energy": 3
-                }),
-    
-    make_peep("Jayce", 
-              "Hedonistic Tank", 
-              {
-                "Strength": 1, "Defense": 5, "Evasion": -3,
-                "Dexterity": -4, "Recovery": -1, "Intellect": 1,
-                "Creativity": 2, "Fear": 4, "Intimidation": -1,
-                "Charisma": 4, "Stress": 1, "Health": 4,
-                "Hunger": 0, "Energy": 5
-                }),
-    
-    make_peep("Neo", 
-              "The Jack of All Trades", 
-              {
-                "Strength": 1, "Defense": 2, "Evasion": 1,
-                "Dexterity": 2, "Recovery": 3, "Intellect": 4,
-                "Creativity": 2, "Fear": -1, "Intimidation": -3,
-                "Charisma": 1, "Stress": 4, "Health": 2,
-                "Hunger": 1, "Energy": -1
-                }),
-    
-    make_peep("Jimmy", 
-              "Independant Bully", 
-              {
-                "Strength": 4, "Defense": 4, "Evasion": 3,
-                "Dexterity": 1, "Recovery": 1, "Intellect": 0,
-                "Creativity": 2, "Fear": 4, "Intimidation": 4,
-                "Charisma": -3, "Stress": -2, "Health": 4,
-                "Hunger": -2, "Energy": -2
-                }),
-]
+
+SIMPLE_PEOPLE = get_peeps_as_simple()
 
 ''' Prints all character names, titles, and stats '''
 def print_peeps():
-    for p in PEOPLE:
+    for p in SIMPLE_PEOPLE:
         print(p, "\n")
 
 # dictionary to keep track of how many ways a character can be selected based on choosing
@@ -187,7 +96,7 @@ class combo:
       
 '''Gets average difference between stats for each character, and their overall average'''
 def set_avg_stat_diff():
-    for p in PEOPLE:
+    for p in SIMPLE_PEOPLE:
         total_avg = 0
         for stat in STAT_NAMES:
             avg = 0
@@ -205,7 +114,7 @@ def set_avg_stat_diff():
 def print_avg_stats():
     set_avg_stat_diff()
     
-    for p in PEOPLE:
+    for p in SIMPLE_PEOPLE:
         print("\n" + p.name + ": ")
         for stat in p.avg_stat_diffs:
             print(stat, p.avg_stat_diffs[stat])
@@ -257,7 +166,7 @@ def get_distribution() -> dict:
     for m_stat in STAT_NAMES:
         for l_stat in STAT_NAMES:
             if m_stat != l_stat:
-                sorted_people = sort_peeps(PEOPLE, m_stat, l_stat)
+                sorted_people = sort_peeps(SIMPLE_PEOPLE, m_stat, l_stat)
                 # tiebreaker
                 top_peeps = get_highest_diff_peep(sorted_people, m_stat, l_stat)
                 top_peep = top_peeps[0]

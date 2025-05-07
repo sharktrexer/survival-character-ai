@@ -1,4 +1,5 @@
 import os, csv
+
 from battle.battle_peep import BattlePeep
 from battle.stats import Stat
 
@@ -19,7 +20,8 @@ STAT_NAMES = [
 # holds the default stats of the OG characters
 PEEPS = []
 
-def get_peeps(): return PEEPS
+def get_peeps(): 
+    return PEEPS
 
 def read_peep_data():
     with open(PATH, 'r') as file:   
@@ -48,3 +50,5 @@ def read_peep_data():
                 
                     
             PEEPS.append(BattlePeep(char_stats_dict["name"], stats_dict))
+            
+    return PEEPS

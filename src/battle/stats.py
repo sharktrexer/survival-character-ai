@@ -31,7 +31,7 @@ class StatContainer:
     Example
     -------------
     input key: "strength" "Strength" "str", "STR"
-    output: all turn into "Strength"
+    output: "Strength"
     
     '''
     def elongate_stat_abreviation(self, abre:str):

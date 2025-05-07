@@ -1,11 +1,9 @@
 from .battle_manager import BattleManager
 from .battle_peep import BattlePeep
 
-import peep_data.data_reader as dr
+from peep_data.data_reader import get_peeps
 
-dr.read_peep_data()
-
-PEEPS = dr.get_peeps()
+PEEPS = get_peeps()
 
 peep_test_group = PEEPS[0:3]
 
