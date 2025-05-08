@@ -1,10 +1,9 @@
 from .character import Character
 from battle.battle_peep import BattlePeep
 
-from peep_data.data_reader import STAT_NAMES, get_peeps
+from peep_data.data_reader import STAT_NAMES, get_peeps, read_peep_data
 
 # List of all the stat names used by characters
-
 
 CHAR_DESC = ["Nourishing Paladin", "Benevolent Assassin", "Vengeful Tinkerer",
              "Unserious Wrestler", "Manipulating Incubus", "Uncouth Coward",
@@ -13,6 +12,13 @@ CHAR_DESC = ["Nourishing Paladin", "Benevolent Assassin", "Vengeful Tinkerer",
 
 # Max amount of points that can be distributed amongst character stats
 MAX_STAT_VAL = 18
+
+# List of Characters with only their aptitudes
+SIMPLE_PEOPLE = []
+
+def peep_fetch():
+    read_peep_data()
+    get_peeps_as_simple()
 
 def make_peep(name: str, desc: str, stats: dict):
     '''Easily creates characters while verifying they have the right amount of stat distribution'''
@@ -34,13 +40,10 @@ def get_peeps_as_simple():
     with a predefined description and a simplified dictionary of their stats, 
     and appends them to the PEOPLE list.
     """
-
     for i, bp in enumerate(get_peeps()):
         SIMPLE_PEOPLE.append(make_peep(bp.name, CHAR_DESC[i], 
-                                {stat.name: stat.apt for stat in bp.stats_dict}))
+                                {stat.name: stat.apt for stat in bp.stats.values()}))
     
-
-SIMPLE_PEOPLE = get_peeps_as_simple()
 
 ''' Prints all character names, titles, and stats '''
 def print_peeps():

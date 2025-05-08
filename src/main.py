@@ -1,10 +1,11 @@
 from peep_data.char_data import STAT_NAMES, SIMPLE_PEOPLE, sort_peeps, get_highest_diff_peep
 from battle.intiative_sim import start_round
-from peep_data.data_reader import read_peep_data
+#from peep_data.data_reader import read_peep_data
 import peep_data.char_data as char_data
 import visualization.graph_data as gd
 
-read_peep_data()
+# read character data and populate SIMPLE_PEOPLE
+char_data.peep_fetch()
 
 def question_main():
     while True:
@@ -128,7 +129,7 @@ def main():
 
     # input
     while not valid:
-        choice = input(("See questions, graphs, distributions, or init sim? (1,2,3, etc...)")).lower()
+        choice = input(("See questions, graphs, distributions, or init sim? (q,g,d,i)")).lower()
         valid = choice in ["q", "g", "d", "i"]
         
     if choice == "q":
