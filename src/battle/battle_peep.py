@@ -1,6 +1,9 @@
 from .stats import Stat
 
-''' A version of character that is battle oriented '''
+''' A version of character that is battle oriented 
+TODO: contain innitiative related stats into its own class
+class for containing functions versus game logic?
+'''
 class BattlePeep():
     def __init__(self, name: str,  stats_dict: dict):
         self.name = name
@@ -10,7 +13,13 @@ class BattlePeep():
         
     def __str__(self):
         return self.name + "\n" + self.stats
-        
+    
+    def get_stat_apts(self):
+        return {stat.name: stat.apt for stat in self.stats.values()}
+    
+    def get_stat_tvs(self):
+        return {stat.name: stat.tv for stat in self.stats.values()}
+     
     def initiative(self):
         return self.stats["Dexterity"].tv + self.stats["Evasion"].tv
         

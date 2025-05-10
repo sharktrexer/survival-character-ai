@@ -42,7 +42,7 @@ def get_peeps_as_simple():
     """
     for i, bp in enumerate(get_peeps()):
         SIMPLE_PEOPLE.append(make_peep(bp.name, CHAR_DESC[i], 
-                                {stat.name: stat.apt for stat in bp.stats.values()}))
+                                bp.get_stat_apts()))
     
 
 ''' Prints all character names, titles, and stats '''

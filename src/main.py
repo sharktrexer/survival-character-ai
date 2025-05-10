@@ -7,6 +7,11 @@ import visualization.graph_data as gd
 # read character data and populate SIMPLE_PEOPLE
 char_data.peep_fetch()
 
+'''
+TODO: cli interface that allows to move up back to main loop
+
+'''
+
 def question_main():
     while True:
 
