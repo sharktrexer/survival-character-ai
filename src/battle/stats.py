@@ -1,7 +1,29 @@
+STAT_NAMES = [
+        "Strength", "Defense", "Evasion",   
+                
+        "Dexterity", "Recovery", "Intelligence", 
+        
+        "Creativity", "Fear", "Intimidation",
+        
+        "Charisma", "Stress", "Health", 
+        
+        "Hunger", "Energy", 
+    ]
 
 class Stat:
-    def __init__(self, name:str, val:int, apt:int):
+    def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
+        """
+        Parameters:
+            name (str): name of stat
+            val (int): base value of stat
+            apt (int): aptitude value of stat
+            abreviation (str): abreviation of stat
+            ex_names (list[str]): list of extra applicable names
+        """
+        
         self.name = name
+        self.abreviation = abreviation
+        self.ex_names = ex_names
         self.value = val
         self.apt = apt
         self.tv = self.calc_true_value()
@@ -22,45 +44,30 @@ class Stat:
             mult = 1 - (abs(apt) * 0.125)
             return int(val * mult)
             
-class StatContainer:
-    def __init__(self, stats:dict):
-        self.stats = stats
-        
-    ''' Returns proper stat name from abreviation
+
+class StatBoard:
+    def __init__(self):
+        self.stats = self.set_stats()
     
-    Example
-    -------------
-    input key: "strength" "Strength" "str", "STR"
-    output: "Strength"
-    
-    '''
-    def elongate_stat_abreviation(self, abre:str):
-        if abre in ["s", "str", "strength"]:
-            return "Strength"
-        elif abre in ["d", "def", "defense"]:
-            return "Defense"
-        elif abre in ["e", "eva", "evasion"]:
-            return "Evasion"
-        elif abre in ["dx", "dex", "dexterity"]:
-            return "Dexterity"
-        elif abre in ["r", "rec", "recovery"]:
-            return "Recovery"
-        elif abre in ["i", "int", "intellect"]:
-            return "Intellect"
-        elif abre in ["c", "cre", "creativity"]:
-            return "Creativity"
-        elif abre in ["f", "fear"]:
-            return "Fear"
-        elif abre in ["it", "itmd", "intimidation"]:
-            return "Intimidation"
-        elif abre in ["ch", "char", "charisma"]:
-            return "Charisma"
-        elif abre in ["ss", "tres", "stress"]:
-            return "Stress"
-        elif abre in ["h", "hp", "health"]:
-            return "Health"
-        elif abre in ["hu", "hun", "hunger"]:
-            return "Hunger"
-        elif abre in ["a", "ap", "energy"]:
-            return "Energy"
+    def set_stats(self):
+        stats = {}
+        stats.append(Stat("strength", 0, 0, "str", ["s", "fuerza"]))
+        stats.append(Stat("defense", 0, 0, "def", ["d", "defensa"]))
+        stats.append(Stat("evasion", 0, 0, "eva", ["e", "evasion"]))
+        stats.append(Stat("dexterity", 0, 0, "dex", ["dx", "destreza"]))
+        stats.append(Stat("recovery", 0, 0, "rec", ["r", "recovery"]))
+        stats.append(Stat("intelligence", 0, 0, "int", 
+                          ["i", "intellect", "inteligencia"]))
+        stats.append(Stat("creativity", 0, 0, "cre", 
+                          ["c", "create", "creatividad"]))
+        stats.append(Stat("fear", 0, 0, "Fear", ["f", "spook", "miedo"]))
+        stats.append(Stat("intimidation", 0, 0, "itmd", ["it", "intimidacion"]))
+        stats.append(Stat("charisma", 0, 0, "ch", ["ch", "char", "carisma"]))
+        stats.append(Stat("stress", 0, 0, "tres", ["ss", "estres"]))
+        stats.append(Stat("health", 0, 0, "hp", 
+                          ["h", "health points", "salud", "puntos de salud"]))
+        stats.append(Stat("hunger", 0, 0, "hun", ["hu", "hun", "hung", "hambre"]))
+        stats.append(Stat("energy", 0, 0, "ap", 
+                          ["a", "action points", "energia", "puntos de accion"]))
         
+        return stats
