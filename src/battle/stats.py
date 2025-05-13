@@ -1,3 +1,5 @@
+import copy
+
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
         """
@@ -74,7 +76,7 @@ def sn(name):
             
 def make_stat(name, val, apt):
         name = sn(name).lower()
-        stat = STAT_TYPES[name]
+        stat = copy.deepcopy(STAT_TYPES[name])
         stat.apt = apt
         stat.value = val
         return stat
