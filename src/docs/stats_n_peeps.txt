@@ -28,7 +28,7 @@ Intellect - int = i
 Creativity - cre = c
 Fear - fear = f
 Intimidation - itmd = it
-Charisma - char = ch
+Charisma - cha = ch
 Stress - tres = ss
 Health - hp = h
 Hunger - hun = hu
@@ -65,15 +65,10 @@ ap
 10 for all, then apt calc
 
 -----------------CREATION---------------
-Manual input through csv:
+Character stats are kept in a google sheets doc for easy updates on different devices.
 
-????> For enemies too or just characters?
-go thru entities.csv
-create each row as a battle peep
-stats are stored in a dictionary, (str, Stat)
-key being column name, value before space is stat value, after space is apt value
-no value after space means apt is 0
-if entirely empty, assume stat is 1 and apt is 0
+Gather Character Stats:
+Reads google sheet, updates this project csv file containing data, data is read on build.
 
 Enemy Creator:
 >Dictate stats you want to be high or low
@@ -84,3 +79,4 @@ difficulty being: trash, regular, elite, miniboss, boss
 or by random range. 
 Perhaps dictate stat vals you want to be high/low for more variation 
 (low stat, high apt or vis versa)
+> These Enemies are then saved and stored in a csv to be read similarly to the character csv

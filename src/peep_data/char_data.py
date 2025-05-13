@@ -1,10 +1,9 @@
 from .character import Character
-from battle.battle_peep import BattlePeep
+from peep_data.data_reader import STAT_TYPES, get_peeps, read_peep_data
 
-from peep_data.data_reader import STAT_NAMES, get_peeps, read_peep_data
+STAT_NAMES = STAT_TYPES.keys()
 
-# List of all the stat names used by characters
-
+# List of all the character descriptions
 CHAR_DESC = ["Nourishing Paladin", "Benevolent Assassin", "Vengeful Tinkerer",
              "Unserious Wrestler", "Manipulating Incubus", "Uncouth Coward",
              "Promiscuous Dancer", "Protector of Parties", "Calm Sorcerer",
@@ -19,6 +18,7 @@ SIMPLE_PEOPLE = []
 def peep_fetch():
     read_peep_data()
     get_peeps_as_simple()
+    i = 0
 
 def make_peep(name: str, desc: str, stats: dict):
     '''Easily creates characters while verifying they have the right amount of stat distribution'''
@@ -40,7 +40,8 @@ def get_peeps_as_simple():
     with a predefined description and a simplified dictionary of their stats, 
     and appends them to the PEOPLE list.
     """
-    for i, bp in enumerate(get_peeps()):
+    complex_peeps = get_peeps()
+    for i, bp in enumerate(complex_peeps):
         SIMPLE_PEOPLE.append(make_peep(bp.name, CHAR_DESC[i], 
                                 bp.get_stat_apts()))
     

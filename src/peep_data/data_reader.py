@@ -1,21 +1,9 @@
 import os, csv
 
 from battle.battle_peep import BattlePeep
-from battle.stats import Stat
+from battle.stats import STAT_TYPES, make_stat
 
 PATH = os.getcwd() + "\\src\\peep_data\\char_data.csv"
-
-STAT_NAMES = [
-        "Strength", "Defense", "Evasion",   
-                
-        "Dexterity", "Recovery", "Intelligence", 
-        
-        "Creativity", "Fear", "Intimidation",
-        
-        "Charisma", "Stress", "Health", 
-        
-        "Hunger", "Energy", 
-    ]
 
 # holds the default stats of the OG characters
 PEEPS = []
@@ -35,20 +23,23 @@ def read_peep_data():
             s_name = ""
             s_apt = ""
             for key, val in char_stats_dict.items(): 
+                
+                key = key.lower()
+                
                 # Name already obtained
                 if key == "name": continue
                 # Obtain aptitude value
-                if key in STAT_NAMES:
+                if key in STAT_TYPES.keys():
                     s_name = key
                     s_apt = val
                 # If key isn't a stat name then assume the val is the stat's numerical value
                 # STAT obj can be created with both apt and val
                 else:
-                    stats_dict[s_name] = Stat(s_name, int(val), int(s_apt))
+                    stats_dict[s_name] = make_stat(s_name, int(val), int(s_apt)) 
+                    # reset vals for easier debugging
                     s_name = ""
                     s_apt = ""
                 
                     
             PEEPS.append(BattlePeep(char_stats_dict["name"], stats_dict))
             
-    return PEEPS

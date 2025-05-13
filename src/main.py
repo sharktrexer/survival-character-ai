@@ -1,6 +1,5 @@
-from peep_data.char_data import STAT_NAMES, SIMPLE_PEOPLE, sort_peeps, get_highest_diff_peep
+from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, sort_peeps, get_highest_diff_peep
 from battle.intiative_sim import start_round
-#from peep_data.data_reader import read_peep_data
 import peep_data.char_data as char_data
 import visualization.graph_data as gd
 
@@ -11,6 +10,8 @@ char_data.peep_fetch()
 TODO: cli interface that allows to move up back to main loop
 
 '''
+
+STAT_NAMES = STAT_TYPES.keys()
 
 def question_main():
     while True:
@@ -26,7 +27,7 @@ def question_main():
         while not valid:
             most_choice = input(("Of these choices, what do you value the most? " + 
                                  ", ".join(STAT_NAMES) + ": ")).lower()
-            most_choice = most_choice[0].upper() + most_choice[1:]   
+            #most_choice = most_choice[0].upper() + most_choice[1:]   
             valid = most_choice in STAT_NAMES
 
         # get list of stats excluding previously chosen stat
@@ -39,7 +40,7 @@ def question_main():
         while not valid:
             least_choice = input(("Of these choices, what do you value the least? " + 
                                   ", ".join(valid_stats) + ": ")).lower()
-            least_choice = least_choice[0].upper() + least_choice[1:]  
+            #least_choice = least_choice[0].upper() + least_choice[1:]  
             valid = least_choice in valid_stats
             
         # sort people by chosen stats!! based on difference between them
