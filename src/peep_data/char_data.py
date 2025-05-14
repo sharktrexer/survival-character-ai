@@ -16,7 +16,6 @@ MAX_STAT_VAL = 18
 SIMPLE_PEOPLE = []
 
 def peep_fetch():
-    read_peep_data()
     get_peeps_as_simple()
     i = 0
 

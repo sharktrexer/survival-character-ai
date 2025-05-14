@@ -43,11 +43,38 @@ TEMP_ENEMIES = [
     
 ]
 
+PLAYGROUND = PEEPS + TEMP_ENEMIES
 
+VALID_NAMES = [p.name for p in PLAYGROUND]
 
 peep_test_group = PEEPS[0:3]
 
-init_tester = BattleManager(peep_test_group)
+class InitiativeSimulator():
+    
+    def __init__(self):
+        self.init_tester = BattleManager(peep_test_group)
+    
+    def start_round(self):
+        self.init_tester.next_round()
 
-def start_round():
-    init_tester.next_round()
+    def validate_choice(self, peep_name):
+        return peep_name in VALID_NAMES
+
+    def get_peep_by_name(self, peep_name):
+        return [p for p in PLAYGROUND if p.name == peep_name][0]
+
+    def modify_battle(self, peep_name, do_add):
+        if self.validate_choice(peep_name):
+            p = self.get_peep_by_name(peep_name)
+            self.init_tester.change_member_list(p, do_add)
+            return True
+        else:
+            return False
+        
+    def print_current_peeps(self):
+        for p in self.init_tester.members:
+            print(p.name, sep="\n")
+            
+    def print_options(self):
+        for p in PLAYGROUND:
+            print(p.name, sep="\n")

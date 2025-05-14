@@ -1,5 +1,5 @@
 from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, sort_peeps, get_highest_diff_peep
-from battle.intiative_sim import start_round
+from battle.intiative_sim import InitiativeSimulator 
 import peep_data.char_data as char_data
 import visualization.graph_data as gd
 
@@ -123,9 +123,38 @@ def dist_main():
         char_data.print_distribution()
 
 def init_main():
+    im = InitiativeSimulator()
     while True:
-        start_round()
-        input("Press enter to continue")
+        
+        im.start_round()
+        
+        print("\n")
+        
+        valid = False
+        choice = ""
+
+        # input
+        while not valid:
+            choice = input(("cmds: add, remove, battle, options, or nothing to continue ")).lower()
+            valid = choice in ["add", "remove", "battle", "options"]
+        
+        if choice == "add":
+            valid = False
+            while not valid:
+                im.print_options()
+                choice = input(("Choose!!!! "))
+                valid = im.modify_battle(choice, True)
+        elif choice == "remove":
+            valid = False
+            while not valid:
+                im.print_options()
+                choice = input(("Choose!!!! "))
+                valid = im.modify_battle(choice, False)
+        elif choice == "battle":
+            im.print_current_peeps()
+        elif choice == "options":
+            im.print_options()
+        
 
 def main():
     print("\n")

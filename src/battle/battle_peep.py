@@ -21,7 +21,7 @@ class BattlePeep():
         return {stat.name: stat.tv for stat in self.stats.values()}
      
     def initiative(self):
-        return self.stats["Dexterity"].tv + self.stats["Evasion"].tv
+        return self.stats["dexterity"].tv + self.stats["evasion"].tv
         
     def turn(self):
         self.init_rounds_passed += 1

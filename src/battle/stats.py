@@ -79,6 +79,7 @@ def make_stat(name, val, apt):
         stat = copy.deepcopy(STAT_TYPES[name])
         stat.apt = apt
         stat.value = val
+        stat.tv = stat.calc_true_value()
         return stat
 
 class StatBoard:

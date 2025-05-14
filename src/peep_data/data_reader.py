@@ -43,3 +43,5 @@ def read_peep_data():
                     
             PEEPS.append(BattlePeep(char_stats_dict["name"], stats_dict))
             
+            
+read_peep_data()
