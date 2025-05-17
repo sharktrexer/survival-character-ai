@@ -123,10 +123,9 @@ def dist_main():
         char_data.print_distribution()
 
 def init_main():
-    im = InitiativeSimulator()
+    IS = InitiativeSimulator()
+    IS.start_round()
     while True:
-        
-        im.start_round()
         
         print("\n")
         
@@ -136,24 +135,26 @@ def init_main():
         # input
         while not valid:
             choice = input(("cmds: add, remove, battle, options, or nothing to continue ")).lower()
-            valid = choice in ["add", "remove", "battle", "options"]
+            valid = choice in ["add", "remove", "battle", "options", ""]
         
         if choice == "add":
             valid = False
             while not valid:
-                im.print_options()
+                IS.print_options()
                 choice = input(("Choose!!!! "))
-                valid = im.modify_battle(choice, True)
+                valid = IS.modify_battle(choice, True)
         elif choice == "remove":
             valid = False
             while not valid:
-                im.print_options()
+                IS.print_options()
                 choice = input(("Choose!!!! "))
-                valid = im.modify_battle(choice, False)
+                valid = IS.modify_battle(choice, False)
         elif choice == "battle":
-            im.print_current_peeps()
+            IS.print_current_peeps()
         elif choice == "options":
-            im.print_options()
+            IS.print_options()
+            
+        IS.init_tester.next_round()
         
 
 def main():

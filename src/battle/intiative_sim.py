@@ -39,7 +39,23 @@ TEMP_ENEMIES = [
         "health": make_stat("hp", 80, 1),
         "hunger": make_stat("hun", 20, -2),
         "energy": make_stat("ap", 10, 1),
-    })
+    }),
+    BattlePeep("Heavy Slime", {
+        "strength": make_stat("str", 20, 2),
+        "defense": make_stat("def", 20, 4),
+        "evasion": make_stat("eva", 4, -3),
+        "dexterity": make_stat("dex", 4, -3),
+        "recovery": make_stat("rec", 10, 0),
+        "intelligence": make_stat("int", 5, -4),
+        "creativity": make_stat("cre", 5, -3,),
+        "fear": make_stat("fear", 30, 3),
+        "intimidation": make_stat("itmd", 10, 0),
+        "charisma": make_stat("cha", 5, -4,),
+        "stress": make_stat("tres", 50, 8),
+        "health": make_stat("hp", 100, 4),
+        "hunger": make_stat("hun", 20, 0),
+        "energy": make_stat("ap", 10, 0),
+    }),
     
 ]
 
@@ -55,26 +71,27 @@ class InitiativeSimulator():
         self.init_tester = BattleManager(peep_test_group)
     
     def start_round(self):
-        self.init_tester.next_round()
-
-    def validate_choice(self, peep_name):
-        return peep_name in VALID_NAMES
-
-    def get_peep_by_name(self, peep_name):
-        return [p for p in PLAYGROUND if p.name == peep_name][0]
+        print("~Intiative Sim~", "\n")
+        print("Members:")
+        for p in self.init_tester.members:
+            
+            print("[",p.name, "] with init: ", str(p.initiative()), sep="")
 
     def modify_battle(self, peep_name, do_add):
-        if self.validate_choice(peep_name):
-            p = self.get_peep_by_name(peep_name)
-            self.init_tester.change_member_list(p, do_add)
+        # validate name
+        if peep_name in VALID_NAMES:
+            # get peep by name
+            peep = [p for p in PLAYGROUND if p.name == peep_name][0]
+            self.init_tester.change_member_list(peep, do_add)
             return True
         else:
+            print("Invalid peep name")
             return False
         
     def print_current_peeps(self):
         for p in self.init_tester.members:
-            print(p.name, sep="\n")
+            print("[",p.name, "] with init: ", str(p.initiative()))
             
     def print_options(self):
         for p in PLAYGROUND:
-            print(p.name, sep="\n")
+            print("[",p.name, "] with init: ", str(p.initiative()))
