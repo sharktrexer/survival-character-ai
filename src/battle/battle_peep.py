@@ -10,6 +10,7 @@ class BattlePeep():
         self.stats = stats_dict
         self.init_growth = 0
         self.init_rounds_passed = 0
+        self.gained_ap_bonus = False
         
     def __str__(self):
         return self.name + "\n" + self.stats
@@ -24,7 +25,12 @@ class BattlePeep():
         return self.stats["dexterity"].tv + self.stats["evasion"].tv
         
     def turn(self):
-        self.init_rounds_passed += 1
+        #TODO: Add turn logic
+        
+        # End of turn, increment rounds passed for init gain if bonus wasnt gained this round.
+        if not self.gained_ap_bonus:
+            self.init_rounds_passed += 1
+            self.gained_ap_bonus = False
      
     ''' Gained extra energy from initiative calculations. 
     Reset vars and obtain an energy bonus
@@ -32,5 +38,7 @@ class BattlePeep():
     def energy_bonus(self):
         self.init_rounds_passed = 0
         self.init_growth = 0
-        print(self.name + "- Gained energy bonus from initiative!")
+        self.gained_ap_bonus = True
+        print(self.name + " - Gained energy bonus from initiative! Growth reset :O")
+        #TODO: Add energy bonus to AP value
         

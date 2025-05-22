@@ -9,7 +9,7 @@ class BattleManager():
     def get_anchor_init(self):
         anchor = min(self.members, key = lambda peep: peep.initiative())
         print("Anchor: " + anchor.name, " with init: " + str(anchor.initiative()))
-        self.init_anchor = anchor.initiative()
+        return anchor.initiative()
     
     def change_member_list(self, peep:BattlePeep, do_add:bool):
         if do_add:
@@ -19,7 +19,7 @@ class BattleManager():
             print("Removed " + peep.name)
             self.members.remove(peep)
             
-        self.get_anchor_init()
+        self.init_anchor = self.get_anchor_init()
         
     def next_round(self):
         self.rounds += 1
@@ -29,10 +29,10 @@ class BattleManager():
         print("\nCurrent Anchor Value: |" + str(self.init_anchor) + "|")
         
         for peep in self.members:
-            self.do_gain_bonus_AP_from_init(peep, self.init_anchor)
+            self.do_gain_bonus_AP_from_init(peep)
             peep.turn()
             
-    def do_gain_bonus_AP_from_init(self, peep: BattlePeep, anchor_init):
+    def do_gain_bonus_AP_from_init(self, peep: BattlePeep):
         
         """
         Calculates whether a peep should gain bonus AP based on their initiative 
@@ -47,14 +47,25 @@ class BattleManager():
         """
         past_growth = peep.init_growth
         peep.init_growth = (
-            (peep.initiative() - anchor_init) * peep.init_rounds_passed ) 
-        gain_bonus = peep.initiative() + peep.init_growth - anchor_init >= 2 * anchor_init
+            (max(0, peep.initiative() - self.init_anchor)) * peep.init_rounds_passed ) 
         
-        # print init growth
-        print(peep.name + "- Growth: " + str(past_growth) + " -> " + str(peep.init_growth))
-        
-        # let peep know they have bonus
-        if gain_bonus:
-            peep.energy_bonus()
+        # Dont show growth if there is none
+        if peep.initiative() == self.init_anchor:
+            print(peep.name + " did not have growth as they are the anchor! :(")
+            gain_bonus = False
+        else:
+            past_progress = peep.initiative() + past_growth - self.init_anchor
+            
+            progress = peep.initiative() + peep.init_growth - self.init_anchor
+            target = 2 * self.init_anchor
+            
+            gain_bonus =  progress >= target
+            
+            # print init growth
+            print(peep.name + " - Growth: " + str(past_growth) + " -> " + str(progress) + " | Target: " + str(target) )
+            
+            # let peep know they have bonus
+            if gain_bonus:
+                peep.energy_bonus()
             
         return gain_bonus
