@@ -27,6 +27,7 @@ class BattleManager():
         print("\n~Round " + str(self.rounds) + "~")
         
         print("\nCurrent Anchor Value: |" + str(self.init_anchor) + "|")
+        print("Target: |" + str(self.init_anchor*2) + "|")
         
         for peep in self.members:
             self.do_gain_bonus_AP_from_init(peep)
@@ -53,16 +54,15 @@ class BattleManager():
         if peep.initiative() == self.init_anchor:
             print(peep.name + " did not have growth as they are the anchor! :(")
             gain_bonus = False
-        else:
-            past_progress = peep.initiative() + past_growth - self.init_anchor
-            
+        else:            
             progress = peep.initiative() + peep.init_growth - self.init_anchor
-            target = 2 * self.init_anchor
             
-            gain_bonus =  progress >= target
+            past_progress = progress - (peep.initiative() + past_growth - self.init_anchor)
+            
+            gain_bonus =  progress >= 2 * self.init_anchor
             
             # print init growth
-            print(peep.name + " - Growth: " + str(past_growth) + " -> " + str(progress) + " | Target: " + str(target) )
+            print(peep.name + " - Growth: " + str(past_progress) + " -> " + str(progress))
             
             # let peep know they have bonus
             if gain_bonus:

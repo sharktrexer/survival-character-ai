@@ -146,7 +146,7 @@ def init_main():
         elif choice == "remove":
             valid = False
             while not valid:
-                IS.print_options()
+                IS.print_current_peeps()
                 choice = input(("Choose!!!! "))
                 valid = IS.modify_battle(choice, False)
         elif choice == "battle":
