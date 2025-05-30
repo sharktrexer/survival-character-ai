@@ -156,25 +156,26 @@ def init_main():
             
         IS.init_tester.next_round()
         
+        
+sims = [question_main, graph_main, dist_main, init_main]
 
 def main():
-    print("\n")
+    print("\n\n")
         
     valid = False
     choice = ""
 
     # input
     while not valid:
-        choice = input(("See questions, graphs, distributions, or init sim? (q,g,d,i)")).lower()
-        valid = choice in ["q", "g", "d", "i"]
+        for s in sims:
+            print(s.__name__)
+        choice = input((f"Pick a number from  0-{len(sims)-1}")).lower()
+        try:
+            choice = int(choice)
+        except:
+            continue
+        valid = choice >= 0 and choice < len(sims)
         
-    if choice == "q":
-        question_main()
-    elif choice == "g":
-        graph_main()
-    elif choice == "d":
-        dist_main()
-    elif choice == "i":
-        init_main()
+    sims[choice]()
 
 if __name__ == "__main__": main()
