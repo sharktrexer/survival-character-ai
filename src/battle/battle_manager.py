@@ -53,7 +53,10 @@ class BattleManager():
         # Dont show growth if there is none
         if peep.initiative() == self.init_anchor:
             print(peep.name + " did not have growth as they are the anchor! :(")
-            gain_bonus = False
+            # Reset anchor's round passed since they arent doing any growing
+            # TODO: this class probably shouldnt do this?
+            peep.init_rounds_passed = 0
+            return False
         else:            
             progress = peep.initiative() + peep.init_growth - self.init_anchor
             
