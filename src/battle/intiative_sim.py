@@ -90,9 +90,11 @@ class InitiativeSimulator():
             return False
         
     def print_current_peeps(self):
+        print("~Members~")
         for p in self.init_tester.members:
             print("[",p.name, "] with init: ", str(p.initiative()))
             
     def print_options(self):
+        print("~Spawnables~")
         for p in PLAYGROUND:
             print("[",p.name, "] with init: ", str(p.initiative()))

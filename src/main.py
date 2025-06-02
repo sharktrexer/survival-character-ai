@@ -134,7 +134,7 @@ def init_main():
 
         # input
         while not valid:
-            choice = input(("cmds: add, remove, battle, options, or nothing to continue ")).lower()
+            choice = input(("cmds: add, remove, battle, options, or nothing to continue\n")).lower()
             valid = choice in ["add", "remove", "battle", "options", ""]
         
         if choice == "add":
@@ -151,8 +151,10 @@ def init_main():
                 valid = IS.modify_battle(choice, False)
         elif choice == "battle":
             IS.print_current_peeps()
+            continue
         elif choice == "options":
             IS.print_options()
+            continue
             
         IS.init_tester.next_round()
         
