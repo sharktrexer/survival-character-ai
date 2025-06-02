@@ -18,8 +18,12 @@ class BattleManager():
         else:
             print("Removed " + peep.name)
             self.members.remove(peep)
-            
+        
         self.init_anchor = self.get_anchor_init()
+     
+    def start_round(self):
+        for peep in self.members:
+            peep.start(self.init_anchor)
         
     def next_round(self):
         self.rounds += 1
@@ -47,28 +51,34 @@ class BattleManager():
             bool: whether the peep gained bonus AP
         """
         past_growth = peep.init_growth
-        peep.init_growth = (
-            (max(0, peep.initiative() - self.init_anchor)) * peep.init_rounds_passed ) 
-        
-        # Dont show growth if there is none
+        peep.init_growth += max(0, peep.initiative() - self.init_anchor)
+        # max is used so there is never negative growth
+            
+#~~~~~~~~ Dont show growth if there is none
         if peep.initiative() == self.init_anchor:
             print(peep.name + " did not have growth as they are the anchor! :(")
-            # Reset anchor's round passed since they arent doing any growing
-            # TODO: this class probably shouldnt do this?
-            peep.init_rounds_passed = 0
             return False
-        else:            
-            progress = peep.initiative() + peep.init_growth - self.init_anchor
-            
-            past_progress = progress - (peep.initiative() + past_growth - self.init_anchor)
-            
-            gain_bonus =  progress >= 2 * self.init_anchor
+#~~~~~~~~ Growth Calculation      
+        else:         
+            gain_bonus =  peep.init_growth >= 2 * self.init_anchor
             
             # print init growth
-            print(peep.name + " - Growth: " + str(past_progress) + " -> " + str(progress))
+            print(peep.name + " - Growth: " + str(past_growth) + " -> " + str(peep.init_growth))
             
             # let peep know they have bonus
             if gain_bonus:
                 peep.energy_bonus()
             
-        return gain_bonus
+            return gain_bonus
+    
+#Intiative pseudo code
+'''
+>Character gains difference of self.init - init_anchor.init every round 
+    (anchor init can be updated anytime)
+>init growth starts at zero
+    
+>Character gains ap bonus if growth >= 2 * init_anchor.init
+    (growth resets to zero)
+
+anchors dont gain any growth
+'''

@@ -76,6 +76,7 @@ class InitiativeSimulator():
         for p in self.init_tester.members:
             
             print("[",p.name, "] with init: ", str(p.initiative()), sep="")
+        self.init_tester.start_round()
 
     def modify_battle(self, peep_name, do_add):
         # validate name

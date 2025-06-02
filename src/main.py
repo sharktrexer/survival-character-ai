@@ -169,7 +169,7 @@ def main():
     while not valid:
         for s in sims:
             print(s.__name__)
-        choice = input((f"Pick a number from  0-{len(sims)-1}")).lower()
+        choice = input((f"Pick a number from  0-{len(sims)-1} \n")).lower()
         try:
             choice = int(choice)
         except:

@@ -9,7 +9,6 @@ class BattlePeep():
         self.name = name
         self.stats = stats_dict
         self.init_growth = 0
-        self.init_rounds_passed = 0
         self.gained_ap_bonus = False
         
     def __str__(self):
@@ -24,19 +23,21 @@ class BattlePeep():
     def initiative(self):
         return self.stats["dexterity"].tv + self.stats["evasion"].tv
         
+    def start(self, anchor_init:int):
+        #TODO: Add start logic
+        #TODO: a battle info obj should be passed in instead of just the anchor_init val
+        pass 
+    
     def turn(self):
         #TODO: Add turn logic
         
-        # End of turn, increment rounds passed for init gain if bonus wasnt gained this round.
-        if not self.gained_ap_bonus:
-            self.init_rounds_passed += 1
-            self.gained_ap_bonus = False
+        pass
      
     ''' Gained extra energy from initiative calculations. 
     Reset vars and obtain an energy bonus
     '''   
     def energy_bonus(self):
-        self.init_rounds_passed = 0
+        #TODO: should battle manager handle this???
         self.init_growth = 0
         self.gained_ap_bonus = True
         print(self.name + " - Gained energy bonus from initiative! Growth reset :O")
