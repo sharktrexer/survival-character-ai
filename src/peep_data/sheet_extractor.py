@@ -72,11 +72,15 @@ def fetch_sheet_data():
 def create_csv_from_sheet():
   data = fetch_sheet_data()
   
+  print("\n SHEET DATA FETCHED SUCCESSFULLY \n")
+  
   file_name = "char_data.csv"
   
   with open(file_name, 'w', newline='') as csvf:
     writer = csv.writer(csvf)
     writer.writerows(data)
+    
+  print("\n CSV UPDATED SUCCESSFULLY \n")
     
 def main():
   create_csv_from_sheet()
