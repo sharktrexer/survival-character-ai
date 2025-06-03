@@ -24,6 +24,8 @@ RANGE_NAME = "data!A1:AC"
 
 # Credentials path
 PATH = os.getcwd() + "\\sheet_credentials.json"
+# Token path
+TOKEN_PATH = os.getcwd() + "\\token.json"
 
 
 def fetch_sheet_data():
@@ -38,7 +40,11 @@ def fetch_sheet_data():
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
+      try:
+        creds.refresh(Request())
+      except:
+        os.remove(TOKEN_PATH)
+        print("\nCredentials failed to refresh. token.json deleted. Please run again.")
     else:
       flow = InstalledAppFlow.from_client_secrets_file(
           PATH, SCOPES
