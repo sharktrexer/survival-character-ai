@@ -1,0 +1,53 @@
+                                ~~~~~~~~~~~MODIFYING STATS~~~~~~~~~~~~~~
+
+Throughout the game, stats can grow/deplete either by run progression 
+    (leveling up, doing activities that buff stat & aptitutude values),
+    buffs/debuffs (from battle or events), weapons, & meta progression (relics, achievements)
+
+This calls for a modular system where entities can recieve different effects and have their stats 
+updated accordingly, while also reverting stat changes when effects have expired. The systems
+needs to keep in mind that stats can be permenantly altered as well.
+
+
+---------------------------------Buffs, Debuffs, & Status Effects ---------------------------------
+
+                            ~~~PROPERTIES & PROBLEMS TO SOLVE~~~
+>duration - how long the effect lasts 
+    (for... days, minutes, rounds, turns, moves/actions, ever, 
+    afflictor's lifetime, another entity's lifetime)
+>stat effects - what stat is affected, by how much, is it aptitude, value, both?
+    are multiple stats affected?
+>special effects - is this effect more than a stat modifier? Perhaps damage is dealt over time,
+    actions are limited, outgoing damage from any source is affected, movement is better/worse
+    or works completely different, like sliding around; an entity has control of another's turn,
+    can the effect spread and how? Could new actions be available?
+    Can the effect do multiple things? Like increase action amount AND provide a new ability?
+    Are the effectsd only related to battle? Or can they affect sleep or base upkeep or how deep
+    in a dungeon the player can go? What if the effect modified what spawns on a floor?
+>interactions - are some special effects incompatible with one another? An entity can't be both
+    wet and on fire, so what should happen if both are applied to an entity?
+    Perhaps wetness has a higher priority than fire and so fire gets dispelled. Could having
+    mutiple ailments create r merge into a new ailment?
+>stat association - status effects should relate to a stat, like inflicting "hungry" would
+    relate to the Hunger stat. The stat of the afflictor's effect should then compare to the
+    victim's Recovery to dictate how long it lasts and its efficiency.
+>resistance - The Recovery stat is used to resist/boost the duration and efficiency of a status effect,
+    while the Hunger stat is used to resist/boost similarly, but only to plain debuffs/buffs.
+    How should the resistance or boost work for effects where it isn't obvious,
+    like an ailment that stops the use of all combat moves? Perhaps Recovery only affects the
+    duration if the effect cant numerically be represented. Otherwise the effectiveness would have
+    to be hardcoded. Other stats could determine the effectiveness of the ailment,
+    such as ones that come from excess Fear or Stress. Default stat would be Recovery however.
+>afflictors - What can inflict ailments? Almost anything should or can.
+    (Entities, traps, discussions, items like food, weapons, armor, throwables; events like
+    reaching a certain day or completing a sucessful dungeon run;)
+>removal - Ailments will mostly be removed by the duration completing, but what others ways
+    could it be removed? How specific would it be? Some moves could cleanse ailments, but 
+    other ailments might have more specific conditions for removal.
+>triggers - what if an ailment does something when a condition is met? Could it have a condition and
+    a passive effect too? What could cause the condition and how would it know when it is met?
+    For example, when a specific floor is reached, or when enough enemies are killed.
+>rank - Status effects do not need a ranking as their effectiveness can either be an 
+    entirely new named effect or the enemy can have a high stat associated with the effect's power
+
+

@@ -18,6 +18,14 @@ class Stat:
         self.apt = apt
         self.tv = self.calc_true_value()
         
+    def set_value(self, val:int):
+        self.value = val
+        self.tv = self.calc_true_value()    
+        
+    def set_apt(self, apt:int):
+        self.apt = apt
+        self.tv = self.calc_true_value()
+    
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
         
@@ -40,9 +48,9 @@ class Stat:
 STAT_TYPES = {
         "strength": Stat("strength", 0, 0, "str", ["s", "fuerza"]),
         "defense": Stat("defense", 0, 0, "def", ["d", "defensa"]),
-        "evasion": Stat("evasion", 0, 0, "eva", ["e", "evasion"]),
+        "evasion": Stat("evasion", 0, 0, "eva", ["e", "evade"]),
         "dexterity": Stat("dexterity", 0, 0, "dex", ["dx", "destreza"]),
-        "recovery": Stat("recovery", 0, 0, "rec", ["r", "recovery"]),
+        "recovery": Stat("recovery", 0, 0, "rec", ["r", "recuperación"]),
         "intelligence": Stat("intelligence", 0, 0, "int", ["i", "intellect", "inteligencia"]),
         "creativity": Stat("creativity", 0, 0, "cre", ["c", "create", "creatividad"]),
         "fear": Stat("fear", 0, 0, "fear", ["f", "spook", "miedo"]),
@@ -50,7 +58,7 @@ STAT_TYPES = {
         "charisma": Stat("charisma", 0, 0, "cha", ["ch", "char", "carisma"]),
         "stress": Stat("stress", 0, 0, "tres", ["ss", "estres"]),
         "health": Stat("health", 0, 0, "hp", ["h", "health points", "salud", "puntos de salud"]),
-        "hunger": Stat("hunger", 0, 0, "hun", ["hu", "hun", "hung", "hambre"]),
+        "hunger": Stat("hunger", 0, 0, "hun", ["hu", "hung", "hambre"]),
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
  
@@ -83,7 +91,11 @@ def make_stat(name, val, apt):
         return stat
 
 class StatBoard:
-    def __init__(self):
-        self.stats = STAT_TYPES
-        
     
+    def __init__(self, stats_dict: dict):
+        self.cur_stats = stats_dict
+        self.mem_stats = stats_dict
+        
+ 
+ 
+   
