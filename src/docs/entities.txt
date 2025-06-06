@@ -1,0 +1,32 @@
+                        ~~~~~~~~~~~PLAYERS, ALLIES, ENEMIES, OBJECTS~~~~~~~~~~~~~~
+
+The meat of the game involves a character that a user controls and other characters and objects to
+interact with. There can be many ways for each thing to interact with one another but some
+objects dont need to work exactly like characters. 
+
+Another modular architecture is required so that these different things can be interacted with
+in similar ways, but not every way. A chest object can be interacted with to open, or for a button
+object to be pressed to open a door, but an enemy probably doesn't want to be interacted with,
+though some may want to talk with you. A pile of rubble can be searched through for loot but
+a character might try to fight you if they notice your sleight of hand.
+
+-------------------------------------------- Entities --------------------------------------------
+
+                                  ~~~OBJECTS VERSUS CHARACTERS~~~
+       Characters:
+-Will always have a health pool and stats
+-Contains AI except for the Player
+
+        Objects:
+-sometimes cant be hurt
+-dont need stats beyond health if it can be hurt
+-has a variable dictating if someone can perceive it
+
+      Common Features:
+-can be afflicted with status effects (though immunity is up to the entity)
+-can show up in combat
+-can drop items
+-can do an action (an object could be a trap that shoots arrows every couple of seconds)
+-can activate events (characters on death or objects on interact)
+-can be spawned by anything
+-can be interacted with
