@@ -15,8 +15,13 @@ needs to keep in mind that stats can be permenantly altered as well.
 >duration - how long the effect lasts 
     (for... days, minutes, rounds, turns, moves/actions, ever, 
     afflictor's lifetime, another entity's lifetime)
->stat effects - what stat is affected, by how much, is it aptitude, value, both?
-    are multiple stats affected?
+>stat effects - what stat is affected, by how much. 
+    -Should alterations effect:
+        base stat number?
+        true stat value?
+        stat aptitude?
+        multiple of the options at once?
+        any one of the options?
 >special effects - is this effect more than a stat modifier? Perhaps damage is dealt over time,
     actions are limited, outgoing damage from any source is affected, movement is better/worse
     or works completely different, like sliding around; an entity has control of another's turn,
@@ -58,10 +63,38 @@ needs to keep in mind that stats can be permenantly altered as well.
 >rank - Status effects do not need a ranking as their effectiveness can either be an 
     entirely new named effect or the enemy can have a high stat associated with the effect's power
 
-                                     ~~~PSEUDO CODE~~~
+                                     ~~~Deep Dive~~~
 
-                                       ~Stat Memory~
+                                 ~Stat Memory & Alterations~
 When stats are changed temporarily, the changes need to be memorized to later be reversed while
-keeping permanent changes untouched.
+keeping permanent changes untouched. Bring in the Stat Board to track both permanent and temporary
+stats values of characters. The idea is that 2 dicts of Stat objs are stored, memorized & current
+respectively. Any time a stat is permenantly altered, both are updated with the change. When a 
+stat is temporarily altered, only the current type is updated. The current stats are the values 
+to be read when necessary.
+
+Numerical changes of a stat are represented by <Alteration> classes, and are stored in
+a list by a Character
+
+class Alteration
+
+    name - string title
+    value - int or decimal that effects a stat
+        any Integer [1, -1, etc..] EXCLUDING 0 
+            which will simply be added to the appropriate aspect of a stat
+        any decimal between -1 and 1 (inclusive)
+            which will act as a percentage decrease or increase to a stat value
+    duration - how long it lasts, trigger by <Time> class obj
+    ef_stat - name of stat to effect
+    ef_type - what aspect of the stat to affect 
 
 
+
+Class StatBoard
+    cur_stats
+    main_stats
+
+
+
+                                        ~Time~
+Describes what event the effect is looking for and for how many triggers.

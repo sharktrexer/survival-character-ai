@@ -6,9 +6,7 @@ objects dont need to work exactly like characters.
 
 Another modular architecture is required so that these different things can be interacted with
 in similar ways, but not every way. A chest object can be interacted with to open, or for a button
-object to be pressed to open a door, but an enemy probably doesn't want to be interacted with,
-though some may want to talk with you. A pile of rubble can be searched through for loot but
-a character might try to fight you if they notice your sleight of hand.
+object to be pressed to open a door, but you cant open up a character. 
 
 -------------------------------------------- Entities --------------------------------------------
 
