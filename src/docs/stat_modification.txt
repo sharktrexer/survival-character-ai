@@ -73,21 +73,47 @@ respectively. Any time a stat is permenantly altered, both are updated with the 
 stat is temporarily altered, only the current type is updated. The current stats are the values 
 to be read when necessary.
 
-Numerical changes of a stat are represented by <Alteration> classes, and are stored in
-a list by a Character
+Percentage changes of a stat are represented by <Alteration> classes, and are stored in
+a list by a Character, where the list represents all alterations that are applied to a Character 
+at one time. These changes manipulate the current stats dictionary and When an alteration expires, 
+they're removed from the list and cur stats dict is updated through a new calculation
+    EX: a list containing a debuff and buff relating to the Strength stat of 10:
+        [0.9, 1.2] = 10-10%+20% = 10.8 rounded to 11
+        when -0.1 expires, for [1.2] then: 10+20% = 12
+        then -0.1 is added back for [1.2, 0.9] then: 10+20%-10% = 10.8 rounded to 11
+        This equates to 0.9 * 1.2 = 1.08 which is an 8% increase
+
+                                        ~RULES~
+        Alterations are only percentage based changes
+        Buffs & Debuffs of the same stat can coexist
+        Debuffs or buffs of the same stat will have the higher potency effect takes priority
+        If the potency is the same, the one with higher duration takes priority
+        If the duration is the same, the duration is refreshed on the current alteration
+        otherwise, the alteration is ignored
+        HOWEVER
+        If a higher potency alteration overrides a lower potency but higher duration alteration,
+            when the more potent alteration expires, the less potent alteration will take its place
+
+
 
 class Alteration
 
     name - string title
-    value - int or decimal that effects a stat
-        any Integer [1, -1, etc..] EXCLUDING 0 
-            which will simply be added to the appropriate aspect of a stat
-        any decimal between -1 and 1 (inclusive)
-            which will act as a percentage decrease or increase to a stat value
+    value - a float representing a percentage change (1.5 for +50%, 0.8 for -20%)
+        Excludes 0
     duration - how long it lasts, trigger by <Time> class obj
     ef_stat - name of stat to effect
-    ef_type - what aspect of the stat to affect 
+    ef_type - what aspect of the stat to affect (base, true, aptitude)
 
+    def __eq__(self, other):
+
+        this is then used to reset the duration of the alteration instead of adding to the
+        list as a duplicate alteration
+
+How does the alterataion remove itself from the Character's list when it expires?
+
+A battle manager class should check the alterations if they have expired and calls a removal
+function to delete the alteration from the character's list and recalculate's their cur stats
 
 
 Class StatBoard
