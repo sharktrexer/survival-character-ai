@@ -73,14 +73,13 @@ respectively. Any time a stat is permenantly altered, both are updated with the 
 stat is temporarily altered, only the current type is updated. The current stats are the values 
 to be read when necessary.
 
+                                       -Alterations-
 Percentage changes of a stat are represented by <Alteration> classes, and are stored in
 a list by a Character, where the list represents all alterations that are applied to a Character 
-at one time. These changes manipulate the current stats dictionary and When an alteration expires, 
+at one time. These changes manipulate the current stats dictionary and when an alteration expires, 
 they're removed from the list and cur stats dict is updated through a new calculation
     EX: a list containing a debuff and buff relating to the Strength stat of 10:
         [0.9, 1.2] = 10-10%+20% = 10.8 rounded to 11
-        when -0.1 expires, for [1.2] then: 10+20% = 12
-        then -0.1 is added back for [1.2, 0.9] then: 10+20%-10% = 10.8 rounded to 11
         This equates to 0.9 * 1.2 = 1.08 which is an 8% increase
 
                                         ~RULES~
@@ -96,6 +95,32 @@ they're removed from the list and cur stats dict is updated through a new calcul
 
 
 
+To Store all Alterations per stat
+
+    Each stat has its own alterations to own
+    <Stat> obj contains an alteration list which will also trigger the effect to the stat value
+        while in the list
+
+class Stat
+
+    init 
+        self.buffs = []
+        self.debuffs = []
+
+    // called everytime an high priority alteration is applied or removed from this stat
+    def get_alteration_effect
+        get highest priority debuff and buff on this stat
+        multiply their percentages together
+        apply to this stat value
+
+    def sort lists ()
+        for debuff and buff lists
+            if none, or size = 1 return 
+            if size > 1
+                sort by higher potency, and then higher duration
+                
+
+
 class Alteration
 
     name - string title
@@ -105,10 +130,37 @@ class Alteration
     ef_stat - name of stat to effect
     ef_type - what aspect of the stat to affect (base, true, aptitude)
 
-    def __eq__(self, other):
+    def apply
+        gets alteration list associated with this one's value (neg or pos) and stat it affects
+        list should come prioritized by potency, duration
 
-        this is then used to reset the duration of the alteration instead of adding to the
-        list as a duplicate alteration
+        for a in list
+
+            if this potency > a potency and a is highest priority
+                add to front of list
+                trigger stat recalc
+                break
+
+            // 2nd entry and after
+            if this potentency > a potency and this duration is more than previous alteration in list
+                insert into list
+                breal
+
+            if this potency = a potency
+                if duration is equal
+                    reset its duration
+                    alert: an alteration was reset
+                    break
+                if this duration >
+                    replace a with this
+                    break
+            
+            //this should only trigger at end of the list         
+            if this potency < a potency and this duration >
+                add to list
+            
+            
+
 
 How does the alterataion remove itself from the Character's list when it expires?
 
