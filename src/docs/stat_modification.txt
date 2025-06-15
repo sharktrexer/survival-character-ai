@@ -125,7 +125,7 @@ class Alteration
 
     name - string title
     value - a float representing a percentage change (1.5 for +50%, 0.8 for -20%)
-        Excludes 0
+        Excludes 1
     duration - how long it lasts, trigger by <Time> class obj
     ef_stat - name of stat to effect
     ef_type - what aspect of the stat to affect (base, true, aptitude)

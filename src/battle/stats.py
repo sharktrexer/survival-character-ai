@@ -17,6 +17,8 @@ class Stat:
         self.value = val
         self.apt = apt
         self.tv = self.calc_true_value()
+        self.buffs = []
+        self.debuffs = []
         
     def set_value(self, val:int):
         self.value = val
