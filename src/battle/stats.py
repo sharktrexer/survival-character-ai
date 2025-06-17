@@ -1,5 +1,7 @@
 import copy
 
+from battle.alteration import Alteration
+
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
         """
@@ -97,6 +99,15 @@ class StatBoard:
     def __init__(self, stats_dict: dict):
         self.cur_stats = stats_dict
         self.mem_stats = stats_dict
+        
+    def apply_alteration(self, alteration: Alteration):
+        for s in self.mem_stats:
+            if s.name == alteration.ef_stat:
+                if alteration.value > 1:
+                    s.buffs.append(alteration)
+                else:
+                    s.debuffs.append(alteration)
+                break
         
  
  
