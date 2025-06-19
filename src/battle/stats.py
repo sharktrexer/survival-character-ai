@@ -98,16 +98,38 @@ class StatBoard:
     
     def __init__(self, stats_dict: dict):
         self.cur_stats = stats_dict
+        # These stats dont ever have Alterations applied to them
+        # and are only affected by permanent upgrades/effects
         self.mem_stats = stats_dict
         
     def apply_alteration(self, alteration: Alteration):
-        for s in self.mem_stats:
-            if s.name == alteration.ef_stat:
+        for s in self.cur_stats:
+            if s.name == sn(alteration.ef_stat):
                 if alteration.value > 1:
+                    # call alteration apply func
+                    # triggeer recalc of stat value if True is returned
                     s.buffs.append(alteration)
                 else:
                     s.debuffs.append(alteration)
                 break
+            
+    def remove_alteration(self, alteration: Alteration):
+        for s in self.cur_stats:
+            if s.name == sn(alteration.ef_stat):
+                if alteration.value > 1:
+                    s.buffs.remove(alteration)
+                else:
+                    s.debuffs.remove(alteration)
+                break
+            
+    def check_alterations_4_expiration(self):
+        for s in self.cur_stats:
+            for b in s.buffs:
+                if b.duration_left <= 0:
+                    s.buffs.remove(b)
+            for d in s.debuffs:
+                if d.duration_left <= 0:
+                    s.debuffs.remove(d)
         
  
  

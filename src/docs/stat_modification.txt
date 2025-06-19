@@ -162,16 +162,10 @@ class Alteration
             
 
 
-How does the alterataion remove itself from the Character's list when it expires?
+How the alterataion remove itself from the Character's list when it expires:
 
-A battle manager class should check the alterations if they have expired and calls a removal
+The statboard class should check the alterations if they have expired and calls a removal
 function to delete the alteration from the character's list and recalculate's their cur stats
-
-
-Class StatBoard
-    cur_stats
-    main_stats
-
 
 
                                         ~Time~

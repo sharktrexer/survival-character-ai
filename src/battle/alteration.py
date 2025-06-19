@@ -5,18 +5,67 @@ class Alteration:
         if value < 0 or value == 1:
             raise Exception("Alteration value must be greater than 0 and cannot be 1")
         
-        self.name = name
+        self.name = name # won't be displayed in game, only used for internal equality checks
         self.value = value
+        self.is_buff = value > 1
         self.duration = duration #TODO: will be changed into its own object
+        self.duration_left = duration
         self.ef_stat = ef_stat
         self.ef_type = ef_type
         
-        def __eq__(self, other):
-            if isinstance(other, Alteration):
-                return (self.name == other.name and self.value == other.value 
-                        and self.duration == other.duration and self.ef_stat == other.ef_stat 
-                        and self.ef_type == other.ef_type)
-            return NotImplemented
+    def __eq__(self, other):
+        if isinstance(other, Alteration):
+            return (self.name == other.name or (self.value == other.value 
+                    and self.duration == other.duration and self.ef_stat == other.ef_stat 
+                    and self.ef_type == other.ef_type))
+        return NotImplemented
+    
+    def tick(self):
+        self.duration_left -= 1
+        
+    def is_this_more_potent(self, alt):
+        if not isinstance(alt, Alteration) or self.is_buff != alt.is_buff:
+            return None
+        
+        if self.is_buff:
+            return self.value > alt.value
+        else:
+            return self.value < alt.value
+        
+    def apply(self, alt_list:list):
+        '''
+        Applies this alteration to the list of alterations, assuming
+        the list is sorted by potency then duration, the list only regards one stat,
+        and the list is populated with Alterations of the same value type as this one
+        (buffs or debuffs)
+        '''
+        if alt_list == []:
+            alt_list.append(self)
+            return True
+        
+        for i, a in enumerate(alt_list):
+            
+            # This alteration is more potent, insert it in front of this index
+            # Stats are recalculated if this is inserted in front of the list
+            if self.is_this_more_potent(a):
+                alt_list.insert(i, self)
+                return i == 0 
+            
+            # If the potency is the same, perhaps this alteration is a copy or is superior
+            if self.value == a.value:
+                # refresh duration
+                if self.duration == a.duration:
+                    a.duration_left = a.duration 
+                    return False
+                # replace alteration in list as it has more duration
+                elif self.duration > a.duration:
+                    alt_list[i] = self
+                    return False
+             
+            # This alteration is the least potent, but has potential to trigger in the future   
+            if not self.is_this_more_potent(a) and self.duration > a.duration:
+                alt_list.append(self)
+                return False
         
 # test alterations, applying to base stat values
 #TODO: make into a test file
