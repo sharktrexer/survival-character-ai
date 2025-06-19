@@ -102,6 +102,20 @@ class StatBoard:
         # and are only affected by permanent upgrades/effects
         self.mem_stats = stats_dict
         
+    def get_stat(self, name):
+        for s in self.cur_stats:
+            if s.name == sn(name):
+                return s
+            
+    def get_stat_apts(self):
+        return {stat.name: stat.apt for stat in self.cur_stats.values()}
+    
+    def get_stat_tvs(self):
+        return {stat.name: stat.tv for stat in self.cur_stats.values()}
+     
+    def initiative(self):
+        return self.cur_stats["dexterity"].tv + self.cur_stats["evasion"].tv
+        
     def apply_alteration(self, alteration: Alteration):
         for s in self.cur_stats:
             if s.name == sn(alteration.ef_stat):
@@ -129,6 +143,18 @@ class StatBoard:
                     s.buffs.remove(b)
             for d in s.debuffs:
                 if d.duration_left <= 0:
+                    s.debuffs.remove(d)
+            
+    # TEMPORARY func to tick alterations.
+    def tick_alterations(self):
+        for s in self.cur_stats:
+            for b in s.buffs:
+                if b.tick():
+                    print("Removed buff: " + b.name)
+                    s.buffs.remove(b)   
+            for d in s.debuffs:
+                if d.tick():
+                    print("Removed debuff: " + d.name)
                     s.debuffs.remove(d)
         
  

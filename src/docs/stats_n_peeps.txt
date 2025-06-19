@@ -80,3 +80,14 @@ or by random range.
 Perhaps dictate stat vals you want to be high/low for more variation 
 (low stat, high apt or vis versa)
 > These Enemies are then saved and stored in a csv to be read similarly to the character csv
+
+~Intiative pseudo code~
+
+>Character gains difference of self.init - init_anchor.init every round 
+    (anchor init can be updated anytime)
+>init growth starts at zero
+    
+>Character gains ap bonus if growth >= 2 * init_anchor.init
+    (growth resets to zero)
+
+anchors dont gain any growth

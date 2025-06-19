@@ -22,6 +22,7 @@ class Alteration:
     
     def tick(self):
         self.duration_left -= 1
+        return self.duration_left <= 0
         
     def is_this_more_potent(self, alt):
         if not isinstance(alt, Alteration) or self.is_buff != alt.is_buff:
@@ -30,7 +31,7 @@ class Alteration:
         if self.is_buff:
             return self.value > alt.value
         else:
-            return self.value < alt.value
+            return self.value <= alt.value
         
     def apply(self, alt_list:list):
         '''
@@ -62,8 +63,8 @@ class Alteration:
                     alt_list[i] = self
                     return False
              
-            # This alteration is the least potent, but has potential to trigger in the future   
-            if not self.is_this_more_potent(a) and self.duration > a.duration:
+            # This alteration is the least potent, add it to the end
+            if not self.is_this_more_potent(a) and i == len(alt_list) - 1:
                 alt_list.append(self)
                 return False
         

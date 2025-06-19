@@ -71,14 +71,3 @@ class BattleManager():
             
             return gain_bonus
     
-#Intiative pseudo code
-'''
->Character gains difference of self.init - init_anchor.init every round 
-    (anchor init can be updated anytime)
->init growth starts at zero
-    
->Character gains ap bonus if growth >= 2 * init_anchor.init
-    (growth resets to zero)
-
-anchors dont gain any growth
-'''
