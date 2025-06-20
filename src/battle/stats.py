@@ -32,6 +32,20 @@ class Stat:
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
+    
+    def calc_alts(self):
+        '''
+        Applies highest potency buff and debuff to base stat value
+        '''
+        # Prevent index out of bounds, Get values if they exist
+        buff_val = 1 if self.buffs == [] else self.buffs[0].value
+        debuff_val = 1 if self.debuffs == [] else self.debuffs[0]
+        
+        mult = buff_val * debuff_val
+        
+        self.value = int(self.value * mult)
+        self.tv = self.calc_true_value()
+        
         
     def calc_true_value(self):
         
@@ -116,16 +130,19 @@ class StatBoard:
     def initiative(self):
         return self.cur_stats["dexterity"].tv + self.cur_stats["evasion"].tv
         
-    def apply_alteration(self, alteration: Alteration):
+    def apply_alteration(self, alt: Alteration):
         for s in self.cur_stats:
-            if s.name == sn(alteration.ef_stat):
-                if alteration.value > 1:
+            if s.name == sn(alt.ef_stat):
+                recalc = False
+                if alt.value > 1:
                     # call alteration apply func
-                    # triggeer recalc of stat value if True is returned
-                    s.buffs.append(alteration)
+                    # trigger recalc of stat value if True is returned
+                    recalc = alt.apply(s.buffs)
                 else:
-                    s.debuffs.append(alteration)
-                break
+                    recalc = alt.apply(s.debuffs)
+                
+                if recalc:
+                    s.calc_alts()
             
     def remove_alteration(self, alteration: Alteration):
         for s in self.cur_stats:
