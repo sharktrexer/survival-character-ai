@@ -20,6 +20,9 @@ class Alteration:
                     and self.ef_type == other.ef_type))
         return NotImplemented
     
+    def __str__(self):
+        return f"{self.name}: ({self.value}) | {self.duration_left} turns left"
+    
     def tick(self):
         self.duration_left -= 1
         return self.duration_left <= 0
@@ -71,7 +74,7 @@ class Alteration:
 # test alterations, applying to base stat values
 #TODO: make into a test file
 str_buff = Alteration("Minor Strength", 1.2, 5, "Strength", "base")
-str_buff2 = Alteration("Major Strength", 2, 1, "Strength", "base")
+str_buff2 = Alteration("Major Strength", 2, 2, "Strength", "base")
 str_buff3 = Alteration("Itty Bitty Strength", 1.1, 10, "Strength", "base")
 str_debuff = Alteration("Minor Weakness", 0.8, 5, "Strength", "base")
 str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "Strength", "base")

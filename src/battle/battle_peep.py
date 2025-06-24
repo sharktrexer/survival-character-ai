@@ -15,13 +15,13 @@ class BattlePeep():
         return self.name + "\n" + self.stats
     
     def get_stat_apts(self):
-        return StatBoard.get_stat_apts()
+        return self.stats.get_stat_apts()
     
     def get_stat_tvs(self):
-        return StatBoard.get_stat_tvs()
+        return self.stats.get_stat_tvs()
      
     def initiative(self):
-        return StatBoard.initiative()
+        return self.stats.initiative()
         
     def start(self, anchor_init:int):
         #TODO: Add start logic
@@ -29,9 +29,21 @@ class BattlePeep():
         pass 
     
     def turn(self):
-        #TODO: Add turn logic
         
-        pass
+        self.stats.tick_alterations()
+        
+        # temp print to test debuffs and buffs on one stat
+        str_buffs = self.stats.get_all_buffs()["Strength"]
+        print("this is my most potent strength buff: ", 
+              self.stats.str_buffs[0],
+              "\n",
+              "Rest: ", *str_buffs)
+        
+        str_debuffs = self.stats.get_all_debuffs()["Strength"]
+        print("this is my most potent strength debuff: ", 
+              self.stats.str_debuffs[0],
+              "\n",
+              "Rest: ", *str_debuffs)
      
     ''' Gained extra energy from initiative calculations. 
     Reset vars and obtain an energy bonus

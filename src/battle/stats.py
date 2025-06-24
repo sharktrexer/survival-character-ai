@@ -33,10 +33,13 @@ class Stat:
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
     
-    def calc_alts(self):
+    def calc_alts(self, og_value:int):
         '''
         Applies highest potency buff and debuff to base stat value
         '''
+        # reset b4 calc
+        self.value = og_value
+        
         # Prevent index out of bounds, Get values if they exist
         buff_val = 1 if self.buffs == [] else self.buffs[0].value
         debuff_val = 1 if self.debuffs == [] else self.debuffs[0]
@@ -46,6 +49,16 @@ class Stat:
         self.value = int(self.value * mult)
         self.tv = self.calc_true_value()
         
+        
+        
+    def get_priority_alt(self, is_buff:bool=True):
+        
+        alts = self.buffs if is_buff else self.debuffs
+            
+        if alts == []:
+            return None
+        else:
+            return alts[0]
         
     def calc_true_value(self):
         
@@ -142,7 +155,8 @@ class StatBoard:
                     recalc = alt.apply(s.debuffs)
                 
                 if recalc:
-                    s.calc_alts()
+                    og_value = self.mem_stats[s.name].value
+                    s.calc_alts(og_value)
             
     def remove_alteration(self, alteration: Alteration):
         for s in self.cur_stats:
@@ -152,15 +166,6 @@ class StatBoard:
                 else:
                     s.debuffs.remove(alteration)
                 break
-            
-    def check_alterations_4_expiration(self):
-        for s in self.cur_stats:
-            for b in s.buffs:
-                if b.duration_left <= 0:
-                    s.buffs.remove(b)
-            for d in s.debuffs:
-                if d.duration_left <= 0:
-                    s.debuffs.remove(d)
             
     # TEMPORARY func to tick alterations.
     def tick_alterations(self):
@@ -173,6 +178,18 @@ class StatBoard:
                 if d.tick():
                     print("Removed debuff: " + d.name)
                     s.debuffs.remove(d)
+                    
+    def get_all_buffs(self):
+        all_buffs = {}
+        for s in self.cur_stats:
+            all_buffs[s.name] = s.buffs
+        return all_buffs
+    
+    def get_all_debuffs(self):
+        all_debuffs = {}
+        for s in self.cur_stats:
+            all_debuffs[s.name] = s.debuffs
+        return all_debuffs
         
  
  
