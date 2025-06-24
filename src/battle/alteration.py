@@ -3,7 +3,7 @@ class Alteration:
     def __init__(self, name: str, value: float, duration: int, ef_stat: str, ef_type: str):
         
         if value < 0 or value == 1:
-            raise Exception("Alteration value must be greater than 0 and cannot be 1")
+            raise Exception("Alteration value must be greater than r equal to 0 and cannot be 1")
         
         self.name = name # won't be displayed in game, only used for internal equality checks
         self.value = value
@@ -42,7 +42,11 @@ class Alteration:
         the list is sorted by potency then duration, the list only regards one stat,
         and the list is populated with Alterations of the same value type as this one
         (buffs or debuffs)
+        
+        Returns:
+            bool: if this alteration has the highest potency and the stat value should be recalculated
         '''
+        
         if alt_list == []:
             alt_list.append(self)
             return True
@@ -50,20 +54,22 @@ class Alteration:
         for i, a in enumerate(alt_list):
             
             # This alteration is more potent, insert it in front of this index
-            # Stats are recalculated if this is inserted in front of the list
             if self.is_this_more_potent(a):
                 alt_list.insert(i, self)
                 return i == 0 
             
-            # If the potency is the same, perhaps this alteration is a copy or is superior
+            # If the potency is the same, perhaps this alteration is a copy or will 
+            # increase duration left
+            # TODO: allow for different duration types and comparisons, like a move versus a day
+            # TODO: alert game if alteration was refreshed or extended
+            # current funcctionality is ONLY turn based
             if self.value == a.value:
                 # refresh duration
-                if self.duration == a.duration:
-                    a.duration_left = a.duration 
-                    return False
-                # replace alteration in list as it has more duration
-                elif self.duration > a.duration:
-                    alt_list[i] = self
+                if self.duration == a.duration or self.duration > a.duration:
+                    a.duration_left = (self.duration 
+                                       if a.duration_left < self.duration 
+                                       else a.duration_left)
+                    # refresh is ignored if it would actually reduce the duration left
                     return False
              
             # This alteration is the least potent, add it to the end
@@ -74,7 +80,8 @@ class Alteration:
 # test alterations, applying to base stat values
 #TODO: make into a test file
 str_buff = Alteration("Minor Strength", 1.2, 5, "Strength", "base")
-str_buff2 = Alteration("Major Strength", 2, 2, "Strength", "base")
-str_buff3 = Alteration("Itty Bitty Strength", 1.1, 10, "Strength", "base")
-str_debuff = Alteration("Minor Weakness", 0.8, 5, "Strength", "base")
-str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "Strength", "base")
+str_buff2 = Alteration("Major Strength", 2, 2, "STRENGTH", "base")
+str_buff3 = Alteration("Itty Bitty Strength", 1.1, 10, "str", "base")
+
+str_debuff = Alteration("Minor Weakness", 0.8, 5, "feurza", "base")
+str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "s", "base")

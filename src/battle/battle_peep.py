@@ -1,4 +1,5 @@
 from .stats import Stat, StatBoard
+from .alteration import Alteration
 
 ''' A version of character that is battle oriented 
 TODO: contain innitiative related stats into its own class
@@ -22,6 +23,12 @@ class BattlePeep():
      
     def initiative(self):
         return self.stats.initiative()
+    
+    def recieve_alt(self, alt: Alteration):
+        self.stats.apply_alteration(alt)
+        
+    def cleanse_alt(self, alt: Alteration):
+        self.stats.remove_alteration(alt)
         
     def start(self, anchor_init:int):
         #TODO: Add start logic

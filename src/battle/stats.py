@@ -36,6 +36,10 @@ class Stat:
     def calc_alts(self, og_value:int):
         '''
         Applies highest potency buff and debuff to base stat value
+        
+        Parameters:
+            og_value (int): base stat value to apply alterations to, 
+                most likely from the memorized version of the stat
         '''
         # reset b4 calc
         self.value = og_value
@@ -110,8 +114,8 @@ def sn(name):
         poss_names = stat.get_all_names()
         if name.lower() in poss_names:
             full_name = stat.name
+            return full_name
             
-    return full_name
             
 def make_stat(name, val, apt):
         name = sn(name).lower()
@@ -144,19 +148,21 @@ class StatBoard:
         return self.cur_stats["dexterity"].tv + self.cur_stats["evasion"].tv
         
     def apply_alteration(self, alt: Alteration):
-        for s in self.cur_stats:
-            if s.name == sn(alt.ef_stat):
-                recalc = False
-                if alt.value > 1:
-                    # call alteration apply func
-                    # trigger recalc of stat value if True is returned
-                    recalc = alt.apply(s.buffs)
-                else:
-                    recalc = alt.apply(s.debuffs)
-                
-                if recalc:
-                    og_value = self.mem_stats[s.name].value
-                    s.calc_alts(og_value)
+        
+        # obtain correct list to apply alteration
+        stat_name = sn(alt.ef_stat)
+        alt_list = (self.cur_stats[stat_name].buffs 
+                    if alt.is_buff 
+                    else self.cur_stats[stat_name].debuffs)
+        
+        # call alteration apply func
+        # trigger recalc of stat value if True is returned
+        recalc = alt.apply(alt_list)
+        
+        if recalc:
+            # get memorized stat value to apply alteration multipliers to
+            og_value = self.mem_stats[stat_name].value
+            self.cur_stats[stat_name].calc_alts(og_value)
             
     def remove_alteration(self, alteration: Alteration):
         for s in self.cur_stats:
