@@ -9,7 +9,7 @@ class Character:
         self.avg_diff = 0
         
     def __str__(self):
-        return self.name + ": " + "\n" + self.desc + "\n" + str(self.stat_aps)
+        return self.name + ", the " + self.desc + "\nStat Apts:\n" + str(self.stat_aps)
     
     ''' Prints the formatted difference between two stats'''
     def str_difference(self, m_stat, l_stat, is_reversed=False, no_name=False, is_simple=False):

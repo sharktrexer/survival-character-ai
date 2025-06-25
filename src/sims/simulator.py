@@ -44,7 +44,9 @@ class Simulator(ABC):
         
         while not valid:
             for i, s in enumerate(self.funcs):
-                print(s.__name__, f"[{i+1}]")
+                formatted_name = s.__name__.replace("_", " ")
+                formatted_name = formatted_name[0].upper() + formatted_name[1:]
+                print(formatted_name, f"[{i+1}]")
                 
             self.notify_of_option_to_exit()
             choice = input((f"Pick a number from  1-{len(self.funcs)} \n")).lower()
@@ -102,3 +104,109 @@ class GraphSimulator(Simulator):
 
 
 
+class WhoAreYouSimulator(Simulator):
+    
+    def __init__(self):
+        self.name = "Who Are You Simulator"
+        self.funcs = [self.who_are_you, self.who_are_you_with_extra_info]
+        self.stat_choices = list(STAT_TYPES.keys())
+        self.obtained = {key: 0 for key in SIMPLE_PEOPLE}
+        self.history = []
+
+    def welcome(self):
+        print(f"Welcome to the {self.name}!\n", 
+              "Here you will choose a stat you value the most and the stat you value the least.",
+              "Based on those choices, you will obtain a character that fits your preferences.",
+              "Specifically, the given character will have the highest difference between your chosen stats.",
+              "Before you get started, you can choose to play normally or with extra information detailing how the character was chosen.",)
+        t.sleep(1)
+    
+    def who_are_you(self, verbose: bool = False):
+        while True:
+            
+            valid = False
+            most_choice = ""
+            least_choice = ""
+
+            # get input that is a valid choice 
+            # (converted into format that compares to str in STAT_NAMES)
+            while not valid:
+                most_choice = input(("Of these choices, what do you value the most? " + 
+                                    ", ".join(self.stat_choices) + ": ")).lower()
+                #most_choice = most_choice[0].upper() + most_choice[1:]   
+                valid = most_choice in self.stat_choices
+
+            # get list of stats excluding previously chosen stat
+            valid_stats = self.stat_choices.copy()
+            valid_stats.remove(most_choice)
+            
+            valid = False
+
+            # input of sacrified stat
+            while not valid:
+                least_choice = input(("Of these choices, what do you value the least? " + 
+                                    ", ".join(valid_stats) + ": ")).lower()
+                valid = least_choice in valid_stats
+                
+            # sort people by chosen stats!! based on difference between them
+            sorted_people = sort_peeps(SIMPLE_PEOPLE, most_choice, least_choice)
+            
+            # print sorted people
+            if verbose:
+                print("\nSORTED ")
+                for p in sorted_people:
+                    print(p.name + ": " + str(p.stats[most_choice] - p.stats[least_choice]))
+
+            # tiebreaker:
+            top_peeps = get_highest_diff_peep(sorted_people, most_choice, least_choice)
+            
+            if verbose:
+                print("\nTOP 3")
+                for p in top_peeps:
+                    print(p.name + ": " + str(p.stats[most_choice] - p.stats[least_choice]))
+
+            # TODO: perhaps only show the stats that the user chose?
+            print("\nYou got: " + str(top_peeps[0]) + "\n")
+            self.obtained[top_peeps[0]] += 1
+            t.sleep(2)
+            
+            # log choices
+            self.history.append((most_choice, least_choice, top_peeps[0].name))
+            
+            print("You have so far obtained:")
+            for p in self.obtained:
+                if self.obtained[p] == 0:
+                    continue
+                print(p.name + ": " + str(self.obtained[p]) + " times!")
+            t.sleep(1)
+                        
+            valid = False
+            while not valid:
+                continue_choice = input("Play Again? (y/n) or show history? (h): ").lower()
+                valid = continue_choice in ["y", "n", "h"]
+                
+                # show history and ask again to play
+                if valid and continue_choice == "h":
+                    print("\nHISTORY: ")
+                    for c in self.history:
+                        print(f"{c[0]} > {c[1]} = {c[2]}")
+                    print("\n")
+                    valid = False
+                
+            if continue_choice == "n":
+                return
+            
+    
+    def who_are_you_with_extra_info(self):
+        self.who_are_you(True)
+    
+    def simulate(self):
+        print("\n")
+            
+        self.welcome()
+        
+        while True:
+            exit_code = self.choose_func()
+            if exit_code == 0:
+                return
+            t.sleep(1)
