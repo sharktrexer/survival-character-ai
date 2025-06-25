@@ -38,18 +38,18 @@ class Simulator(ABC):
         choice = ""
         
         while not valid:
-            for s in self.funcs:
-                print(s.__name__)
+            for i, s in enumerate(self.funcs):
+                print(s.__name__, f"[{i+1}]")
                 
             self.notify_of_option_to_exit()
-            choice = input((f"Pick a number from  0-{len(self.funcs)-1} \n")).lower()
+            choice = input((f"Pick a number from  1-{len(self.funcs)} \n")).lower()
             
             if self.validate_exit(choice):
                 self.goodbye()
                 return 0
             
             try:
-                choice = int(choice)
+                choice = int(choice) - 1
             except:
                 continue
             valid = choice >= 0 and choice < len(self.funcs)
@@ -94,7 +94,6 @@ class GraphSimulator(Simulator):
             if exit_code == 0:
                 return
             t.sleep(1)
-            
-            
-            
-POSSIBLE_SIMS = [GraphSimulator().simulate]          
+
+
+

@@ -2,10 +2,11 @@ from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, sort_peeps, get_highe
 from battle.intiative_sim import InitiativeSimulator 
 import visualization.graph_data as gd
 import peep_data.char_data as char_data
-from sims.simulator import POSSIBLE_SIMS
+from sims.available import AVAIL_SIMS, get_available_sims
 
 # read character data and populate SIMPLE_PEOPLE
 peep_fetch()
+get_available_sims()
 
 '''
 TODO: cli interface that allows to move up back to main loop
@@ -160,7 +161,30 @@ def init_main():
         IS.init_tester.next_round()
         
         
-sims = [question_main, POSSIBLE_SIMS[0], graph_main, dist_main, init_main]
+sims = [question_main, AVAIL_SIMS[0][1].simulate, graph_main, dist_main, init_main]
+
+def main_refactor():
+        
+    print("\n\nWelcome to the peep simulator!\n" +
+          "What simulation would you like to run?\n")
+    
+    while True:
+        valid = False
+        choice = ""
+        
+        while not valid:
+
+            for i, s in enumerate(AVAIL_SIMS):
+                print(s[0], f"[{i+1}]")
+                
+            choice = input((f"Pick a number from  1-{len(AVAIL_SIMS)} \n")).lower()
+            try:
+                choice = int(choice) - 1
+            except:
+                continue
+            valid = choice >= 0 and choice < len(AVAIL_SIMS)
+            
+        AVAIL_SIMS[choice][1].simulate()
 
 def main():
     print("\n\n")
@@ -173,7 +197,7 @@ def main():
         valid = False
         choice = ""
         
-        print("CHOICES")
+        print("CHOICES: ")
         
         while not valid:
             for s in sims:
@@ -187,4 +211,4 @@ def main():
             
         sims[choice]()
 
-if __name__ == "__main__": main()
+if __name__ == "__main__": main_refactor()
