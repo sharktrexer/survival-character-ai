@@ -207,11 +207,11 @@ def print_combos_by_peep():
         print(combo.str_simple())
 
 ''' Prints character names and how many times they would be selected based on 2 stat choices'''
-def print_distribution():
+def print_distribution_count():
 
-    print("\nCharacter distribution:")
+    print("\nCharacter\'s and how many combos there are to obtain them:")
     for key in character_count:
-        print(key, character_count[key])
+        print(key + ": ", character_count[key])
 
     print("\n")
     

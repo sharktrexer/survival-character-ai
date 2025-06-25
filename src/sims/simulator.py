@@ -6,7 +6,17 @@ import peep_data.char_data as char_data
 from abc import ABC, abstractmethod
 
 from battle.intiative_sim import InitiativeSimulator 
-from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, sort_peeps, get_highest_diff_peep
+from peep_data.char_data import (
+    STAT_TYPES, 
+    SIMPLE_PEOPLE, 
+    sort_peeps, 
+    get_highest_diff_peep, 
+    get_distribution, 
+    print_combos_by_peep, 
+    print_combos_by_M_stat, 
+    print_combos_by_L_stat, 
+    print_distribution_count
+    )
 
 class Simulator(ABC):
     
@@ -100,7 +110,7 @@ class GraphSimulator(Simulator):
             exit_code = self.choose_func()
             if exit_code == 0:
                 return
-            t.sleep(1)
+            t.sleep(0.5)
 
 
 
@@ -209,4 +219,35 @@ class WhoAreYouSimulator(Simulator):
             exit_code = self.choose_func()
             if exit_code == 0:
                 return
-            t.sleep(1)
+            t.sleep(0.5)
+            
+            
+class DistSimulator(Simulator):
+    def __init__(self):
+        self.name = "Distribution of Stat Combos Simulator"
+        self.funcs = [print_combos_by_peep, 
+                      print_combos_by_M_stat, 
+                      print_combos_by_L_stat, 
+                      print_distribution_count]
+        
+        get_distribution()
+        
+    def welcome(self):
+        print(f"Welcome to the {self.name}!\n", 
+              "Here you can view the different combinations of a chosen desired and undesired stat,"
+              + "and what character would be obtained with that combo.",
+              "These combos can be grouped by character, desired stat, or undesired stat.",
+              "You can also just view how many combos there are to obtain each character.",
+              "Keep in mind this is a very rough implementation without much styling.")
+        t.sleep(1)    
+        
+    def simulate(self):
+        print("\n")
+            
+        self.welcome()
+        
+        while True:
+            exit_code = self.choose_func()
+            if exit_code == 0:
+                return
+            t.sleep(0.5)
