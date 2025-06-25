@@ -43,9 +43,9 @@ class Character:
     
     def get_emotional_stats(self):
         return {stat: self.stat_aps[stat] for stat in 
-                ["Fear", "Intimidation", "Charisma", "Stress", "Hunger", "Creativity"]}
+                ["fear", "intimidation", "charisma", "stress", "hunger", "creativity"]}
         
     def get_physical_stats(self):
         return {stat: self.stat_aps[stat] for stat in 
-                ["Strength", "Defense", "Evasion", "Dexterity", "Intelligence", "Recovery", "Health", "Energy"]}
+                ["strength", "defense", "evasion", "dexterity", "intelligence", "recovery", "health", "energy"]}
         

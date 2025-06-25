@@ -69,7 +69,8 @@ class Alteration:
                     a.duration_left = (self.duration 
                                        if a.duration_left < self.duration 
                                        else a.duration_left)
-                    # refresh is ignored if it would actually reduce the duration left
+                    # EDGE CASE: 
+                        # refresh is ignored if it would actually reduce the duration left
                     return False
              
             # This alteration is the least potent, add it to the end
