@@ -34,6 +34,11 @@ class Simulator(ABC):
         t.sleep(1)
     
     def choose_func(self):
+        '''
+        Asks user to pick a function to run from self.funcs. If user enters self.EXIT_KEY,
+        ends the simulation and says goodbye. If not, calls the function and returns 1.
+        Otherwise, continues to ask user until valid input is given.
+        '''
         valid = False
         choice = ""
         

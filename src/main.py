@@ -165,6 +165,12 @@ sims = [question_main, AVAIL_SIMS[0][1].simulate, graph_main, dist_main, init_ma
 
 def main_refactor():
         
+    """
+    Displays a welcome message for the peep simulator and prompts the user to select a 
+    simulation to from AVAIL_SIMS where the user can choose one by inputting a number. 
+    Validates user input to ensure a correct choice is made, then executes the selected simulation.
+    """
+
     print("\n\nWelcome to the peep simulator!\n" +
           "What simulation would you like to run?\n")
     

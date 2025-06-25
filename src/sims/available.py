@@ -8,8 +8,11 @@ import inspect
 AVAIL_SIMS = []
 
 def get_available_sims():
-
-    # Get all concrete Simulator classes
+    '''
+    Fetches all non-abstract Simulator's in the simulator module and instantiates
+    them for use in the main loop. They are added to AVAIL_SIMS as a tuple of
+    (instance name, instance)
+    '''
     concrete_classes = [
         sims for name, sims in inspect.getmembers(simulator)
         if inspect.isclass(sims) and not inspect.isabstract(sims) 
