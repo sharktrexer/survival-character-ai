@@ -1,4 +1,4 @@
-from .stats import Stat, StatBoard
+from .stats import Stat, StatBoard, sn
 from .alteration import Alteration
 
 ''' A version of character that is battle oriented 
@@ -30,7 +30,7 @@ class BattlePeep():
     def cleanse_alt(self, alt: Alteration):
         self.stats.remove_alteration(alt)
         
-    def start(self, anchor_init:int):
+    def start(self):
         #TODO: Add start logic
         #TODO: a battle info obj should be passed in instead of just the anchor_init val
         pass 
@@ -40,17 +40,23 @@ class BattlePeep():
         self.stats.tick_alterations()
         
         # temp print to test debuffs and buffs on one stat
-        str_buffs = self.stats.get_all_buffs()["Strength"]
-        print("this is my most potent strength buff: ", 
-              self.stats.str_buffs[0],
-              "\n",
-              "Rest: ", *str_buffs)
+        '''
+        buffs = self.stats.get_all_buffs().values()
+        if buffs:
+            str_buffs = buffs[sn("Strength")]
+            print("this is my most potent strength buff: ", 
+                self.stats.str_buffs[0],
+                "\n",
+                "Rest: ", *str_buffs)
         
-        str_debuffs = self.stats.get_all_debuffs()["Strength"]
-        print("this is my most potent strength debuff: ", 
-              self.stats.str_debuffs[0],
-              "\n",
-              "Rest: ", *str_debuffs)
+        debuffs = self.stats.get_all_debuffs()
+        if debuffs:
+            str_debuffs = debuffs[sn("Strength")]
+            print("this is my most potent strength debuff: ", 
+                self.stats.str_debuffs[0],
+                "\n",
+                "Rest: ", *str_debuffs)
+                '''
      
     ''' Gained extra energy from initiative calculations. 
     Reset vars and obtain an energy bonus
@@ -59,6 +65,5 @@ class BattlePeep():
         #TODO: should battle manager handle this???
         self.init_growth = 0
         self.gained_ap_bonus = True
-        print(self.name + " - Gained energy bonus from initiative! Growth reset :O")
         #TODO: Add energy bonus to AP value
         

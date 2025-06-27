@@ -4,12 +4,20 @@ class BattleManager():
     def __init__(self, members:list):
         self.rounds = 0
         self.members = members
-        self.init_anchor = self.get_anchor_init()
+        self.init_anchor = 0
+        self.get_anchor_init()
         
     def get_anchor_init(self):
+        """ 
+        Sets the anchor initiative value to the lowest initiative value among the 
+        peeps. The anchor value is used to determine when a peep gains 
+        bonus AP. 
+        """
+        if self.members == []: return 0
+        
         anchor = min(self.members, key = lambda peep: peep.initiative())
         print("Anchor: " + anchor.name, " with init: " + str(anchor.initiative()))
-        return anchor.initiative()
+        self.init_anchor = anchor.initiative()
     
     def change_member_list(self, peep:BattlePeep, do_add:bool):
         if do_add:
@@ -19,11 +27,11 @@ class BattleManager():
             print("Removed " + peep.name)
             self.members.remove(peep)
         
-        self.init_anchor = self.get_anchor_init()
+        self.get_anchor_init()
      
     def start_round(self):
         for peep in self.members:
-            peep.start(self.init_anchor)
+            peep.start()
         
     def next_round(self):
         self.rounds += 1
@@ -67,6 +75,7 @@ class BattleManager():
             
             # let peep know they have bonus
             if gain_bonus:
+                print(peep.name + " - Gained energy bonus from initiative! Growth reset :O")
                 peep.energy_bonus()
             
             return gain_bonus

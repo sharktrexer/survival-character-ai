@@ -7,43 +7,6 @@ peep_fetch()
 # obtain all available sims
 get_available_sims()
 
-
-def init_main():
-    IS = InitiativeSimulator()
-    IS.start_round()
-    while True:
-        
-        print("\n")
-        
-        valid = False
-        choice = ""
-
-        # input
-        while not valid:
-            choice = input(("cmds: add, remove, battle, options, or nothing to continue\n")).lower()
-            valid = choice in ["add", "remove", "battle", "options", ""]
-        
-        if choice == "add":
-            valid = False
-            while not valid:
-                IS.print_options()
-                choice = input(("Choose!!!! "))
-                valid = IS.modify_battle(choice, True)
-        elif choice == "remove":
-            valid = False
-            while not valid:
-                IS.print_current_peeps()
-                choice = input(("Choose!!!! "))
-                valid = IS.modify_battle(choice, False)
-        elif choice == "battle":
-            IS.print_current_peeps()
-            continue
-        elif choice == "options":
-            IS.print_options()
-            continue
-            
-        IS.init_tester.next_round()
-
 def main():
         
     """
@@ -51,7 +14,6 @@ def main():
     simulation to from AVAIL_SIMS where the user can choose one by inputting a number. 
     Validates user input to ensure a correct choice is made, then executes the selected simulation.
     """
-
     print("\n\nWelcome to the peep simulator!\n" +
           "What simulation would you like to run?\n")
     
@@ -60,7 +22,7 @@ def main():
         choice = ""
         
         while not valid:
-
+            print("\n")
             for i, s in enumerate(AVAIL_SIMS):
                 print(s[0], f"[{i+1}]")
                 

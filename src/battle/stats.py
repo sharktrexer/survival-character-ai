@@ -165,7 +165,7 @@ class StatBoard:
             self.cur_stats[stat_name].calc_alts(og_value)
             
     def remove_alteration(self, alteration: Alteration):
-        for s in self.cur_stats:
+        for s in self.cur_stats.values():
             if s.name == sn(alteration.ef_stat):
                 if alteration.value > 1:
                     s.buffs.remove(alteration)
@@ -175,7 +175,7 @@ class StatBoard:
             
     # TEMPORARY func to tick alterations.
     def tick_alterations(self):
-        for s in self.cur_stats:
+        for s in self.cur_stats.values():
             for b in s.buffs:
                 if b.tick():
                     print("Removed buff: " + b.name)
@@ -187,13 +187,13 @@ class StatBoard:
                     
     def get_all_buffs(self):
         all_buffs = {}
-        for s in self.cur_stats:
+        for s in self.cur_stats.values():
             all_buffs[s.name] = s.buffs
         return all_buffs
     
     def get_all_debuffs(self):
         all_debuffs = {}
-        for s in self.cur_stats:
+        for s in self.cur_stats.values():
             all_debuffs[s.name] = s.debuffs
         return all_debuffs
         

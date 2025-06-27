@@ -25,13 +25,22 @@ class Simulator(ABC):
     name = 'DID NOT SET NAME'
     funcs = ['DID NOT SET FUNCS']
     
-    @abstractmethod
+    
     def simulate(self):
-        pass
+        print("\n")
+            
+        self.welcome()
+        
+        while True:
+            print("")
+            exit_code = self.choose_func()
+            if exit_code == 0:
+                return
+            t.sleep(0.5)
     
     @abstractmethod
     def welcome(self):
-        pass
+        raise NotImplementedError("Welcome method must be implemented in simulator subclass.")
         
     def notify_of_option_to_exit(self):
         print(f"Enter {self.EXIT_KEY} to exit this simulation.")
@@ -130,17 +139,6 @@ class GraphSimulator(Simulator):
               "or ALL stats, or each of those charts for a specific character.")
         t.sleep(1)
     
-    def simulate(self):
-        print("\n")
-            
-        self.welcome()
-        
-        while True:
-            exit_code = self.choose_func()
-            if exit_code == 0:
-                return
-            t.sleep(0.5)
-
 
 
 class WhoAreYouSimulator(Simulator):
@@ -238,17 +236,6 @@ class WhoAreYouSimulator(Simulator):
     
     def who_are_you_with_extra_info(self):
         self.who_are_you(True)
-    
-    def simulate(self):
-        print("\n")
-            
-        self.welcome()
-        
-        while True:
-            exit_code = self.choose_func()
-            if exit_code == 0:
-                return
-            t.sleep(0.5)
             
             
 class DistSimulator(Simulator):
@@ -270,16 +257,7 @@ class DistSimulator(Simulator):
               "Keep in mind this is a very rough implementation without much styling.")
         t.sleep(1)    
         
-    def simulate(self):
-        print("\n")
-            
-        self.welcome()
-        
-        while True:
-            exit_code = self.choose_func()
-            if exit_code == 0:
-                return
-            t.sleep(0.5)
+
             
 
         
