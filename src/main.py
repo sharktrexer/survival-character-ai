@@ -1,5 +1,4 @@
 from peep_data.char_data import peep_fetch
-from battle.intiative_sim import InitiativeSimulator 
 from sims.available import AVAIL_SIMS, get_available_sims
 
 # read character data and populate SIMPLE_PEOPLE

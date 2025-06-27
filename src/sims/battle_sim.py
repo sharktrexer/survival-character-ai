@@ -159,7 +159,6 @@ class BattleSimulator(Simulator):
         print("Resetting Battle...")
         self.battler = BattleManager([])
         
-    
 
 '''
 class InitiativeSimulator(BattleSimulator):
