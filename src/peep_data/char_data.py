@@ -105,7 +105,7 @@ def set_avg_stat_diff():
             avg = 0
             for other_stat in STAT_NAMES:
                 if stat != other_stat:
-                    diff = abs(p.stat_aps[stat] - p.stat_aps[other_stat])
+                    diff = abs(p.stat_apts[stat] - p.stat_apts[other_stat])
                     avg += diff
             avg = round(avg / (len(STAT_NAMES) - 1), 2)
             avg = round(avg, 2)
@@ -127,8 +127,8 @@ def print_avg_stats():
 ''' In progress func to test other ways of calculating difference '''
 def diff_of_stats(peep, m_stat, l_stat):
     
-    most_stat = peep.stat_aps[m_stat]
-    least_stat = peep.stat_aps[l_stat]
+    most_stat = peep.stat_apts[m_stat]
+    least_stat = peep.stat_apts[l_stat]
     
     larger_stat = most_stat if most_stat > least_stat else least_stat
     smaller_stat = least_stat if most_stat > least_stat else most_stat
@@ -140,22 +140,22 @@ def diff_of_stats(peep, m_stat, l_stat):
 
 ''' sort peeps by difference between most and least choice '''
 def sort_peeps(peeps: list, most_choice: str, least_choice: str) -> list:
-    sorted_peeps = sorted(peeps, key=lambda p: -(p.stat_aps[most_choice] - p.stat_aps[least_choice]))
+    sorted_peeps = sorted(peeps, key=lambda p: -(p.stat_apts[most_choice] - p.stat_apts[least_choice]))
     return sorted_peeps
 #TODO: get 2 lists, 1 sorted by highest wanted stat and 1 sorted by lowest discarded stat
 # Pick character with highest difference of indexes between 2 lists.
 
 ''' sort peeps by highest stat, used as a tiebreaker '''
 def get_highest_stat(peeps: list, stat: str) -> str:
-    sorted_peeps = sorted(peeps, key=lambda p: -p.stat_aps[stat])
+    sorted_peeps = sorted(peeps, key=lambda p: -p.stat_apts[stat])
     return sorted_peeps
 
 ''' gets peep with highest difference between most and least desired choice.
 Chooses peep with the highest desired stat of top 3 if there is a tie
 '''
 def get_highest_diff_peep(sorted_peeps: list, m_stat: str, l_stat: str) -> list:
-  top_peep_diff = sorted_peeps[0].stat_aps[m_stat] - sorted_peeps[0].stat_aps[l_stat]
-  next_peep_diff = sorted_peeps[1].stat_aps[m_stat] - sorted_peeps[1].stat_aps[l_stat]
+  top_peep_diff = sorted_peeps[0].stat_apts[m_stat] - sorted_peeps[0].stat_apts[l_stat]
+  next_peep_diff = sorted_peeps[1].stat_apts[m_stat] - sorted_peeps[1].stat_apts[l_stat]
   highest_peeps = sorted_peeps[:3]
   
   if top_peep_diff == next_peep_diff:

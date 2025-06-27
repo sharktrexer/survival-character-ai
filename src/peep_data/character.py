@@ -4,19 +4,19 @@ class Character:
     def __init__(self, name: str, desc: str, stats_dict: dict):
         self.name = name
         self.desc = desc
-        self.stat_aps = stats_dict
+        self.stat_apts = stats_dict
         self.avg_stat_diffs = dict()
         self.avg_diff = 0
         
     def __str__(self):
-        return self.name + ", the " + self.desc + "\nStat Apts:\n" + str(self.stat_aps)
+        return self.name + ", the " + self.desc + "\nStat Apts:\n" + str(self.stat_apts)
     
     ''' Prints the formatted difference between two stats'''
     def str_difference(self, m_stat, l_stat, is_reversed=False, no_name=False, is_simple=False):
         
         # get stat vals
-        m_stat_val = self.stat_aps[m_stat]
-        l_stat_val = self.stat_aps[l_stat]
+        m_stat_val = self.stat_apts[m_stat]
+        l_stat_val = self.stat_apts[l_stat]
         
         # Conditional printing vars
         name = self.name if not no_name else ""
@@ -42,10 +42,10 @@ class Character:
                     )   
     
     def get_emotional_stats(self):
-        return {stat: self.stat_aps[stat] for stat in 
+        return {stat: self.stat_apts[stat] for stat in 
                 ["fear", "intimidation", "charisma", "stress", "hunger", "creativity"]}
         
     def get_physical_stats(self):
-        return {stat: self.stat_aps[stat] for stat in 
+        return {stat: self.stat_apts[stat] for stat in 
                 ["strength", "defense", "evasion", "dexterity", "intelligence", "recovery", "health", "energy"]}
         

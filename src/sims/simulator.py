@@ -43,11 +43,40 @@ class Simulator(ABC):
         print(f"Exiting {self.name}. Goodbye!")
         t.sleep(1)
     
+    def get_choice(self, choices:list):
+        '''
+        Asks user to pick a choice from a list. 
+        Continues to ask user until valid input is given.
+        
+        Parameters:
+            choices (list): list of choices to pick from
+        
+        Returns:
+            int: index of choice
+        '''
+        
+        valid = False
+        choice = ""
+        
+        while not valid:
+            for i, s in enumerate(choices):
+                print(s, f"[{i+1}]")
+            choice = input((f"Pick a number from  1-{len(choices)} \n")).lower()
+            try:
+                choice = int(choice) - 1
+            except:
+                continue
+            valid = choice >= 0 and choice < len(choices)
+        return choice
+    
     def choose_func(self):
         '''
         Asks user to pick a function to run from self.funcs. If user enters self.EXIT_KEY,
         ends the simulation and says goodbye. If not, calls the function and returns 1.
         Otherwise, continues to ask user until valid input is given.
+        
+        Returns:
+            int: 0 if user wants to exit, 1 otherwise
         '''
         valid = False
         choice = ""
@@ -138,13 +167,9 @@ class WhoAreYouSimulator(Simulator):
             most_choice = ""
             least_choice = ""
 
-            # get input that is a valid choice 
-            # (converted into format that compares to str in STAT_NAMES)
-            while not valid:
-                most_choice = input(("Of these choices, what do you value the most? " + 
-                                    ", ".join(self.stat_choices) + ": ")).lower()
-                #most_choice = most_choice[0].upper() + most_choice[1:]   
-                valid = most_choice in self.stat_choices
+            # input of desired stat         
+            print("Of these stat types, which do you value the most?")    
+            most_choice = self.stat_choices[self.get_choice(self.stat_choices)]
 
             # get list of stats excluding previously chosen stat
             valid_stats = self.stat_choices.copy()
@@ -153,29 +178,31 @@ class WhoAreYouSimulator(Simulator):
             valid = False
 
             # input of sacrified stat
-            while not valid:
-                least_choice = input(("Of these choices, what do you value the least? " + 
-                                    ", ".join(valid_stats) + ": ")).lower()
-                valid = least_choice in valid_stats
+            print("Of these stat types, which do you value the least?")
+            least_choice = valid_stats[self.get_choice(valid_stats)]
+            
+            if verbose:
+                print("\nYou chose: " + most_choice + " and " + least_choice)
                 
             # sort people by chosen stats!! based on difference between them
             sorted_people = sort_peeps(SIMPLE_PEOPLE, most_choice, least_choice)
             
             # print sorted people
             if verbose:
-                print("\nSORTED ")
+                print("\nContenders: ")
                 for p in sorted_people:
-                    print(p.name + ": " + str(p.stats[most_choice] - p.stats[least_choice]))
+                    print(p.name + ": " + str(p.stat_apts[most_choice] - p.stat_apts[least_choice]))
 
             # tiebreaker:
             top_peeps = get_highest_diff_peep(sorted_people, most_choice, least_choice)
             
             if verbose:
-                print("\nTOP 3")
+                print("\nTOP 3: ")
                 for p in top_peeps:
-                    print(p.name + ": " + str(p.stats[most_choice] - p.stats[least_choice]))
+                    print(p.name + ": " + str(p.stat_apts[most_choice] - p.stat_apts[least_choice]))
 
             # TODO: perhaps only show the stats that the user chose?
+            # Final answer
             print("\nYou got: " + str(top_peeps[0]) + "\n")
             self.obtained[top_peeps[0]] += 1
             t.sleep(2)
@@ -183,13 +210,15 @@ class WhoAreYouSimulator(Simulator):
             # log choices
             self.history.append((most_choice, least_choice, top_peeps[0].name))
             
+            # print
             print("You have so far obtained:")
             for p in self.obtained:
                 if self.obtained[p] == 0:
                     continue
                 print(p.name + ": " + str(self.obtained[p]) + " times!")
             t.sleep(1)
-                        
+              
+            # ask to play again or show history          
             valid = False
             while not valid:
                 continue_choice = input("Play Again? (y/n) or show history? (h): ").lower()
@@ -251,3 +280,7 @@ class DistSimulator(Simulator):
             if exit_code == 0:
                 return
             t.sleep(0.5)
+            
+
+        
+    

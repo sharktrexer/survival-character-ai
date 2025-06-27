@@ -35,7 +35,7 @@ def show_spider_specific(peep_name: str):
     # dicts
     emo = peep.get_emotional_stats()
     phy = peep.get_physical_stats()
-    all = peep.stat_aps
+    all = peep.stat_apts
     
     # values of stats
     data = [("Emotional", list(emo.values())), ("Physical", list(phy.values())), 
