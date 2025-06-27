@@ -1,11 +1,8 @@
 import visualization.graph_data as gd
 import time as t
 
-import peep_data.char_data as char_data
-
 from abc import ABC, abstractmethod
 
-from battle.intiative_sim import InitiativeSimulator 
 from peep_data.char_data import (
     STAT_TYPES, 
     SIMPLE_PEOPLE, 

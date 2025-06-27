@@ -14,14 +14,16 @@ def main():
     Validates user input to ensure a correct choice is made, then executes the selected simulation.
     """
     print("\n\nWelcome to the peep simulator!\n" +
-          "What simulation would you like to run?\n")
+          "Here you can choose different simiulations to run," 
+          "from displaying data, or controlling a battle.\n")
+    
     
     while True:
         valid = False
         choice = ""
         
         while not valid:
-            print("\n")
+            print("Pick a simulator from the list below:")
             for i, s in enumerate(AVAIL_SIMS):
                 print(s[0], f"[{i+1}]")
                 

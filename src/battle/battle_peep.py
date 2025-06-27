@@ -13,7 +13,7 @@ class BattlePeep():
         self.gained_ap_bonus = False
         
     def __str__(self):
-        return self.name + "\n" + self.stats
+        return self.name 
     
     def get_stat_apts(self):
         return self.stats.get_stat_apts()

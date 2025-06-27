@@ -19,6 +19,9 @@ class BattleManager():
         print("Anchor: " + anchor.name, " with init: " + str(anchor.initiative()))
         self.init_anchor = anchor.initiative()
     
+    def get_member_names(self):
+        return [peep.name for peep in self.members]
+    
     def change_member_list(self, peep:BattlePeep, do_add:bool):
         if do_add:
             print("Added " + peep.name)

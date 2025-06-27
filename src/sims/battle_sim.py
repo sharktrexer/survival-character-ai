@@ -88,7 +88,8 @@ class BattleSimulator(Simulator):
         
     def welcome(self):
         print(f"Welcome to the {self.name}!\n", 
-              "Here you can simulate a battle between characters.",)
+              "Here you can simulate a battle between characters.",
+              "There are many different things to do so have fun!")
         t.sleep(1)
         
     def toggle_init_debug(self):
@@ -107,11 +108,12 @@ class BattleSimulator(Simulator):
         
     def modify_battle(self):
         
+        print("Add or remove something?")
         do_add = bool(self.get_choice(["Remove", "Add"]))
         msg = "Add" if do_add else "Remove"
         
         #TODO: choices should have more info on char, like init, etc
-        choices = VALID_NAMES if do_add else self.battler.members
+        choices = VALID_NAMES if do_add else self.battler.get_member_names()
             
         if not choices:
             print("No members to remove.")
@@ -122,12 +124,15 @@ class BattleSimulator(Simulator):
         # loop to allow multiple removals or additions
         while True:
             
+            # if only the option to exit remains, break out
             if len(choices) == 1:
                 print("No members to remove.")
                 return
             
+            print(f"Choose what to {msg}:")
             peep_name = choices[self.get_choice(choices)]
             
+            # exit option
             if peep_name == self.EXIT_KEY:
                 return
             
@@ -135,8 +140,12 @@ class BattleSimulator(Simulator):
             peep = [p for p in PLAYGROUND if p.name == peep_name][0]
             self.battler.change_member_list(peep, do_add)
             
-            print(f"{msg} more!")
-            t.sleep(0.5)
+            # ensure updated list when removing
+            if not do_add:
+                choices.remove(peep_name)
+            
+            print(f"\n{msg} more!")
+            t.sleep(0.2)
             
 
     def print_current_peeps(self):
