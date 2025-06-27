@@ -1,0 +1,30 @@
+The game has a simple question game to dictate what character you get based on a desired and 
+undesired stat. The current system works fine, so there is a lot of room for improvement.
+
+HOW TO ORGANIZE
+A data organizing package like numpy should be utilized as there is a lot of data to track
+that interwine. Data gathered should also be stored in a csv since results would only change
+when stat values are updated by extracting google docs data.
+
+Per Character 
+    -Name, 
+    -Stat Aptitudes
+    -combos that result in this character
+
+Per Combo
+    - desired stat and undesired stat and the resulting char
+    - ties
+    - runner up chars that lost to the winning combo 
+
+Per Stat
+    -Combos where this stat is desired and who it results
+    -ditto but undesired
+
+To simplify, the Combo data row should be
+Desired Stat Name, & Val, Lesser Stat Name, & Val, difference of vals, Associated Character Name
+
+Then with the set of all combos, 
+    create a new set 
+    where 
+    combos of the max difference when compared to combos of the same stat names are only present, 
+    ties included.
