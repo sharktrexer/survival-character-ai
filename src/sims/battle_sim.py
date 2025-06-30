@@ -70,12 +70,14 @@ peep_test_group = PEEPS[0:3]
 class BattleSimulator(Simulator):
     def __init__(self):
         self.name = "Battle Simulator"
-        self.funcs = [self.reset_battle,
-                      self.print_current_peeps, 
-                      self.print_options, 
+        self.funcs = [self.next_round,
                       self.modify_battle,
+                      self.print_current_peeps, 
+                      self.print_spawn_options, 
+                      self.reset_battle,
                       self.manage_debug_info,
-                      self.next_round]
+                      ]
+                      
         self.battler = BattleManager([])
         
         # TODO: turn into own class to manage toggles of all debugs
@@ -110,7 +112,7 @@ class BattleSimulator(Simulator):
         
         print("Add or remove something?")
         do_add = bool(self.get_choice(["Remove", "Add"]))
-        msg = "Add" if do_add else "Remove"
+        verb_str = "Add" if do_add else "Remove"
         
         #TODO: choices should have more info on char, like init, etc
         choices = VALID_NAMES if do_add else self.battler.get_member_names()
@@ -129,7 +131,7 @@ class BattleSimulator(Simulator):
                 print("No members to remove.")
                 return
             
-            print(f"Choose what to {msg}:")
+            print(f"Choose what to {verb_str}:")
             peep_name = choices[self.get_choice(choices)]
             
             # exit option
@@ -144,7 +146,7 @@ class BattleSimulator(Simulator):
             if not do_add:
                 choices.remove(peep_name)
             
-            print(f"\n{msg} more!")
+            print(f"\n{verb_str} more!")
             t.sleep(0.2)
             
 
@@ -156,7 +158,7 @@ class BattleSimulator(Simulator):
         for p in self.battler.members:
             print("[",p.name, "] with init: ", str(p.initiative()))
             
-    def print_options(self):
+    def print_spawn_options(self):
         print("~Spawnables~")
         for p in PLAYGROUND:
             print("[",p.name, "] with init: ", str(p.initiative()))
