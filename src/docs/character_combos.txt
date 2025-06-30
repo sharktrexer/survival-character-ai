@@ -23,6 +23,13 @@ Per Stat
 To simplify, the Combo data row should be
 Desired Stat Name, & Val, Lesser Stat Name, & Val, difference of vals, Associated Character Name
 
+Header: 
+    Char_Name, M_stat_name, M_stat_apt, L_stat_name, L_stat_apt, difference
+Row Example:
+    Chris, strength, 4, defense, 4, 0
+    Chris, strength, 4, Evasion, -2, 6
+
+
 Then with the set of all combos, 
     create a new set 
     where 

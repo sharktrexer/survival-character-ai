@@ -26,6 +26,9 @@ RANGE_NAME = "data!A1:AC"
 PATH = os.getcwd() + "\\sheet_credentials.json"
 # Token path
 TOKEN_PATH = os.getcwd() + "\\token.json"
+# csv path
+CSV_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 
+                        'char_data.csv')
 
 
 def fetch_sheet_data():
@@ -35,8 +38,8 @@ def fetch_sheet_data():
   # The file token.json stores the user's access and refresh tokens, and is
   # created automatically when the authorization flow completes for the first
   # time.
-  if os.path.exists("token.json"):
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+  if os.path.exists(TOKEN_PATH):
+    creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
@@ -51,7 +54,7 @@ def fetch_sheet_data():
       )
       creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
-    with open("token.json", "w") as token:
+    with open(TOKEN_PATH, "w") as token:
       token.write(creds.to_json())
 
   try:
@@ -80,9 +83,7 @@ def create_csv_from_sheet():
   
   print("\n SHEET DATA FETCHED SUCCESSFULLY \n")
   
-  file_name = "char_data.csv"
-  
-  with open(file_name, 'w', newline='') as csvf:
+  with open(CSV_PATH, 'w', newline='') as csvf:
     writer = csv.writer(csvf)
     writer.writerows(data)
     

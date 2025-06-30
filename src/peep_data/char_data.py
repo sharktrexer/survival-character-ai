@@ -17,7 +17,7 @@ SIMPLE_PEOPLE = []
 
 def peep_fetch():
     get_peeps_as_simple()
-    i = 0
+
 
 def make_peep(name: str, desc: str, stats: dict):
     '''Easily creates characters while verifying they have the right amount of stat distribution'''
