@@ -29,7 +29,7 @@ class Simulator(ABC):
         self.welcome()
         
         while True:
-            print("")
+            print()
             exit_code = self.choose_func()
             if exit_code == 0:
                 return

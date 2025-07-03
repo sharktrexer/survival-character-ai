@@ -1,10 +1,17 @@
 from peep_data.char_data import peep_fetch
 from sims.available import AVAIL_SIMS, get_available_sims
 
+
 # read character data and populate SIMPLE_PEOPLE
 peep_fetch()
 # obtain all available sims
 get_available_sims()
+# initialize db after char data is loaded
+import peep_data.combo_db as c
+c.initialize_combos_db()
+
+
+
 
 def main():
         
@@ -16,7 +23,6 @@ def main():
     print("\n\nWelcome to the peep simulator!\n" +
           "Here you can choose different simiulations to run," 
           "from displaying data, or controlling a battle.\n")
-    
     
     while True:
         valid = False
