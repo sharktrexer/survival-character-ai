@@ -205,20 +205,20 @@ def print_pretty_results(results:list, do_exclude_ids=True):
     Parameters:
         results (list): list of dicts representing rows of db to print pretty
     '''
-    if do_exclude_ids:
-        for r in results:
-            del r["rowid"]
+    
+    pad = 15
     
     for k in results[0].keys():
-        print(f"{k:<15}", end="")
+        print(f"{k:<{pad}}", end="")
     print()
         
     for d in results:
-        for v in d.values():
-            if not v:
-                print(f"{'':<15}", end="")
+        for k, v in d.items():
+            if k == "rowid" and do_exclude_ids:
                 continue
-            
-            print(f"{v:<15}", end="")
+            if v == None:
+                v = ' '
+
+            print(f"{v:<{pad}}", end="")
         print()
     
