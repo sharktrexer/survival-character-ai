@@ -1,5 +1,6 @@
 import visualization.graph_data as gd
 import time as t
+import peep_data.combo_db as c
 
 from abc import ABC, abstractmethod
 
@@ -46,16 +47,21 @@ class Simulator(ABC):
         return user_in.lower().strip() == self.EXIT_KEY
     
     def goodbye(self):
-        print(f"Exiting {self.name}. Goodbye!")
+        print(f"\nExiting {self.name}. Goodbye!")
         t.sleep(1)
     
-    def get_choice(self, choices:list):
+    def get_character_choice(self):
+        return self.get_choice([p.name[0].upper() + p.name[1:] for p in SIMPLE_PEOPLE ],
+                               get_index=False)
+    
+    def get_choice(self, choices:list, get_index: bool = True, prompt: str = ""):
         '''
         Asks user to pick a choice from a list. 
         Continues to ask user until valid input is given.
         
         Parameters:
             choices (list): list of choices to pick from
+            get_index (bool): whether to return index or reference of choice 
         
         Returns:
             int: index of choice
@@ -67,13 +73,18 @@ class Simulator(ABC):
         while not valid:
             for i, s in enumerate(choices):
                 print(s, f"[{i+1}]")
+            print(prompt)
             choice = input((f"Pick a number from  1-{len(choices)} \n")).lower()
             try:
                 choice = int(choice) - 1
             except:
                 continue
             valid = choice >= 0 and choice < len(choices)
-        return choice
+            
+        if get_index:
+            return choice
+        else:
+            return choices[choice]
     
     def choose_func(self):
         '''
@@ -119,15 +130,11 @@ class GraphSimulator(Simulator):
                 self.get_specific_spider]
     
     def get_specific_spider(self):
-        valid = False
-        choice = ""
-        while not valid:
-            choice = input("Which peep charts do you want to see? " + ", ".join([p.name for p in SIMPLE_PEOPLE]) + ": ").lower()
-            valid = [p for p in SIMPLE_PEOPLE if p.name.lower() == choice]
         
-        validated_choice = choice[0].upper() + choice[1:]    
+        print("Which peep charts do you want to see? ")
+        choice = self.get_character_choice()
             
-        gd.show_spider_specific(validated_choice)
+        gd.show_spider_specific(choice)
         
     def welcome(self):
         print(f"Welcome to the {self.name}!\n", 
@@ -158,28 +165,25 @@ class WhoAreYouSimulator(Simulator):
     def who_are_you(self, verbose: bool = False):
         while True:
             
-            valid = False
             most_choice = ""
             least_choice = ""
 
             # input of desired stat         
-            print("Of these stat types, which do you value the most?")    
-            most_choice = self.stat_choices[self.get_choice(self.stat_choices)]
+            p = "Of these stat types, which do you value the most?"   
+            most_choice = self.get_choice(self.stat_choices, get_index=False, prompt=p)
 
             # get list of stats excluding previously chosen stat
             valid_stats = self.stat_choices.copy()
             valid_stats.remove(most_choice)
-            
-            valid = False
 
             # input of sacrified stat
-            print("Of these stat types, which do you value the least?")
-            least_choice = valid_stats[self.get_choice(valid_stats)]
+            p = "Of these stat types, which do you value the least?"
+            least_choice = self.get_choice(valid_stats, get_index=False, prompt=p)
             
             if verbose:
                 print("\nYou chose: " + most_choice + " and " + least_choice)
                 
-            # sort people by chosen stats!! based on difference between them
+            # TODO: change to using combo db
             sorted_people = sort_peeps(SIMPLE_PEOPLE, most_choice, least_choice)
             
             # print sorted people
@@ -210,24 +214,27 @@ class WhoAreYouSimulator(Simulator):
             for p in self.obtained:
                 if self.obtained[p] == 0:
                     continue
-                print(p.name + ": " + str(self.obtained[p]) + " times!")
+                time_word_str = "times" if self.obtained[p] > 1 else "time"
+                print(p.name + ": " + str(self.obtained[p]) + f" {time_word_str}!")
             t.sleep(1)
               
-            # ask to play again or show history          
-            valid = False
-            while not valid:
-                continue_choice = input("Play Again? (y/n) or show history? (h): ").lower()
-                valid = continue_choice in ["y", "n", "h"]
+            # ask to play again or show history  
+            continue_choice = 2      
+            while continue_choice == 2:
+                print("\nDo you want to play again?")
+                continue_choice = self.get_choice(
+                ["Yes, continue", 
+                 "No, return to menu", 
+                 "Show history and decide after"])  
                 
                 # show history and ask again to play
-                if valid and continue_choice == "h":
+                if continue_choice == 2:
                     print("\nHISTORY: ")
                     for c in self.history:
                         print(f"{c[0]} > {c[1]} = {c[2]}")
-                    print("\n")
-                    valid = False
+                    
                 
-            if continue_choice == "n":
+            if continue_choice == 1:
                 return
             
     
@@ -245,13 +252,16 @@ class DistSimulator(Simulator):
         
         get_distribution()
         
+    def get_combos_by_all_peeps():
+        pass
+        
     def welcome(self):
         print(f"Welcome to the {self.name}!\n", 
               "Here you can view the different combinations of a chosen desired and undesired stat,"
               + "and what character would be obtained with that combo.",
               "These combos can be grouped by character, desired stat, or undesired stat.",
-              "You can also just view how many combos there are to obtain each character.",
-              "Keep in mind this is a very rough implementation without much styling.")
+              "You can also view the count of how many combos there are to obtain each character.",
+              "")
         t.sleep(1)    
         
 

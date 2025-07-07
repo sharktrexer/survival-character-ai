@@ -22,14 +22,14 @@ def main():
     """
     print("\n\nWelcome to the peep simulator!\n" +
           "Here you can choose different simiulations to run," 
-          "from displaying data, or controlling a battle.\n")
+          "from displaying data, or controlling a battle.")
     
     while True:
         valid = False
         choice = ""
         
         while not valid:
-            print("Pick a simulator from the list below:")
+            print("\nPick a simulator from the list below:")
             for i, s in enumerate(AVAIL_SIMS):
                 print(s[0], f"[{i+1}]")
                 

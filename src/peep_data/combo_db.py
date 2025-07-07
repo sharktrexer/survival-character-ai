@@ -165,6 +165,20 @@ def get_all_ties():
     return [dict(row) for row in results] 
 
 
+def get_specific_combo_n_runner_ups(m_stat_name:str, l_stat_name:str):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute(f'''SELECT * FROM combos 
+                   WHERE m_stat_name = ? AND l_stat_name = ?
+                   ORDER BY diff DESC''', (m_stat_name, l_stat_name))
+
+    results = cursor.fetchall()
+    conn.close()
+    
+    return [dict(row) for row in results]
+
 def get_count_of_combos_per_char():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -206,10 +220,12 @@ def print_pretty_results(results:list, do_exclude_ids=True):
         results (list): list of dicts representing rows of db to print pretty
     '''
     
-    pad = 15
+    PAD = 15
     
     for k in results[0].keys():
-        print(f"{k:<{pad}}", end="")
+        if k == "rowid" and do_exclude_ids:
+            continue
+        print(f"{k:<{PAD}}", end="")
     print()
         
     for d in results:
@@ -219,6 +235,8 @@ def print_pretty_results(results:list, do_exclude_ids=True):
             if v == None:
                 v = ' '
 
-            print(f"{v:<{pad}}", end="")
+            print(f"{v:<{PAD}}", end="")
         print()
+        
+    print("\n" + "Count: " + str(len(results)))
     
