@@ -1,14 +1,12 @@
 import visualization.graph_data as gd
 import time as t
-import peep_data.combo_db as c
+import peep_data.combo_db as cdb
 
 from abc import ABC, abstractmethod
 
 from peep_data.char_data import (
     STAT_TYPES, 
     SIMPLE_PEOPLE, 
-    sort_peeps, 
-    get_highest_diff_peep, 
     get_distribution, 
     print_combos_by_peep, 
     print_combos_by_M_stat, 
@@ -183,31 +181,24 @@ class WhoAreYouSimulator(Simulator):
             if verbose:
                 print("\nYou chose: " + most_choice + " and " + least_choice)
                 
-            # TODO: change to using combo db
-            sorted_people = sort_peeps(SIMPLE_PEOPLE, most_choice, least_choice)
+            results = cdb.get_specific_combo_n_runner_ups(most_choice, least_choice)
+            
+            winner = [p for p in SIMPLE_PEOPLE if p.name == results[0]["name"]][0]
             
             # print sorted people
             if verbose:
                 print("\nContenders: ")
-                for p in sorted_people:
-                    print(p.name + ": " + str(p.stat_apts[most_choice] - p.stat_apts[least_choice]))
-
-            # tiebreaker:
-            top_peeps = get_highest_diff_peep(sorted_people, most_choice, least_choice)
-            
-            if verbose:
-                print("\nTOP 3: ")
-                for p in top_peeps:
-                    print(p.name + ": " + str(p.stat_apts[most_choice] - p.stat_apts[least_choice]))
+                for p in results:
+                    print(p["name"] + ": " + str(p["diff"]))
 
             # TODO: perhaps only show the stats that the user chose?
             # Final answer
-            print("\nYou got: " + str(top_peeps[0]) + "\n")
-            self.obtained[top_peeps[0]] += 1
+            print("\nYou got: " + str(winner) + "\n")
+            self.obtained[winner] += 1
             t.sleep(2)
             
             # log choices
-            self.history.append((most_choice, least_choice, top_peeps[0].name))
+            self.history.append((most_choice, least_choice, winner.name))
             
             # print
             print("You have so far obtained:")
@@ -227,12 +218,12 @@ class WhoAreYouSimulator(Simulator):
                  "No, return to menu", 
                  "Show history and decide after"])  
                 
-                # show history and ask again to play
+                # history
                 if continue_choice == 2:
                     print("\nHISTORY: ")
                     for c in self.history:
                         print(f"{c[0]} > {c[1]} = {c[2]}")
-                    
+            # end loop    
                 
             if continue_choice == 1:
                 return
