@@ -4,15 +4,9 @@ import peep_data.combo_db as cdb
 
 from abc import ABC, abstractmethod
 
-from peep_data.char_data import (
-    STAT_TYPES, 
-    SIMPLE_PEOPLE, 
-    get_distribution, 
-    print_combos_by_peep, 
-    print_combos_by_M_stat, 
-    print_combos_by_L_stat, 
-    print_distribution_count
-    )
+from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE
+
+STAT_CHOICES = list(STAT_TYPES.keys())
 
 class Simulator(ABC):
     
@@ -49,7 +43,7 @@ class Simulator(ABC):
         t.sleep(1)
     
     def get_character_choice(self):
-        return self.get_choice([p.name[0].upper() + p.name[1:] for p in SIMPLE_PEOPLE ],
+        return self.get_choice([p.name for p in SIMPLE_PEOPLE],
                                get_index=False)
     
     def get_choice(self, choices:list, get_index: bool = True, prompt: str = ""):
@@ -148,7 +142,6 @@ class WhoAreYouSimulator(Simulator):
     def __init__(self):
         self.name = "Who Are You Simulator"
         self.funcs = [self.who_are_you, self.who_are_you_with_extra_info]
-        self.stat_choices = list(STAT_TYPES.keys())
         self.obtained = {key: 0 for key in SIMPLE_PEOPLE}
         self.history = []
 
@@ -168,10 +161,10 @@ class WhoAreYouSimulator(Simulator):
 
             # input of desired stat         
             p = "Of these stat types, which do you value the most?"   
-            most_choice = self.get_choice(self.stat_choices, get_index=False, prompt=p)
+            most_choice = self.get_choice(STAT_CHOICES, get_index=False, prompt=p)
 
             # get list of stats excluding previously chosen stat
-            valid_stats = self.stat_choices.copy()
+            valid_stats = STAT_CHOICES.copy()
             valid_stats.remove(most_choice)
 
             # input of sacrified stat
@@ -182,6 +175,8 @@ class WhoAreYouSimulator(Simulator):
                 print("\nYou chose: " + most_choice + " and " + least_choice)
                 
             results = cdb.get_specific_combo_n_runner_ups(most_choice, least_choice)
+            
+            #TODO: check for and communicate ties.
             
             winner = [p for p in SIMPLE_PEOPLE if p.name == results[0]["name"]][0]
             
@@ -236,23 +231,49 @@ class WhoAreYouSimulator(Simulator):
 class DistSimulator(Simulator):
     def __init__(self):
         self.name = "Distribution of Stat Combos Simulator"
-        self.funcs = [print_combos_by_peep, 
-                      print_combos_by_M_stat, 
-                      print_combos_by_L_stat, 
-                      print_distribution_count]
+        self.funcs = [self.view_combos_by_peep, 
+                      self.view_combos_by_major_stat, 
+                      self.view_combos_by_lesser_stat, 
+                      self.view_count_of_combos_per_peep, 
+                      ]
+    
+    def view_combos_by_peep(self):
+        self.view_combos_by([p.name for p in SIMPLE_PEOPLE], "name")
         
-        get_distribution()
+    def view_combos_by_major_stat(self):
+        self.view_combos_by(STAT_CHOICES, "m_stat_name")
         
-    def get_combos_by_all_peeps():
-        pass
+    def view_combos_by_lesser_stat(self):
+        self.view_combos_by(STAT_CHOICES, "l_stat_name")
+    
+    def view_combos_by(self, choices: list, column_name: str):
+        user_choices = choices[:]
+        user_choices.append("All")
+        c = self.get_choice(user_choices, get_index=False)
+        if c != "All":
+            results = cdb.get_combos_by(column_name, c)
+            cdb.print_pretty_results(results, do_print_count=True)
+            return
         
+        print("\nALL COMBOS BY " + column_name + ": ")
+        for elem in choices:
+            print("\n" + elem + ": ")
+            results = cdb.get_combos_by(column_name, elem)
+            cdb.print_pretty_results(results, do_print_count=True)
+    
+    def view_count_of_combos_per_peep(self):
+        print()
+        results = cdb.get_count_of_combos_per_peep()
+        cdb.print_pretty_results(results, do_print_count=True)
+        
+  
     def welcome(self):
         print(f"Welcome to the {self.name}!\n", 
-              "Here you can view the different combinations of a chosen desired and undesired stat,"
-              + "and what character would be obtained with that combo.",
+              "Here you can view the different combinations of choosing a desired and undesired stat,"
+              + "and what character would be obtained with that combo based on the character's stat aptitudes.",
               "These combos can be grouped by character, desired stat, or undesired stat.",
               "You can also view the count of how many combos there are to obtain each character.",
-              "")
+              "If you like looking at lots of data at once, you can view every permutation of combos grouped by your choosing.")
         t.sleep(1)    
         
 

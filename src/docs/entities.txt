@@ -17,10 +17,10 @@ object to be pressed to open a door, but you cant open up a character.
 
         Objects:
 -sometimes cant be hurt
--dont need stats beyond health if it can be hurt
--has a variable dictating if someone can perceive it
+-dont need stats beyond health if it can be hurt (maybe def and eva?)
+-will probably be immune to psychological and physical status effects (like charm and prone)
 
-      Common Features:
+      Shared Features:
 -can be afflicted with status effects (though immunity is up to the entity)
 -can show up in combat
 -can drop items
@@ -28,3 +28,4 @@ object to be pressed to open a door, but you cant open up a character.
 -can activate events (characters on death or objects on interact)
 -can be spawned by anything
 -can be interacted with
+-has a variable dictating if someone can perceive it (otherwise a silhouette of varying accuracy)

@@ -20,8 +20,8 @@ def show_spider_physical():
     
 ''' Shows every character's spidar chart of all stats '''
 def show_spider_all():
-    data = [(p.name, list(p.stat_aps.values())) for p in SIMPLE_PEOPLE]
-    labels = list(SIMPLE_PEOPLE[0].stat_aps.keys())
+    data = [(p.name, list(p.stat_apts.values())) for p in SIMPLE_PEOPLE]
+    labels = list(SIMPLE_PEOPLE[0].stat_apts.keys())
     title = "All Stats of Characters"
     color = 'g'
     create_char_graph(len(labels), data, labels, title, color)

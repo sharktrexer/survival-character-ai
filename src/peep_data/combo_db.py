@@ -21,6 +21,7 @@ def clear_db():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
 
+# TODO: create cursor and pass it to the queries to prevent constant db connection and closure
 def initialize_combos_db():
     create_db()
     create_max_table()
@@ -31,6 +32,7 @@ def initialize_combos_db():
 
 def create_db():
     
+    # prevent inserting copies of combo data
     if os.path.exists(DB_PATH):
         print("Database already exists. Please clear if you want the db to update.")
         return
@@ -139,26 +141,11 @@ def create_ties_table():
     return [dict(row) for row in results]
          
 def get_all_ties():
-    '''
-    Gets all rows that have tied max differences in their combos
-    Names are in one string separated by commas
-    
-    Returns:
-        list: a list of tuples of the form (diff, m_stat_name, l_stat_name, tied_names)
-    '''
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    cursor.execute('''SELECT m_stat_name, l_stat_name, GROUP_CONCAT(name) AS tied_names, GROUP_CONCAT(rowid) AS tied_ids
-                FROM (
-                SELECT rowid, m_stat_name, l_stat_name, diff, name,
-                    COUNT(*) OVER (PARTITION BY m_stat_name, l_stat_name, diff) AS count
-                    FROM max_combos
-                ) AS subquery
-                WHERE count > 1
-                GROUP BY m_stat_name, l_stat_name, diff
-                   ''')
+    cursor.execute('''SELECT * FROM ties''')
 
     results = cursor.fetchall()
     conn.close()
@@ -179,7 +166,7 @@ def get_specific_combo_n_runner_ups(m_stat_name:str, l_stat_name:str):
     
     return [dict(row) for row in results]
 
-def get_count_of_combos_per_char():
+def get_count_of_combos_per_peep():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -214,10 +201,12 @@ def get_combos_by_lesser_stat(l_stat_name:str):
 def get_combos_by_name(name:str):
     return get_combos_by("name", name)
         
-def print_pretty_results(results:list, do_exclude_ids=True):
+def print_pretty_results(results:list, do_exclude_ids=True, do_print_count=True):
     '''
     Parameters:
         results (list): list of dicts representing rows of db to print pretty
+        do_exclude_ids (bool): to print rowid
+        do_print_count (bool): to print count of rows at end of print
     '''
     
     PAD = 15
@@ -237,6 +226,7 @@ def print_pretty_results(results:list, do_exclude_ids=True):
 
             print(f"{v:<{PAD}}", end="")
         print()
-        
-    print("\n" + "Count: " + str(len(results)))
+       
+    if do_print_count: 
+        print("\n" + "Count: " + str(len(results)))
     

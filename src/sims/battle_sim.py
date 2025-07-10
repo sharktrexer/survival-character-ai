@@ -164,11 +164,22 @@ class BattleSimulator(Simulator):
             print("[",p.name, "] with init: ", str(p.initiative()))
             
     def next_round(self):
+        if self.check_if_no_peeps():
+            return
         self.battler.next_round()
         
     def reset_battle(self):
+        if self.check_if_no_peeps():
+            return
         print("Resetting Battle...")
         self.battler = BattleManager([])
+        
+    def check_if_no_peeps(self):
+        no_peeps = self.battler.members == []
+        if no_peeps:
+            print("\nThere is no one here so nothing happened...",
+                  "You should add some peeps using the modify battle option.")
+        return no_peeps
         
 
 '''
