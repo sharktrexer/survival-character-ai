@@ -1,17 +1,14 @@
-from peep_data.char_data import peep_fetch
+from peep_data.char_data import get_peeps_as_simple
 from sims.available import AVAIL_SIMS, get_available_sims
 
 
 # read character data and populate SIMPLE_PEOPLE
-peep_fetch()
+get_peeps_as_simple()
 # obtain all available sims
 get_available_sims()
 # initialize db after char data is loaded
 import peep_data.combo_db as c
 c.initialize_combos_db()
-
-
-
 
 def main():
         

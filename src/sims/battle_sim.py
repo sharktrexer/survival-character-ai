@@ -81,6 +81,7 @@ class BattleSimulator(Simulator):
         self.battler = BattleManager([])
         
         # TODO: turn into own class to manage toggles of all debugs
+        # this will allow different print statements throughout battle based on these choices
         self.show_init_debug = False
         self.show_alt_debug = False
         self.debug_mode = False
@@ -175,6 +176,14 @@ class BattleSimulator(Simulator):
         self.battler = BattleManager([])
         
     def check_if_no_peeps(self):
+        '''
+        The Battle Manager works without containing members, but this simulator
+        should be able to communicate that to the user and pass calling
+        functions that would do nothing without peeps.
+        
+        Returns:
+            bool: if there are peeps in the battle
+        '''
         no_peeps = self.battler.members == []
         if no_peeps:
             print("\nThere is no one here so nothing happened...",

@@ -6,17 +6,6 @@ from peep_data.char_data import SIMPLE_PEOPLE, STAT_NAMES
 DB_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 
                        'all_combos.db')
 
-# Queries to Remember
-#ONLY MAX diff results from sorted list
-MAX_DIFFS = '''SELECT name, m_stat_name, l_stat_name, MAX(diff) as diff FROM combos 
-            GROUP BY m_stat_name, l_stat_name
-            ORDER BY m_stat_name, l_stat_name, diff DESC
-            '''
-# All results sorted desc order by diff
-SORTED_BY_DIFF = '''SELECT name, m_stat_name, l_stat_name, diff FROM combos 
-                ORDER BY m_stat_name, l_stat_name, diff DESC
-                '''
-
 def clear_db():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
@@ -140,16 +129,10 @@ def create_ties_table():
     conn.close()
     return [dict(row) for row in results]
          
-def get_all_ties():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+''' END OF TABLE CREATION '''
 
-    cursor.execute('''SELECT * FROM ties''')
 
-    results = cursor.fetchall()
-    conn.close()
-    return [dict(row) for row in results] 
+
 
 
 def get_specific_combo_n_runner_ups(m_stat_name:str, l_stat_name:str):
@@ -192,15 +175,7 @@ def get_combos_by(column_name: str, value_name:str):
     
     return [dict(row) for row in results] 
 
-def get_combos_by_major_stat(m_stat_name:str):
-    return get_combos_by("m_stat_name", m_stat_name)
-
-def get_combos_by_lesser_stat(l_stat_name:str):
-    return get_combos_by("l_stat_name", l_stat_name)
-    
-def get_combos_by_name(name:str):
-    return get_combos_by("name", name)
-        
+ 
 def print_pretty_results(results:list, do_exclude_ids=True, do_print_count=True):
     '''
     Parameters:
@@ -229,4 +204,26 @@ def print_pretty_results(results:list, do_exclude_ids=True, do_print_count=True)
        
     if do_print_count: 
         print("\n" + "Count: " + str(len(results)))
+
+
+''' UNUSED but may serve a future purpose'''
+def get_all_ties():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute('''SELECT * FROM ties''')
+
+    results = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in results] 
+
+def get_combos_by_major_stat(m_stat_name:str):
+    return get_combos_by("m_stat_name", m_stat_name)
+
+def get_combos_by_lesser_stat(l_stat_name:str):
+    return get_combos_by("l_stat_name", l_stat_name)
     
+def get_combos_by_name(name:str):
+    return get_combos_by("name", name)
+''' END OF UNUSED '''    

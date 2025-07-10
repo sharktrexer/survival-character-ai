@@ -56,7 +56,7 @@ class Simulator(ABC):
             get_index (bool): whether to return index or reference of choice 
         
         Returns:
-            int: index of choice
+            Any: index or reference of choice
         '''
         
         valid = False
@@ -64,7 +64,7 @@ class Simulator(ABC):
         
         while not valid:
             for i, s in enumerate(choices):
-                print(s, f"[{i+1}]")
+                print(f"[{i+1}]", s)
             print(prompt)
             choice = input((f"Pick a number from  1-{len(choices)} \n")).lower()
             try:
@@ -94,7 +94,7 @@ class Simulator(ABC):
             for i, s in enumerate(self.funcs):
                 formatted_name = s.__name__.replace("_", " ")
                 formatted_name = formatted_name[0].upper() + formatted_name[1:]
-                print(formatted_name, f"[{i+1}]")
+                print(f"[{i+1}]", formatted_name)
                 
             self.notify_of_option_to_exit()
             choice = input((f"Pick a number from  1-{len(self.funcs)} \n")).lower()
@@ -251,6 +251,7 @@ class DistSimulator(Simulator):
         user_choices.append("All")
         c = self.get_choice(user_choices, get_index=False)
         if c != "All":
+            print("\nCOMBOS BY " + c + " as " + column_name + ": ")
             results = cdb.get_combos_by(column_name, c)
             cdb.print_pretty_results(results, do_print_count=True)
             return
