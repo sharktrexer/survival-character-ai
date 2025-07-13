@@ -1,0 +1,92 @@
+While at the base the user will be able to choose an activity to spend time doing in exchange for
+stat boosts. The AI controlled peeps will do the same and thus will require a system to choose
+activities for them while remembering their past choosen activities.
+Model-based reflex agents fit the bill :O. (Perhaps goal-based too)
+
+``````````````````````````````````````````````Activities``````````````````````````````````````````````
+These are what the player and ai can choose to boost their stats for upcoming fights.
+Their attributes are:
+
+Location: 
+    Where in the cabin they are, like kitchen or garden.
+Stat boosts: 
+    What stats are upgraded
+    Is it aptitude or base values? (max val for HP, AP, Stress)
+Stat reductions: 
+    What other stats are nerfed to balance out big boosts.
+Time Necessary:
+    How many minutes/hours required to complete the task.
+    Some can be a variable amount set by the user.
+    The energy stat dictates how long a peep can stay awake before sleeping for 8hrs
+Cost/Refill:
+    Activites all have a Stress costs if the activity is not relaxing
+    Few characters may have activities they find relaxing that others don't
+    Sometimes there can be an HP cost if something goes wrong or is very risky
+    Relaxing activities refund Stress
+    Example: Sleep completely refills Stress, Health, and Energy
+Resource Relation:
+    If the activity require other resources (like food) or produces resources 
+    (like gardening or barricading)
+Tags:
+    Simple descriptors of activities that different characters will be attracted to or that 
+    describe the outcome
+    Examples:
+        Calming - stress free
+        Dirty - deals with dirt or grime
+        Naturific - deals with plants
+        Resourcing: Large, Some, Lil, None, Loosing, Costly, Expensive
+        Unhelpful - doesn't do much for the base
+        Communal - helps the base
+
+``````````````````````````````````````````````Time Limit``````````````````````````````````````````````
+Depending on a character's Energy Aptitude, they can only stay awake for so long and 
+require a certain amount of sleep.
+
+                                            Sleep Schedule
+Time Spent Asleep:
+    With 0 Energy Aptitude or Higher: 
+        peeps need 8 hours of sleep.
+    Per point of Energy Apt below 0: 
+        peeps need +1 more hrs of sleep (12 max)
+
+Time Spent Awake:
+    Per point of Energy Aptitude above 0: 
+        Peep can stay awake +1 hrs without negative effects (16 max)
+    At 0 Energy Aptitude or lower: 
+        Peep can stay awake for 8 hrs
+
+
+                                                Careful:
+When peeps are asleep they cannot assist in any attacks on the base.
+They can wake up to help, but doing so will increase an amount of stress recieved, by 10% per hr of sleep
+they still need.
+After disrupting their sleep, they will need a full required amount of sleep again.
+
+AI peeps can be woken up by the player, however they
+will always go back to sleep if they have a 40% penalty or higher, after the attack is over.
+If there is no attack, they will go back to sleep and reduce their relation with you.
+
+``````````````````````````````````````````````AI Choices``````````````````````````````````````````````
+
+The AI will have certain variables to determine their choices. The higher level AI won't know
+any of these things and instead use functions to return a number representing the priority of possible
+choices. Then a choice will be made using the highest priority number alongside some slight randomness.
+
+Memory:
+    The perferences AI will store a representation of:
+    -List of preferences each ordered descendingly:
+        desired stats 
+        desired activity tags 
+        other peeps and their relation to this peep
+    -A history of their choices
+    -Their current stats (including sleep stat)
+    -Their goals (what they want their choices to culminate towards)
+
+    History:
+        What choices they have made and what the results were. The AI
+        will check their choice against history to determine if they should change things up
+        or it has been too long since a desired actvity (like drinking)
+
+    Stats:
+        Choices will be check against their stats to determine if the increase of stats should be
+        higher priority. Having low sleep will make Sleeping the highest priority.
