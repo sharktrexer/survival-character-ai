@@ -63,7 +63,7 @@ they still need.
 After disrupting their sleep, they will need a full required amount of sleep again.
 
 AI peeps can be woken up by the player, however they
-will always go back to sleep if they have a 40% penalty or higher, after the attack is over.
+will always go back to sleep if they have a 30% penalty or higher, after the attack is over.
 If there is no attack, they will go back to sleep and reduce their relation with you.
 
 ``````````````````````````````````````````````AI Choices``````````````````````````````````````````````
@@ -72,21 +72,46 @@ The AI will have certain variables to determine their choices. The higher level 
 any of these things and instead use functions to return a number representing the priority of possible
 choices. Then a choice will be made using the highest priority number alongside some slight randomness.
 
-Memory:
-    The perferences AI will store a representation of:
+Deciding Factors:
+    The perferences AI will make descisions based of off:
+    -The current game stat (base food supply, ingredient supply, barricade health, peeps alive)
     -List of preferences each ordered descendingly:
         desired stats 
-        desired activity tags 
+        desired activity tags (night vs day versions)
         other peeps and their relation to this peep
     -A history of their choices
     -Their current stats (including sleep stat)
     -Their goals (what they want their choices to culminate towards)
+    -Special cases
+
+    Game State:
+        The resources at base including who is alive, time of day.
+        If there are a lot of ingredients but no cooked food, 
+            then gardening will have a lower priority.
+        The more peeps are dead the more practical activites will be priotizied 
+            (food prep vs video gaming)
+
+    Preferences:
+        The most basic choices will first be made using these ordered lists, with 
+        other factors multiplying the priority.
+        Peeps will each have their own lists sorted in order of priority,
+        such as what stats they prefer growing over others, what types of activities
+        they like participating in more than others, with a different list for 
+        night and day; and based on the relationship they have with other peeps and their 
+        overall sociability, what other peeps they enjoy doing activities with.
 
     History:
         What choices they have made and what the results were. The AI
         will check their choice against history to determine if they should change things up
-        or it has been too long since a desired actvity (like drinking)
+        or it has been too long since a favorite actvity of a peep
 
     Stats:
         Choices will be check against their stats to determine if the increase of stats should be
-        higher priority. Having low sleep will make Sleeping the highest priority.
+        higher priority. 
+        Ex: Running out of awake hrs will progressivly make Sleeping higher priority.
+            Having high stress will prioritize calming activities
+            Having low hunger will prioritize eating
+
+    Special Cases:
+        Some peeps may do specific activities due to specific conditions that override the 
+        priority system. This can be simple like "Day 2: Eat sandwich"
