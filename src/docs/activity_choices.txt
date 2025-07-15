@@ -1,4 +1,4 @@
-While at the base the user will be able to choose an activity to spend time doing in exchange for
+While at the base the player will be able to choose an activity to spend time doing in exchange for
 stat boosts. The AI controlled peeps will do the same and thus will require a system to choose
 activities for them while remembering their past choosen activities.
 Model-based reflex agents fit the bill :O. (Perhaps goal-based too)
@@ -16,14 +16,14 @@ Stat reductions:
     What other stats are nerfed to balance out big boosts.
 Time Necessary:
     How many minutes/hours required to complete the task.
-    Some can be a variable amount set by the user.
-    The energy stat dictates how long a peep can stay awake before sleeping for 8hrs
+    Some can be a variable amount set by the peep.
 Cost/Refill:
     Activites all have a Stress costs if the activity is not relaxing
     Few characters may have activities they find relaxing that others don't
     Sometimes there can be an HP cost if something goes wrong or is very risky
     Relaxing activities refund Stress
     Example: Sleep completely refills Stress, Health, and Energy
+        Eating fills Hunger
 Resource Relation:
     If the activity require other resources (like food) or produces resources 
     (like gardening or barricading)
@@ -58,7 +58,7 @@ Time Spent Awake:
 
                                                 Careful:
 When peeps are asleep they cannot assist in any attacks on the base.
-They can wake up to help, but doing so will increase an amount of stress recieved, by 10% per hr of sleep
+They can wake up to help, but doing so will increase amount of stress recieved, by 10% per hr of sleep
 they still need.
 After disrupting their sleep, they will need a full required amount of sleep again.
 
@@ -95,10 +95,13 @@ Deciding Factors:
         The most basic choices will first be made using these ordered lists, with 
         other factors multiplying the priority.
         Peeps will each have their own lists sorted in order of priority,
-        such as what stats they prefer growing over others, what types of activities
-        they like participating in more than others, with a different list for 
-        night and day; and based on the relationship they have with other peeps and their 
-        overall sociability, what other peeps they enjoy doing activities with.
+        such as:
+            -what stats they prefer growing over others, avoiding activities
+            that reduce high priority stats; 
+            -what types of activities they like participating in more than others, with a 
+            different list for night and day; 
+            -what other peeps they enjoy doing activities with based on the relationship 
+            they have with other peeps and their overall sociability.
 
     History:
         What choices they have made and what the results were. The AI
