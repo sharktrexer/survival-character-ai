@@ -32,11 +32,62 @@ class ResourceExchanger():
         self.produces = produces
         
     def does_this_cover_cost(self, owned_resources:list[Resource]):
+        
+        """
+        Determines whether the owned resources are sufficient to cover the costs.
+
+        Parameters:
+            owned_resources (list[Resource]): A list of resources currently owned. 
+                Every type of resource is assumed to be represented in this list.
+
+        Returns:
+            bool: True if all resources in the costs list are covered by the owned resources,
+                  False otherwise.
+        """
+
         for cost in self.costs:
             for owned in owned_resources:
-                if cost == owned: 
-                    if cost.amount > owned.amount:
-                        return False
+                if cost != owned: 
+                    continue
+                if cost.amount > owned.amount:
+                    return False
+        return True
+    
+    def exchange(self, owned_resources:list[Resource]):
+        """
+        Exchanges resources according to the costs and produces defined in this
+        ResourceExchanger.
+
+        Parameters:
+            owned_resources (list[Resource]): A list of resources currently owned. 
+                Every type of resource is assumed to be represented in this list.
+
+        Returns:
+            bool: True if the exchange is successful, False otherwise.
+        """
+
+        enough_owned = self.does_this_cover_cost(owned_resources)
+        
+        if not enough_owned:
+            return 0
+        
+        # consume resources
+        for cost in self.costs:
+            for owned in owned_resources:
+                if cost != owned:
+                    continue 
+                owned.amount -= cost.amount
+                
+        # if no resources to produce
+        if self.produces is None:
+            return True
+        
+        # produce resources
+        for produce in self.produces:
+            for owned in owned_resources:
+                if produce != owned:
+                    continue
+                owned.amount += produce.amount
         return True
 
 class StatChange():
