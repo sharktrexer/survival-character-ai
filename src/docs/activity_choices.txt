@@ -94,7 +94,7 @@ Deciding Factors:
     Preferences:
         The most basic choices will first be made using these ordered lists, with 
         other factors multiplying the priority.
-        Peeps will each have their own lists sorted in order of priority,
+        Peeps will each have their own lists sorted in order of priority, (0 being the lowest)
         such as:
             -what stats they prefer growing over others, avoiding activities
             that reduce high priority stats; 
@@ -118,3 +118,54 @@ Deciding Factors:
     Special Cases:
         Some peeps may do specific activities due to specific conditions that override the 
         priority system. This can be simple like "Day 2: Eat sandwich"
+
+
+                                        How Do we Assign Number Values?!
+store activity and preference data in csv!!!!!
+
+                                            Preference lists
+Stat and Peep Lists will have their least desired element on the end with a priority val
+of 0, with every element gaining a +5 val from the previous element.
+    EX: slice of stat list would be [Strength, Hunger, Dexterity] with vals: [10, 5, 0] 
+
+These values are then multiplied based on the goals of the AI.
+    EX: Ray really wants more strength, so Strength would be at the top of the list
+        and then multiplied by 2 for a total val of 20
+    EX: Everybody wants to increase their Defens in preperation for the final battle,
+        so def priority will gain a x5 mult.
+
+                                            Scaling Mults
+The lists regarding peep relationships and desired activity will have varying mults depending
+on different circumstances. Since the list will affect the base priority of a preference, an
+additional number should be added to the base priority so the multiplier isn't entirely decreased
+by a low base priority, e.i. to prevent the bottom prefence having no multiplier effect (since it is 0),
+a median priority value will first be added to its priority before multiplying.
+
+For Peep Relationship List:
+    The list is still ordered by best relationship, but the value of the relationship meter will
+    add or multiply the priority. So if the relationship meter is at 100 for 2 people, then the 
+    priority should be equal amongst them, despite one of the peeps having to be further up the 
+    list than the other.
+        EX: [Jayce, Cindy] with relationship 100 each should NOT give priority values [10, 5]
+        but instead both [10, 10]. Then with an example mult of 2: [20, 20]
+
+    When looking at an activity that contains 2+ people, the relationship priorities should be combined.
+    This will make any activity with 2+ friends have great priority, unless they are not in a social mood.
+
+    Relationship can also be negative, causing the lowest priority of 0 in most cases.
+
+For Activity List:
+    Still ordered as expected, however the 2 lists will have their values slowly change based
+    on time of day, with the day list decreasing as it turns night while increasing as it turns day,
+    and the night list would work inversely. Once a certain time is hit though, one of the lists should
+    get a boosted priority so that there isn't a period of time where both lists have exact equal
+    priority vals.
+
+    EX: Day list [cook, patrol, garden], Night List [bedroom, game, cook, work-out(inside)]
+    Priority Vals:
+        During Day: [15, 10, 5] and [0,0,0,0]
+        Midday: [15, 10, 5] and [5, 1, 0, 0]
+        Night: [0, 0, 0] and [15, 10, 5, 1]
+
+
+
