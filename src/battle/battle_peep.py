@@ -15,6 +15,9 @@ class BattlePeep():
     def __str__(self):
         return self.name 
     
+    def get_stat(self, name:str):
+        return self.stats.get_stat(name)
+    
     def get_stat_apts(self):
         return self.stats.get_stat_apts()
     
