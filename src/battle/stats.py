@@ -89,7 +89,7 @@ class Stat:
         # Numericals
         self.value = val
         self.apt = apt
-        self.apt_exp = XP_REQURED_PER_APT[self.apt]
+        self.apt_exp = 0 #XP_REQURED_PER_APT[self.apt]
         self.av = 0
         self.multiplier = 1.0
         
@@ -97,7 +97,7 @@ class Stat:
         self.buffs = []
         self.debuffs = []
         
-        self.calc_active_value()
+        #self.calc_active_value()
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
@@ -118,7 +118,7 @@ class Stat:
         self.multiplier *= get_mult_of_aptitude(self.apt)
         
         # ADD OTHER MULTIPLIERS HERE
-        # perhaps store mult funcs in a lits and iteration over them
+        # perhaps store mult funcs in a lits and iterate over them
         
         # Alteration multiplier
         self.multiplier *= self.get_alteration_mult()
@@ -135,7 +135,7 @@ class Stat:
         buff_val = 1 if self.buffs == [] else self.buffs[0].value
         debuff_val = 1 if self.debuffs == [] else self.debuffs[0].value
         
-        # TODO: incorpoate Hunger apt mult here
+        # TODO: incorporate Hunger apt mult here
         return buff_val * debuff_val
     
     ''' 
@@ -152,8 +152,20 @@ class Stat:
     def change_aptitude_xp(self, amount:int):
         self.apt_exp += amount
         
-        # remember overflow, positive
-        self.apt = min(XP_REQURED_PER_APT, key=lambda apt: abs(XP_REQURED_PER_APT[apt] - self.apt_exp))
+        #cap
+        if self.apt_exp < 0:
+            self.apt_exp = 0
+          
+        elif self.apt_exp > XP_REQURED_PER_APT[8]:
+            self.apt_exp = XP_REQURED_PER_APT[8]
+
+        
+        #get apt with the exp value that is less than, yet closest to the current exp
+        for apt, req_xp in XP_REQURED_PER_APT.items():
+            if self.apt_exp >= req_xp:
+                self.apt = apt
+            else:
+                break
         
         self.set_new_vals(self.value, self.apt)
          
