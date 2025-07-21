@@ -1,6 +1,74 @@
 import copy
+import math
 
 from battle.alteration import Alteration, ap_buff
+
+'''
+                         APTITUDE UTILITIES
+'''
+
+def get_mult_of_aptitude(apt):
+    
+    """
+    Aptitudes range from -4 to 8, with -4 being the most negative and 8 being the most positive.
+    Positive Aptitudes increase mult stat values by 25% from 1 for each aptitude above 0
+    Negative Aptitudes decrease mult by 12.5% from 1 for each aptitude below 0.
+    Aptitiude of 0 has a mult of 1
+
+    Parameters:
+        apt (int): Aptitude of the stat
+
+    Returns:
+        float: Multiplier of the stat's aptitude
+    """
+    if apt < -4 or apt > 8:
+        raise ValueError("Aptitude must be between -4 and 8")
+    
+    # 25% increments when positive 
+    #   1      2     3     4  etc...  8
+    #  1.25   1.5   1.75   2          3
+    if apt >= 0:
+        return (apt * 0.25) + 1
+    # 12.5% decrements when negative 
+    #  -1     -2    -3    -4
+    # 0.875, 0.75, 0.625, 0.5
+    else:
+        return 1 - (abs(apt) * 0.125)
+
+'''
+                         APTITUDE LEVELING
+'''
+
+def get_xp_to_level(apt:int):
+    
+    #exit condition
+    if apt == -4:
+        return 0
+    
+    MAX_POINTS = 40
+    MAX_DIVISOR = 10
+    divisor = 1
+    
+    # inverted absolute value graph with a steeper negative slope
+    # top point, where x=0 is the max divisor of the max points
+    # https://www.desmos.com/calculator/4eoktr5zde
+    if apt >= 0:
+        divisor = -(1/0.8) * abs(apt) + MAX_DIVISOR
+    elif apt < 0:
+        divisor = -2.5 * abs(apt) + MAX_DIVISOR
+    
+    # prevent division by zero
+    divisor = 1 if divisor == 0 else divisor
+    
+    return math.floor(MAX_POINTS / divisor + 0.5) + get_xp_to_level(apt - 1)
+
+XP_REQURED_PER_APT = {}
+
+def store_points_req_per_level():
+    for apt in range(-4, 9):
+        XP_REQURED_PER_APT[apt] = get_xp_to_level(apt)
+
+store_points_req_per_level()
 
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
@@ -21,15 +89,15 @@ class Stat:
         # Numericals
         self.value = val
         self.apt = apt
-        self.apt_growth = 0
+        self.apt_exp = XP_REQURED_PER_APT[self.apt]
         self.av = 0
         self.multiplier = 1.0
-        
-        self.calc_active_value()
         
         # Alterations
         self.buffs = []
         self.debuffs = []
+        
+        self.calc_active_value()
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
@@ -81,7 +149,13 @@ class Stat:
         
         self.set_new_vals(self.value + amount, self.apt)
         
-
+    def change_aptitude_xp(self, amount:int):
+        self.apt_exp += amount
+        
+        # remember overflow, positive
+        self.apt = min(XP_REQURED_PER_APT, key=lambda apt: abs(XP_REQURED_PER_APT[apt] - self.apt_exp))
+        
+        self.set_new_vals(self.value, self.apt)
          
 
 ''' 
@@ -163,35 +237,7 @@ def reduce_increasing_modifier(apt_mult:float, modifier:float):
         raise ValueError("Modifier must be greater than 1, an increasing modifier")
     
     return 1 + ((1 - modifier) * apt_mult)
-    
-
-def get_mult_of_aptitude(apt):
-    
-    """
-    Aptitudes range from -4 to 8, with -4 being the most negative and 8 being the most positive.
-    Positive Aptitudes increase mult stat values by 25% from 1 for each aptitude above 0
-    Negative Aptitudes decrease mult by 12.5% from 1 for each aptitude below 0.
-    Aptitiude of 0 has a mult of 1
-
-    Parameters:
-        apt (int): Aptitude of the stat
-
-    Returns:
-        float: Multiplier of the stat's aptitude
-    """
-    if apt < -4 or apt > 8:
-        raise ValueError("Aptitude must be between -4 and 8")
-    
-    # 25% increments when positive 
-    #   1      2     3     4  etc...  8
-    #  1.25   1.5   1.75   2          3
-    if apt >= 0:
-        return (apt * 0.25) + 1
-    # 12.5% decrements when negative 
-    #  -1     -2    -3    -4
-    # 0.875, 0.75, 0.625, 0.5
-    else:
-        return 1 - (abs(apt) * 0.125)
+        
 
 def sn(name):
     """
@@ -218,9 +264,15 @@ def make_stat(name, val, apt):
         stat = copy.deepcopy(STAT_TYPES[name])
         stat.apt = apt
         stat.value = val
+        stat.apt_exp = XP_REQURED_PER_APT[stat.apt]
         stat.calc_active_value()
         return stat
 
+''' 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                        STAT BOARD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
 
 class StatBoard:
     
@@ -231,7 +283,7 @@ class StatBoard:
         self.mem_stats = stats_dict
         
     def get_stat(self, name):
-        for s in self.cur_stats:
+        for s in self.cur_stats.values():
             if s.name == sn(name):
                 return s
         return None
@@ -261,9 +313,7 @@ class StatBoard:
         recalc = alt.apply(alt_list)
         
         if recalc:
-            # get memorized stat value to apply alteration multipliers to
-            og_value = self.mem_stats[stat_name].value
-            self.cur_stats[stat_name].calc_alts(og_value)
+            self.cur_stats[stat_name].calc_active_value()
             
     def remove_alteration(self, alteration: Alteration):
         for s in self.cur_stats.values():
