@@ -8,6 +8,65 @@ This calls for a modular system where entities can recieve different effects and
 updated accordingly, while also reverting stat changes when effects have expired. The systems
 needs to keep in mind that stats can be permenantly altered as well.
 
+How should the stat growth, ailments, and aptitude work together?
+
+NEW:
+Apt mults base val, reduces shrink, alteration only effect active val:
+
+    GROWTH from Activities:
+        Pos Apt:
+            str 4 at val 50, active val is 100
+            + 10 str growth
+            val = 60, active = 120
+        Neg Apt:
+            str -4 at val 100, active val is 50
+            + 10 growth
+            val = 110, active = 55
+    
+    SHRINK from Activities:
+        Pos Apt:
+            str 4 at val 50, active val is 100
+            -10 str shrink, divided by 2 = -5 (communicated to player)
+            val = 45, active = 90
+        Neg Apt:
+            str -4, at val 100, active val is 50
+            -10 growth
+            val = 90, active = 45
+
+    
+    ALTERATIONS
+    -10% str alteration (only divided by Hunger Apt)
+    active = 90
+    
+    +10% str ailment (only mult by Hunger Apt)
+    active = 110
+
+TESTING:
+Merging aptitude modifier with buff mult
+    str at apt 4, val 50
+    apt val 4 = x2 modifier
+    +10% alteration = x1.1 modifier
+    total modifier = 2 * 1.1 = 2.2
+    active val= 50 * 2.1 = 110
+
+Merging with debuff mult:
+    str at apt 4, val 50
+    apt val 4 = x2 modifier
+    -10% alteration = x0.9 modifier
+    total = x1.8
+    active val = 50 * 1.8 = 90
+    
+
+                                                APT GROWTH:
+Max points required to change level = 40
+
+https://www.desmos.com/calculator/4eoktr5zde
+
+f(x) = {x > 0 : -(1/0.8)|x| + 10 else -2.5|x| + 10}
+x = apt val
+f(x) equals devisior of max points required to level
+final value to get from one apt val to another = 40 / f(x)
+exception: if f(x) = 0 then skip division
 
 ---------------------------------Buffs, Debuffs, & Status Effects ---------------------------------
 
@@ -18,7 +77,7 @@ needs to keep in mind that stats can be permenantly altered as well.
 >stat effects - what stat is affected, by how much. 
     -Should alterations effect:
         base stat number?
-        true stat value?
+        CHOSEN: active stat value!
         stat aptitude?
         multiple of the options at once?
         any one of the options?
@@ -65,13 +124,117 @@ needs to keep in mind that stats can be permenantly altered as well.
 
                                      ~~~Deep Dive~~~
 
-                                 ~Stat Memory & Alterations~
+                                 ~Stat Memory & Stat Effects~
 When stats are changed temporarily, the changes need to be memorized to later be reversed while
 keeping permanent changes untouched. Bring in the Stat Board to track both permanent and temporary
 stats values of characters. The idea is that 2 dicts of Stat objs are stored, memorized & current
 respectively. Any time a stat is permenantly altered, both are updated with the change. When a 
 stat is temporarily altered, only the current type is updated. The current stats are the values 
-to be read when necessary.
+to be read when necessary. Once a battle run is over, current stats revert to perm stats.
+
+Perm Stats are changed by:
+    Meta Progression
+    Stat growth through activities
+    Events
+    Growth Modifier Effects 
+
+    METHOD:
+    When changed they immediately update current stats. 
+    Meta progressions can charge the starting value of perm stats, or growth modifier.
+    Events can perm alter stats.
+
+    The shrinkage of an affected stat is reduced by positive Aptitudes.
+
+Current Stats are changed by, in order:
+    Perm stats updating
+
+    Aptitude modifier
+    Character Passives
+    Equipment
+    Relationship Passives
+    Food
+    Stat affecting Status Effects
+    Alterations
+
+    METHOD:
+    Whenever one of these changes occur, the perm stat update MUST be calculated first
+    Aptitude when >0 decreases shrinkage.
+
+    UTILITIES:
+
+        Turning a base number stat change into a multiplicative effect:
+
+        EQUATION:
+            number / base stat value + 1
+
+        EXAMPLE:
+            addition:
+            +20 additional value, 50 base value
+            20 / 50 = 0.4 + 1 = x1.4 modifier
+            
+            subtraction:
+            -20 value, 50 base value
+            -20 / 50 = -0.4 + 1 = x0.6 modifier
+
+            big addition:
+            +100 value, 50 base
+            100 / 50 = 2 + 1 = x3 modifier
+
+
+        Postive Aptitude Mult against decreasing Modifier:
+
+            EQUATION:
+            a = aptitude modifier - 1
+            r = 1 - modifier to apply
+            new modifier = 1-(r*a)
+
+            EXAMPLE:
+            4 apt, x0.9 mult:
+            m = 0.9
+            a = 1/2 = 0.5
+            r = 1-0.9 = 0.1
+            new modifier = 1-(0.1*0.5) = x0.95
+
+        Negative Aptitude Mults against increasing Modifier:
+            
+            EQUATION:
+            new modifier = 1 + ((1 - modifier mult) * apt mult)
+
+            EXAMPLE:
+            -4 apt, x1.1 mult:
+            = 1 + ((1 - 1.1) * 0.5)
+            = 1 + (0.1 * 0.5)
+            = 1 + 0.05
+            = 1.05 = new modifier
+
+        Same Aptitude and Modifier combos:
+            Apt mult * modifier mult 
+
+
+    EXAMPLE:
+    perm update
+    str at apt 4, val 50
+
+    apt modifier
+    apt val 4 = x2 modifier
+
+    Char passive (add stat to another)
+    +20 additional value, 50/20 = 0.4 + 1 = x1.4 modifier
+    2 * 1.4 = x2.8 total
+    temp active val = 140 (50 * 2.8)
+
+    Equipment
+    x0.9 modifier, need to be reduced by apt
+    m = 0.9
+    a = 1/2 = 0.5
+    r = 1-0.9 = 0.1
+    new modifier = 1-(0.1*0.5) = x0.95
+    total mult = 0.95*2.8 = 2.66
+    
+    Alteration
+    +10% alteration = x1.1 modifier
+    total mult = 1.1 * 2.66 = x2.926
+    
 
                                        -Alterations-
 Percentage changes of a stat are represented by <Alteration> classes, and are stored in
@@ -83,7 +246,7 @@ they're removed from the list and cur stats dict is updated through a new calcul
         This equates to 0.9 * 1.2 = 1.08 which is an 8% increase
 
                                         ~RULES~
-        Alterations are only percentage based changes
+        Alterations are only percentage based changes and effect active stat values
         Buffs & Debuffs of the same stat can coexist
         Debuffs or buffs of the same stat will have the higher potency effect takes priority
         If the potency is the same, the one with higher duration takes priority
@@ -106,18 +269,23 @@ class Stat
     init 
         self.buffs = []
         self.debuffs = []
+        self.modifier = 1
 
     // called everytime an high priority alteration is applied or removed from this stat
     def get_alteration_effect
         get highest priority debuff and buff on this stat
         multiply their percentages together
-        apply to this stat value
+        decrease or increase modifiers based on Hunger Aptitiude
+        apply to the modifier, which will help create the active val
 
     def sort lists ()
         for debuff and buff lists
             if none, or size = 1 return 
             if size > 1
                 sort by higher potency, and then higher duration
+
+    def calculate active val
+
                 
 
 
@@ -128,7 +296,6 @@ class Alteration
         Excludes 1
     duration - how long it lasts, trigger by <Time> class obj
     ef_stat - name of stat to effect
-    ef_type - what aspect of the stat to affect (base, true, aptitude)
 
     def apply
         gets alteration list associated with this one's value (neg or pos) and stat it affects

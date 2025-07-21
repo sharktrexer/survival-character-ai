@@ -11,10 +11,21 @@ class Tag(Enum):
     INDOORS = auto()
     OUTDOORS = auto()
     
+    FLOOR1 = auto()
+    FLOOR2 = auto()
+    
+    PHYSICAL = auto()
+    EMOTIONAL = auto()
+    MIXED = auto()
+    
+    
 class ResourcesTypes(Enum):
-    FOOD = auto()
+    SEEDS = auto()
     INGREDIENTS = auto()
+    FOOD = auto()
+    
     MATERIALS = auto()
+    DEFENSE = auto()
     
 class Resource():
     def __init__(self, r_type:ResourcesTypes, amount:int):
@@ -69,7 +80,7 @@ class ResourceExchanger():
         enough_owned = self.does_this_cover_cost(owned_resources)
         
         if not enough_owned:
-            return 0
+            return False
         
         # consume resources
         for cost in self.costs:

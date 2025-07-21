@@ -1,6 +1,6 @@
 import copy
 
-from battle.alteration import Alteration
+from battle.alteration import Alteration, ap_buff
 
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
@@ -13,73 +13,83 @@ class Stat:
             ex_names (list[str]): list of extra applicable names
         """
         
+        # Naming
         self.name = name
         self.abreviation = abreviation
         self.ex_names = ex_names
+        
+        # Numericals
         self.value = val
         self.apt = apt
-        self.tv = self.calc_true_value()
+        self.apt_growth = 0
+        self.av = 0
+        self.multiplier = 1.0
+        
+        self.calc_active_value()
+        
+        # Alterations
         self.buffs = []
         self.debuffs = []
-        
-    def set_value(self, val:int):
-        self.value = val
-        self.tv = self.calc_true_value()    
-        
-    def set_apt(self, apt:int):
-        self.apt = apt
-        self.tv = self.calc_true_value()
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
     
-    def calc_alts(self, og_value:int):
-        '''
-        Applies highest potency buff and debuff to base stat value
+    ''' 
+                            ACTIVE VALUE CALCULATION
+    '''   
+    def set_new_vals(self, val:int, apt:int):
+        self.value = val
+        self.apt = apt
+        self.calc_active_value()
+    
+    def calc_active_value(self):
+        # reset
+        self.multiplier = 1
         
-        Parameters:
-            og_value (int): base stat value to apply alterations to, 
-                most likely from the memorized version of the stat
-        '''
-        # reset b4 calc
-        self.value = og_value
+        # add apt multiplier
+        self.multiplier *= get_mult_of_aptitude(self.apt)
         
+        # ADD OTHER MULTIPLIERS HERE
+        # perhaps store mult funcs in a lits and iteration over them
+        
+        # Alteration multiplier
+        self.multiplier *= self.get_alteration_mult()
+        
+        self.av = int(self.value * self.multiplier)
+    
+    
+    def get_alteration_mult(self):
+        '''
+        Applies highest potency buff and debuff to stat mult
+        '''
+
         # Prevent index out of bounds, Get values if they exist
         buff_val = 1 if self.buffs == [] else self.buffs[0].value
-        debuff_val = 1 if self.debuffs == [] else self.debuffs[0]
+        debuff_val = 1 if self.debuffs == [] else self.debuffs[0].value
         
-        mult = buff_val * debuff_val
+        # TODO: incorpoate Hunger apt mult here
+        return buff_val * debuff_val
+    
+    ''' 
+                            PERM CHANGE FUNCS
+    ''' 
+    def change_base(self, amount:int):
         
-        self.value = int(self.value * mult)
-        self.tv = self.calc_true_value()
+        # Reduce shrink by positive aptitude multipliers
+        if amount < 0 and self.apt > 0:
+            amount /= get_mult_of_aptitude(self.apt)
         
+        self.set_new_vals(self.value + amount, self.apt)
         
-        
-    def get_priority_alt(self, is_buff:bool=True):
-        
-        alts = self.buffs if is_buff else self.debuffs
-            
-        if alts == []:
-            return None
-        else:
-            return alts[0]
-        
-    def calc_true_value(self):
-        
-        apt = self.apt
-        val = self.value
-        
-        # 25% increments when positive (add to value after multiplication)
-        if apt >= 0:
-            mult = apt * 0.25 
-            return val + int(val * mult)
-        # 12.5% decrements when negative (multiplying by decimal for division)
-        #  -1     -2    -3    -4
-        # 0.875, 0.75, 0.625, 0.5
-        if apt < 0:
-            mult = 1 - (abs(apt) * 0.125)
-            return int(val * mult)
-   
+
+         
+
+''' 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        GENERIC FUNCTIONS, EQUATIONS & CONSTANTS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+  
 STAT_TYPES = {
         "strength": Stat("strength", 0, 0, "str", ["s", "fuerza"]),
         "defense": Stat("defense", 0, 0, "def", ["d", "defensa"]),
@@ -96,12 +106,98 @@ STAT_TYPES = {
         "hunger": Stat("hunger", 0, 0, "hun", ["hu", "hung", "hambre"]),
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
- 
+
+def convert_base_number_to_multiplier(number:int, base_stat:int):
+    return number / base_stat + 1
+
+def reduce_decreasing_modifier(apt_mult:float, modifier:float):
+    '''
+    When a stat has a decreasing modifier (debuff), it should be reduced based on the increasing
+    aptitude multiplier of the stat.
+    This function calculates the new modifier by multiplying 1 divided by aptitude multiplier with
+    the inverse of the modifier multiplier and then taking one to subtract by the product
+    
+    Example:
+        With an aptitude of 4 and a multiplier of 0.9,
+        the multiplier will have its effect halved by converting it into 0.95.
+
+    Parameters:
+        apt_mult (float): Aptitude multiplier of the stat
+        modifier (float): Modifier multiplier to be reduced
+
+    Returns:
+        float: Reduced modifier
+    '''
+    if apt_mult < 1:
+        raise ValueError("Aptitude multiplier must be greater than 1, an increasing multiplier")
+    
+    if modifier > 1:
+        raise ValueError("Modifier must be less than 1, a decreasing modifier")
+    
+    a = 1 / apt_mult
+    m = 1 - modifier
+    return 1 - (m * a)
+
+def reduce_increasing_modifier(apt_mult:float, modifier:float):
+    '''
+    When a stat has an increasing modifier (buff), it should be reduced based on the decreasing 
+    aptitude multiplier of the stat.
+    This function calculates the new modifier by multiplying the inverse of the modifier 
+    by the aptitude multiplier and then adding one
+
+    Example:
+        With an aptitude of -4 and a multiplier of 1.1,
+        the multiplier will have its effect halved by converting it into 1.05.
+    
+    Parameters:
+        apt_mult (float): Aptitude multiplier of the stat
+        modifier (float): Modifier multiplier to be reduced
+
+    Returns:
+        float: Reduced modifier
+    '''
+    if apt_mult > 1:
+        raise ValueError("Aptitude multiplier must be less than 1, a decreasing multiplier")
+    
+    if modifier < 1:
+        raise ValueError("Modifier must be greater than 1, an increasing modifier")
+    
+    return 1 + ((1 - modifier) * apt_mult)
+    
+
+def get_mult_of_aptitude(apt):
+    
+    """
+    Aptitudes range from -4 to 8, with -4 being the most negative and 8 being the most positive.
+    Positive Aptitudes increase mult stat values by 25% from 1 for each aptitude above 0
+    Negative Aptitudes decrease mult by 12.5% from 1 for each aptitude below 0.
+    Aptitiude of 0 has a mult of 1
+
+    Parameters:
+        apt (int): Aptitude of the stat
+
+    Returns:
+        float: Multiplier of the stat's aptitude
+    """
+    if apt < -4 or apt > 8:
+        raise ValueError("Aptitude must be between -4 and 8")
+    
+    # 25% increments when positive 
+    #   1      2     3     4  etc...  8
+    #  1.25   1.5   1.75   2          3
+    if apt >= 0:
+        return (apt * 0.25) + 1
+    # 12.5% decrements when negative 
+    #  -1     -2    -3    -4
+    # 0.875, 0.75, 0.625, 0.5
+    else:
+        return 1 - (abs(apt) * 0.125)
+
 def sn(name):
     """
     Returns the full name of a stat given a name, abreviation, or 
     any of the extra applicable names. Case insensitive. 
-    Returns empty string if stat name not found.
+    Raises NameError if stat name not found.
 
     Parameters:
         name (str): name of stat
@@ -109,12 +205,12 @@ def sn(name):
     Returns:
         str: full name of stat
     """
-    full_name = ""
     for stat in STAT_TYPES.values():
         poss_names = stat.get_all_names()
         if name.lower() in poss_names:
-            full_name = stat.name
-            return full_name
+            return stat.name
+    
+    raise NameError(f"The string {name} could not be matched to a valid stat name")
             
             
 def make_stat(name, val, apt):
@@ -122,8 +218,9 @@ def make_stat(name, val, apt):
         stat = copy.deepcopy(STAT_TYPES[name])
         stat.apt = apt
         stat.value = val
-        stat.tv = stat.calc_true_value()
+        stat.calc_active_value()
         return stat
+
 
 class StatBoard:
     
@@ -137,16 +234,20 @@ class StatBoard:
         for s in self.cur_stats:
             if s.name == sn(name):
                 return s
+        return None
             
     def get_stat_apts(self):
         return {stat.name: stat.apt for stat in self.cur_stats.values()}
     
-    def get_stat_tvs(self):
-        return {stat.name: stat.tv for stat in self.cur_stats.values()}
+    def get_stat_avs(self):
+        return {stat.name: stat.av for stat in self.cur_stats.values()}
      
     def initiative(self):
-        return self.cur_stats["dexterity"].tv + self.cur_stats["evasion"].tv
-        
+        return self.cur_stats["dexterity"].av + self.cur_stats["evasion"].av
+    
+    def apply_init_ap_bonus(self):
+        self.apply_alteration(ap_buff)
+
     def apply_alteration(self, alt: Alteration):
         
         # obtain correct list to apply alteration
@@ -184,6 +285,8 @@ class StatBoard:
                 if d.tick():
                     print("Removed debuff: " + d.name)
                     s.debuffs.remove(d)
+      
+       
                     
     def get_all_buffs(self):
         all_buffs = {}

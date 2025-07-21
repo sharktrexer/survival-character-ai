@@ -18,8 +18,8 @@ class BattlePeep():
     def get_stat_apts(self):
         return self.stats.get_stat_apts()
     
-    def get_stat_tvs(self):
-        return self.stats.get_stat_tvs()
+    def get_stat_avs(self):
+        return self.stats.get_stat_avs
      
     def initiative(self):
         return self.stats.initiative()

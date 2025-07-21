@@ -38,6 +38,62 @@ Tags:
         Unhelpful - doesn't do much for the base
         Communal - helps the base
 
+
+                                        Activities Available
+Living Room:
+    Play Games  (Dex Apt+)
+        Dating Sim
+        FPS
+        Party-type
+        Puzzle      
+    Watch TV (Tress Apt+)
+        Romance
+        Action
+        Horror
+
+    Socialize (Cha Apt+)
+    Gossip about people's likes & dislikes
+
+Gym:
+    Cardio
+    Heavyweight Training
+    Bodyweight Training
+    Yoga
+
+Lockeroom:
+    Shower
+    Bathe
+    Play a Prank
+
+Kitchen:
+    Grab a Snack
+    Eat a Meal
+    Drink some booze
+    Do the dishes
+    Gossip about people's eating habites
+    
+Garden:
+    Plant seeds
+    Tend garden
+    Harvest
+    Relax by meditating with nature
+
+Outside:
+    Patrol
+    Relax by looking at the foggy view
+
+Foyer:
+    Barricade:
+        Build
+        Upgrade
+        Repair
+
+Bedroom:
+    Shut self out (Tres+, Cha-)
+    Relax by having some me time, visitors welcome!
+    Sleep
+
+
 ``````````````````````````````````````````````Time Limit``````````````````````````````````````````````
 Depending on a character's Energy Aptitude, they can only stay awake for so long and 
 require a certain amount of sleep.
@@ -169,3 +225,7 @@ For Activity List:
 
 
 
+HOW THE NUMBERS WORK:
+
+The baseline priority values in the list should start at 0 and build up to 14x5 = 70
+(5 x number of stats)

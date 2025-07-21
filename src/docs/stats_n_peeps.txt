@@ -3,7 +3,7 @@
 
 ---------------------------------Stat Calcuation---------------------------------
 Creatures have stats with values which will be multiplied by their Aptitude values 
-to get their true stat value
+to get their active stat value
 
 When Apt is positive, each point of apt =
 25% increments (add to value after multiplication)

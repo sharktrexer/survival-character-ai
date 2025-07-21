@@ -1,6 +1,6 @@
 class Alteration:
 
-    def __init__(self, name: str, value: float, duration: int, ef_stat: str, ef_type: str):
+    def __init__(self, name: str, value: float, duration: int, ef_stat: str):
         
         if value < 0 or value == 1:
             raise Exception("Alteration value must be greater than r equal to 0 and cannot be 1")
@@ -11,13 +11,11 @@ class Alteration:
         self.duration = duration #TODO: will be changed into its own object
         self.duration_left = duration
         self.ef_stat = ef_stat
-        self.ef_type = ef_type
         
     def __eq__(self, other):
         if isinstance(other, Alteration):
             return (self.name == other.name or (self.value == other.value 
-                    and self.duration == other.duration and self.ef_stat == other.ef_stat 
-                    and self.ef_type == other.ef_type))
+                    and self.duration == other.duration and self.ef_stat == other.ef_stat ))
         return NotImplemented
     
     def __str__(self):
@@ -80,9 +78,11 @@ class Alteration:
         
 # test alterations, applying to base stat values
 #TODO: make into a test file
-str_buff = Alteration("Minor Strength", 1.2, 5, "Strength", "base")
-str_buff2 = Alteration("Major Strength", 2, 2, "STRENGTH", "base")
-str_buff3 = Alteration("Itty Bitty Strength", 1.1, 10, "str", "base")
+str_buff = Alteration("Minor Strength", 1.2, 5, "Strength")
+str_buff2 = Alteration("Major Strength", 2, 2, "STRENGTH")
+str_buff3 = Alteration("Itty Bitty Strength", 1.1, 10, "str")
 
-str_debuff = Alteration("Minor Weakness", 0.8, 5, "feurza", "base")
-str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "s", "base")
+str_debuff = Alteration("Minor Weakness", 0.8, 5, "feurza")
+str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "s")
+
+ap_buff = Alteration("Intiative Bonus", 1.5, 1, "AP")
