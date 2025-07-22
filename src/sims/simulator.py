@@ -1,10 +1,12 @@
 import visualization.graph_data as gd
 import time as t
+import copy
 import peep_data.combo_db as cdb
 
 from abc import ABC, abstractmethod
 
-from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE
+from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, get_peeps
+from battle.stats import Stat
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -78,6 +80,53 @@ class Simulator(ABC):
         else:
             return choices[choice]
     
+    def get_choice_with_exit(self, choices:list, prompt: str = ""):
+        choices.append(self.EXIT_KEY)
+        choice = self.get_choice(choices=choices, get_index = False, prompt=prompt)
+        
+        if choice == self.EXIT_KEY:
+            return None
+        else:
+            return choice
+    
+    def choose_func(self, funcs:list, input:any):
+        '''
+        Asks user to pick a function to run from passed in func list. If user enters self.EXIT_KEY,
+        0 is returned for the sim to continute with. If not, calls the function and returns 1.
+        Otherwise, continues to ask user until valid input is given. Input can be passed to
+        the chosen function.
+        
+        Returns:
+            int: 0 if user wants to exit, 1 otherwise
+        '''
+        valid = False
+        choice = ""
+        
+        while not valid:
+            for i, s in enumerate(funcs):
+                formatted_name = s.__name__.replace("_", " ")
+                formatted_name = formatted_name[0].upper() + formatted_name[1:]
+                print(f"[{i+1}]", formatted_name)
+                
+            self.notify_of_option_to_exit()
+            choice = input((f"Pick a number from  1-{len(funcs)} \n")).lower()
+            
+            if self.validate_exit(choice):
+                return 0
+            
+            try:
+                choice = int(choice) - 1
+            except:
+                continue
+            
+            valid = choice >= 0 and choice < len(funcs)
+            
+        if input is not None:
+            funcs[choice](input)
+        else:
+            funcs[choice]()
+        return 1
+        
     def choose_func(self):
         '''
         Asks user to pick a function to run from self.funcs. If user enters self.EXIT_KEY,
@@ -109,8 +158,8 @@ class Simulator(ABC):
                 continue
             valid = choice >= 0 and choice < len(self.funcs)
             
-            self.funcs[choice]()
-            return 1
+        self.funcs[choice]()
+        return 1
     
 class GraphSimulator(Simulator):
     
@@ -278,7 +327,103 @@ class DistSimulator(Simulator):
         t.sleep(1)    
         
 
-            
-
+class StatManipulationSimulator(Simulator):
+    def __init__(self):
+        self.name = "Stat Manipulation Simulator"
+        self.peeps = copy.deepcopy(get_peeps())
+        self.funcs = [self.play_with_peep_stats, self.play_with_equations] 
+        self.peep_funcs = [self.manipulate_stat, self.get_peep_info, self.reset_peep_to_default]
+        self.stat_funcs = [self.apply_alteration, self.grow_or_shrink_stat, 
+                           self.set_stat_values_directly, self.manipulate_apt_level_by_xp,
+                           self.reset_stat_to_default]
         
+    def welcome(self):
+        print(f"Welcome to the {self.name}!\n",
+              "Here you can manually change the stats of a character to get a feel for",
+              "how stat values are calcuated.",
+              "You can also view a deep dive of different equations used for stat calcuations.") 
+        t.sleep(0.5)      
+    
+    def play_with_peep_stats(self):
+        while True:
+            peep = self.get_battle_peep_choice()
+            
+            if peep is None:
+                return
+            
+            # TODO: choose to get peep info, hone in on a stat, or reset peep to default values
+            
+            self.manipulate_stat(peep)
+    '''
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PEEP FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    '''        
+    def get_peep_info(self, peep):
+        pass
+    
+    def reset_peep_to_default(self, peep):
+        pass
+           
+    def get_battle_peep_choice(self):
+        prompt = "Which peep would you like to do stat experimentation on?"
+        peep = self.get_choice_with_exit(self.peeps, prompt=prompt)
+        return peep
+    
+    def manipulate_all_stats(self, peep):
+        pass
+    
+    '''
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STAT MANIPULATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    '''
+    
+    def manipulate_stat(self, peep):
+        
+        while True:
+            prompt = "Which stat would you like to manipulate"
+            stat_name = self.get_choice_with_exit(STAT_CHOICES, prompt=prompt)
+            
+            if stat_name is None:
+                return
+            
+            stat = peep.get_stat(stat_name)
+            
+            # choose different funcs of manipulating the stat
+            self.choose_func(self.stat_funcs, stat)      
+       
+    def set_stat_values_directly(self, stat:Stat):
+        pass
+    
+    def grow_or_shrink_stat(self, stat:Stat):
+        pass
+    
+    def manipulate_apt_level_by_xp(self, stat:Stat):
+        pass
+    
+    def reset_stat_to_default(self, stat:Stat):
+        pass
+    
+    def apply_alteration(self, stat:Stat):
+        pass
+    
+    '''
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EQUATIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    '''
+    def play_with_equations(self):
+        pass
+       
+    '''
+    First, choose peep to experiment on
+    Options:
+        see all stat info of peep
+        reset all stats to default
+        choose a stat to start manipulating
+        Stat Options:
+            you can add debuffs or buffs of custom values (within reason)
+            set/grow/shrink the apt and values
+            allow for easy tweaks when new ways to modify multiplier are added
+            you can level down/up aptitudes
+            see different equations and their steps for stat calculating
+            reset this stat to default
+    Changes are only saved for the session
+    
+    '''
     

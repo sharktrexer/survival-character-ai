@@ -39,36 +39,27 @@ def get_mult_of_aptitude(apt):
                          APTITUDE LEVELING
 '''
 
-def get_xp_to_level(apt:int):
-    
-    #exit condition
-    if apt == -4:
-        return 0
-    
-    MAX_POINTS = 40
-    MAX_DIVISOR = 10
-    divisor = 1
-    
-    # inverted absolute value graph with a steeper negative slope
-    # top point, where x=0 is the max divisor of the max points
-    # https://www.desmos.com/calculator/4eoktr5zde
-    if apt >= 0:
-        divisor = -(1/0.8) * abs(apt) + MAX_DIVISOR
-    elif apt < 0:
-        divisor = -2.5 * abs(apt) + MAX_DIVISOR
-    
-    # prevent division by zero
-    divisor = 1 if divisor == 0 else divisor
-    
-    return math.floor(MAX_POINTS / divisor + 0.5) + get_xp_to_level(apt - 1)
-
 XP_REQURED_PER_APT = {}
 
-def store_points_req_per_level():
-    for apt in range(-4, 9):
-        XP_REQURED_PER_APT[apt] = get_xp_to_level(apt)
-
-store_points_req_per_level()
+def populate_xp_dict():
+   
+    XP_REQURED_PER_APT[-4] = 0
+    
+    MAX_POINTS_TO_LEVEL = 40
+    
+    point_inc = MAX_POINTS_TO_LEVEL
+    
+    for i in range(-3, 9):
+        
+        XP_REQURED_PER_APT[i] = point_inc + XP_REQURED_PER_APT[i-1]
+        
+        if i < 0:
+            point_inc = int(point_inc / 2)    
+        elif i > 0:
+            point_inc = (point_inc * 2 if point_inc < MAX_POINTS_TO_LEVEL 
+                         else MAX_POINTS_TO_LEVEL) 
+    
+populate_xp_dict()
 
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
@@ -141,13 +132,16 @@ class Stat:
     ''' 
                             PERM CHANGE FUNCS
     ''' 
-    def change_base(self, amount:int):
+    def change_base_value(self, amount:int):
         
         # Reduce shrink by positive aptitude multipliers
         if amount < 0 and self.apt > 0:
             amount /= get_mult_of_aptitude(self.apt)
         
-        self.set_new_vals(self.value + amount, self.apt)
+        # cap lowest value to 1
+        change = self.value + amount if self.value + amount > 1 else 1
+        
+        self.set_new_vals(change, self.apt)
         
     def change_aptitude_xp(self, amount:int):
         self.apt_exp += amount
@@ -363,5 +357,33 @@ class StatBoard:
         return all_debuffs
         
  
- 
-   
+'''
+                                  DEPOSED FOR NOW
+
+def get_xp_to_level(apt:int):
+    
+    #exit condition
+    if apt == -4:
+        return 0
+    
+    MAX_POINTS = 40
+    MAX_DIVISOR = 10
+    divisor = 1
+    
+    # inverted absolute value graph with a steeper left slope
+    # top point, where x=0 is the max divisor of the max points
+    # https://www.desmos.com/calculator/fszon1uzau
+    if apt >= 0:
+        divisor = -1.125 * abs(apt) + MAX_DIVISOR
+    elif apt < 0:
+        divisor = -2.25 * abs(apt) + MAX_DIVISOR
+    
+    # prevent division by zero
+    divisor = 1 if divisor == 0 else divisor
+    
+    return math.floor(MAX_POINTS / divisor + 0.5) + get_xp_to_level(apt - 1)  
+
+def store_points_req_per_level():
+    for apt in range(-4, 9):
+        XP_REQURED_PER_APT[apt] = get_xp_to_level(apt)
+'''
