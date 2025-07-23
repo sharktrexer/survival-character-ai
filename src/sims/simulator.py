@@ -66,6 +66,12 @@ class Simulator(ABC):
         
         while not valid:
             for i, s in enumerate(choices):
+                
+                # format function names
+                if callable(s):
+                    s = s.__name__.replace("_", " ")
+                    s = s[0].upper() + s[1:]
+                    
                 print(f"[{i+1}]", s)
             print(prompt)
             choice = input((f"Pick a number from  1-{len(choices)} \n")).lower()
@@ -81,6 +87,7 @@ class Simulator(ABC):
             return choices[choice]
     
     def get_choice_with_exit(self, choices:list, prompt: str = ""):
+        choices = copy.deepcopy(choices)
         choices.append(self.EXIT_KEY)
         choice = self.get_choice(choices=choices, get_index = False, prompt=prompt)
         
@@ -89,43 +96,6 @@ class Simulator(ABC):
         else:
             return choice
     
-    def choose_func(self, funcs:list, input:any):
-        '''
-        Asks user to pick a function to run from passed in func list. If user enters self.EXIT_KEY,
-        0 is returned for the sim to continute with. If not, calls the function and returns 1.
-        Otherwise, continues to ask user until valid input is given. Input can be passed to
-        the chosen function.
-        
-        Returns:
-            int: 0 if user wants to exit, 1 otherwise
-        '''
-        valid = False
-        choice = ""
-        
-        while not valid:
-            for i, s in enumerate(funcs):
-                formatted_name = s.__name__.replace("_", " ")
-                formatted_name = formatted_name[0].upper() + formatted_name[1:]
-                print(f"[{i+1}]", formatted_name)
-                
-            self.notify_of_option_to_exit()
-            choice = input((f"Pick a number from  1-{len(funcs)} \n")).lower()
-            
-            if self.validate_exit(choice):
-                return 0
-            
-            try:
-                choice = int(choice) - 1
-            except:
-                continue
-            
-            valid = choice >= 0 and choice < len(funcs)
-            
-        if input is not None:
-            funcs[choice](input)
-        else:
-            funcs[choice]()
-        return 1
         
     def choose_func(self):
         '''
@@ -332,8 +302,11 @@ class StatManipulationSimulator(Simulator):
         self.name = "Stat Manipulation Simulator"
         self.peeps = copy.deepcopy(get_peeps())
         self.funcs = [self.play_with_peep_stats, self.play_with_equations] 
-        self.peep_funcs = [self.manipulate_stat, self.get_peep_info, self.reset_peep_to_default]
-        self.stat_funcs = [self.apply_alteration, self.grow_or_shrink_stat, 
+        
+        self.peep_funcs = [self.manipulate_a_stat, self.get_peep_info, self.get_all_stat_info_of_peep
+                           ,self.reset_peep_to_default]
+        
+        self.stat_funcs = [self.show_stat_info, self.apply_alteration, self.grow_or_shrink_stat, 
                            self.set_stat_values_directly, self.manipulate_apt_level_by_xp,
                            self.reset_stat_to_default]
         
@@ -346,27 +319,31 @@ class StatManipulationSimulator(Simulator):
     
     def play_with_peep_stats(self):
         while True:
-            peep = self.get_battle_peep_choice()
+            prompt = "Which peep would you like to do stat experimentation on?"
+            peep = self.get_choice_with_exit(self.peeps, prompt=prompt)
             
             if peep is None:
                 return
             
             # TODO: choose to get peep info, hone in on a stat, or reset peep to default values
+            prompt = f"What would you like to do with {peep.name}"
+            peep_func = self.get_choice_with_exit(self.peep_funcs, prompt=prompt)
             
-            self.manipulate_stat(peep)
+            if peep_func is None:
+                continue
+            
+            peep_func(peep)
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PEEP FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''        
     def get_peep_info(self, peep):
         pass
     
+    def get_all_stat_info_of_peep(self, peep):
+        pass
+    
     def reset_peep_to_default(self, peep):
         pass
-           
-    def get_battle_peep_choice(self):
-        prompt = "Which peep would you like to do stat experimentation on?"
-        peep = self.get_choice_with_exit(self.peeps, prompt=prompt)
-        return peep
     
     def manipulate_all_stats(self, peep):
         pass
@@ -375,10 +352,10 @@ class StatManipulationSimulator(Simulator):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STAT MANIPULATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''
     
-    def manipulate_stat(self, peep):
+    def manipulate_a_stat(self, peep):
         
         while True:
-            prompt = "Which stat would you like to manipulate"
+            prompt = f"Which stat of {peep.name} would you like to manipulate"
             stat_name = self.get_choice_with_exit(STAT_CHOICES, prompt=prompt)
             
             if stat_name is None:
@@ -386,8 +363,15 @@ class StatManipulationSimulator(Simulator):
             
             stat = peep.get_stat(stat_name)
             
-            # choose different funcs of manipulating the stat
-            self.choose_func(self.stat_funcs, stat)      
+            while True:
+                # choose different funcs of manipulating the stat
+                prompt = f"What would you like to do with the {stat_name} stat?"
+                chosen_func = self.get_choice_with_exit(self.stat_funcs, prompt=prompt) 
+                
+                if chosen_func is None:
+                    break
+                
+                chosen_func(stat)     
        
     def set_stat_values_directly(self, stat:Stat):
         pass
@@ -396,6 +380,10 @@ class StatManipulationSimulator(Simulator):
         pass
     
     def manipulate_apt_level_by_xp(self, stat:Stat):
+        pass
+    
+    def show_stat_info(self, stat:Stat):
+        print("AHHHHH")
         pass
     
     def reset_stat_to_default(self, stat:Stat):

@@ -18,7 +18,7 @@ def main():
     Validates user input to ensure a correct choice is made, then executes the selected simulation.
     """
     print("\n\nWelcome to the peep simulator!\n" +
-          "Here you can choose different simiulations to run," 
+          "Here you can choose different simulations to run," 
           "from displaying data, or controlling a battle.")
     
     while True:
