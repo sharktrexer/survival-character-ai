@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 
 from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, get_peeps
 from battle.stats import Stat
+from battle.battle_peep import BattlePeep
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -60,6 +61,7 @@ class Simulator(ABC):
         Returns:
             Any: index or reference of choice
         '''
+        print()
         
         valid = False
         choice = ""
@@ -80,6 +82,8 @@ class Simulator(ABC):
             except:
                 continue
             valid = choice >= 0 and choice < len(choices)
+        
+        print()
             
         if get_index:
             return choice
@@ -130,6 +134,12 @@ class Simulator(ABC):
             
         self.funcs[choice]()
         return 1
+ 
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+'''   
     
 class GraphSimulator(Simulator):
     
@@ -153,8 +163,12 @@ class GraphSimulator(Simulator):
               "You can choose to see spider charts of all character's Emotional, Physical,",
               "or ALL stats, or each of those charts for a specific character.")
         t.sleep(1)
-    
-
+ 
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+'''   
 
 class WhoAreYouSimulator(Simulator):
     
@@ -246,6 +260,11 @@ class WhoAreYouSimulator(Simulator):
     def who_are_you_with_extra_info(self):
         self.who_are_you(True)
             
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+'''   
             
 class DistSimulator(Simulator):
     def __init__(self):
@@ -296,6 +315,11 @@ class DistSimulator(Simulator):
               "If you like looking at lots of data at once, you can view every permutation of combos grouped by your choosing.")
         t.sleep(1)    
         
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+'''   
 
 class StatManipulationSimulator(Simulator):
     def __init__(self):
@@ -303,10 +327,12 @@ class StatManipulationSimulator(Simulator):
         self.peeps = copy.deepcopy(get_peeps())
         self.funcs = [self.play_with_peep_stats, self.play_with_equations] 
         
-        self.peep_funcs = [self.manipulate_a_stat, self.get_peep_info, self.get_all_stat_info_of_peep
-                           ,self.reset_peep_to_default]
+        self.peep_funcs = [self.manipulate_a_stat, self.manipulate_all_stats, 
+                           self.manipulate_alterations_on_peep, 
+                           self.get_peep_info,
+                           self.reset_peep_to_default]
         
-        self.stat_funcs = [self.show_stat_info, self.apply_alteration, self.grow_or_shrink_stat, 
+        self.stat_funcs = [self.show_stat_info, self.grow_or_shrink_stat, 
                            self.set_stat_values_directly, self.manipulate_apt_level_by_xp,
                            self.reset_stat_to_default]
         
@@ -325,7 +351,7 @@ class StatManipulationSimulator(Simulator):
             if peep is None:
                 return
             
-            # TODO: choose to get peep info, hone in on a stat, or reset peep to default values
+            # get user choice of peep func
             prompt = f"What would you like to do with {peep.name}"
             peep_func = self.get_choice_with_exit(self.peep_funcs, prompt=prompt)
             
@@ -339,14 +365,23 @@ class StatManipulationSimulator(Simulator):
     def get_peep_info(self, peep):
         pass
     
-    def get_all_stat_info_of_peep(self, peep):
-        pass
-    
     def reset_peep_to_default(self, peep):
         pass
     
-    def manipulate_all_stats(self, peep):
+    def manipulate_alterations_on_peep(self, peep):
         pass
+    
+    def manipulate_all_stats(self, peep):
+        while True:
+            # choose different funcs of manipulating the stat
+            prompt = f"What would you like to do with all of {peep.name}'s stat?"
+            chosen_func = self.get_choice_with_exit(self.stat_funcs, prompt=prompt) 
+            
+            if chosen_func is None:
+                break
+            
+            for stat in peep.stats.cur_stats.values():
+                chosen_func(peep, stat)     
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STAT MANIPULATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -371,26 +406,33 @@ class StatManipulationSimulator(Simulator):
                 if chosen_func is None:
                     break
                 
-                chosen_func(stat)     
+                chosen_func(peep, stat)     
+    
        
-    def set_stat_values_directly(self, stat:Stat):
+    def set_stat_values_directly(self, peep:BattlePeep, stat:Stat):
         pass
     
-    def grow_or_shrink_stat(self, stat:Stat):
+    def grow_or_shrink_stat(self, peep:BattlePeep, stat:Stat):
         pass
     
-    def manipulate_apt_level_by_xp(self, stat:Stat):
+    def manipulate_apt_level_by_xp(self, peep:BattlePeep, stat:Stat):
         pass
     
-    def show_stat_info(self, stat:Stat):
-        print("AHHHHH")
+    def show_stat_info(self, peep:BattlePeep, stat:Stat):
+        print(stat, "\n")
         pass
     
-    def reset_stat_to_default(self, stat:Stat):
-        pass
-    
-    def apply_alteration(self, stat:Stat):
-        pass
+    def reset_stat_to_default(self, peep:BattlePeep, stat:Stat):
+        
+        print("\nPrevious Values: ")
+        print(stat)
+        
+        peep.stats.set_cur_stat_to_mem_stat(stat.name)
+        
+        print("\nValues after reset: ")
+        print(stat)
+        print()
+        
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EQUATIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -398,20 +440,4 @@ class StatManipulationSimulator(Simulator):
     def play_with_equations(self):
         pass
        
-    '''
-    First, choose peep to experiment on
-    Options:
-        see all stat info of peep
-        reset all stats to default
-        choose a stat to start manipulating
-        Stat Options:
-            you can add debuffs or buffs of custom values (within reason)
-            set/grow/shrink the apt and values
-            allow for easy tweaks when new ways to modify multiplier are added
-            you can level down/up aptitudes
-            see different equations and their steps for stat calculating
-            reset this stat to default
-    Changes are only saved for the session
-    
-    '''
     

@@ -43,6 +43,16 @@ XP_REQURED_PER_APT = {}
 
 def populate_xp_dict():
    
+   # baseline
+    """
+    Fills in the XP_REQURED_PER_APT dict with the required XP
+    to reach each aptitude level using the MAX_POINTS_TO_LEVEL integer.
+    
+    The current XP requirement formula is as follows:
+        - From -4 to -1: 0, then point_inc / 2 + previous value every iteration
+        - From 1 to 8: point_inc * 2 + previous value every iteration
+    """
+    
     XP_REQURED_PER_APT[-4] = 0
     
     MAX_POINTS_TO_LEVEL = 40
@@ -80,7 +90,7 @@ class Stat:
         # Numericals
         self.value = val
         self.apt = apt
-        self.apt_exp = 0 #XP_REQURED_PER_APT[self.apt]
+        self.apt_exp = 0 
         self.av = 0
         self.multiplier = 1.0
         
@@ -88,10 +98,22 @@ class Stat:
         self.buffs = []
         self.debuffs = []
         
-        #self.calc_active_value()
+    def __str__(self):
+        return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.av:<4}" 
+                + f"\nCurrent Modifier - {self.multiplier:<4}"
+                + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
+    
+    ''' 
+                                HELPER FUNCTIONS
+    ''' 
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
+    
+    def get_xp_req_to_next_apt_level(self):
+        if self.apt == 8: return 0
+        
+        return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
     
     ''' 
                             ACTIVE VALUE CALCULATION
@@ -293,6 +315,12 @@ class StatBoard:
             if s.name == sn(name):
                 return s
         return None
+    
+    def set_cur_stat_to_mem_stat(self, name):
+        for s in self.cur_stats.values():
+            if s.name == sn(name):
+                self.cur_stats[s.name].val = self.mem_stats[s.name].val
+                self.cur_stats[s.name].apt = self.mem_stats[s.name].apt
             
     def get_stat_apts(self):
         return {stat.name: stat.apt for stat in self.cur_stats.values()}
