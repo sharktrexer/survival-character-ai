@@ -42,17 +42,17 @@ def get_mult_of_aptitude(apt):
 XP_REQURED_PER_APT = {}
 
 def populate_xp_dict():
-   
-   # baseline
     """
     Fills in the XP_REQURED_PER_APT dict with the required XP
     to reach each aptitude level using the MAX_POINTS_TO_LEVEL integer.
     
     The current XP requirement formula is as follows:
-        - From -4 to -1: 0, then point_inc / 2 + previous value every iteration
+        - From -4 to -1: 0, point_inc, then point_inc / 2 + previous value every iteration
         - From 1 to 8: point_inc * 2 + previous value every iteration
+        (point_inc is a copy of MAX_POINTS_TO_LEVEL)
     """
     
+    # baseline
     XP_REQURED_PER_APT[-4] = 0
     
     MAX_POINTS_TO_LEVEL = 40

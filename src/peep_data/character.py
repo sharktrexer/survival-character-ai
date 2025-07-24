@@ -9,7 +9,13 @@ class Character:
         self.avg_diff = 0
         
     def __str__(self):
-        return self.name + ", the " + self.desc + "\nStat Apts:\n" + str(self.stat_apts)
+        #stringify apt dict
+        stringified_apt_dict = ""
+        for name, apt in self.stat_apts.items():
+            stringified_apt_dict += f"{name:<13}= {apt:<3}\n"
+        
+        return (self.name + ", the " + self.desc + "\nStat Details:\n"+ f"{'Name':<12} | {'Value':<3}" 
+                + "\n" + stringified_apt_dict)
     
     ''' Prints the formatted difference between two stats'''
     def str_difference(self, m_stat, l_stat, is_reversed=False, no_name=False, is_simple=False):

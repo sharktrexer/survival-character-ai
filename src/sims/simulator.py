@@ -205,7 +205,7 @@ class WhoAreYouSimulator(Simulator):
             least_choice = self.get_choice(valid_stats, get_index=False, prompt=p)
             
             if verbose:
-                print("\nYou chose: " + most_choice + " and " + least_choice)
+                print("You chose: " + most_choice + " and " + least_choice)
                 
             results = cdb.get_specific_combo_n_runner_ups(most_choice, least_choice)
             
@@ -216,14 +216,17 @@ class WhoAreYouSimulator(Simulator):
             # print sorted people
             if verbose:
                 print("\nContenders: ")
+                print(f"{'Name':<8}" + "Difference")
                 for p in results:
-                    print(p["name"] + ": " + str(p["diff"]))
+                    name = p["name"]
+                    print(f"{name:<7}" + ": " + str(p["diff"]))
+                print()
 
             # TODO: perhaps only show the stats that the user chose?
             # Final answer
-            print("\nYou got: " + str(winner) + "\n")
+            print("You got: " + str(winner))
             self.obtained[winner] += 1
-            t.sleep(2)
+            t.sleep(0.8)
             
             # log choices
             self.history.append((most_choice, least_choice, winner.name))
@@ -240,11 +243,11 @@ class WhoAreYouSimulator(Simulator):
             # ask to play again or show history  
             continue_choice = 2      
             while continue_choice == 2:
-                print("\nDo you want to play again?")
+                prompt = "Do you want to play again?"
                 continue_choice = self.get_choice(
                 ["Yes, continue", 
                  "No, return to menu", 
-                 "Show history and decide after"])  
+                 "Show history and decide after"], prompt=prompt)  
                 
                 # history
                 if continue_choice == 2:
@@ -328,12 +331,13 @@ class StatManipulationSimulator(Simulator):
         self.funcs = [self.play_with_peep_stats, self.play_with_equations] 
         
         self.peep_funcs = [self.manipulate_a_stat, self.manipulate_all_stats, 
-                           self.manipulate_alterations_on_peep, 
+                           self.manage_every_alteration_on_peep, 
                            self.get_peep_info,
                            self.reset_peep_to_default]
         
         self.stat_funcs = [self.show_stat_info, self.grow_or_shrink_stat, 
                            self.set_stat_values_directly, self.manipulate_apt_level_by_xp,
+                           self.manage_stat_alterations,
                            self.reset_stat_to_default]
         
     def welcome(self):
@@ -366,9 +370,10 @@ class StatManipulationSimulator(Simulator):
         pass
     
     def reset_peep_to_default(self, peep):
+        peep = copy.deepcopy([p for p in get_peeps() if p.name == peep.name][0])
         pass
     
-    def manipulate_alterations_on_peep(self, peep):
+    def manage_every_alteration_on_peep(self, peep):
         pass
     
     def manipulate_all_stats(self, peep):
@@ -420,6 +425,9 @@ class StatManipulationSimulator(Simulator):
     
     def show_stat_info(self, peep:BattlePeep, stat:Stat):
         print(stat, "\n")
+        pass
+    
+    def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
         pass
     
     def reset_stat_to_default(self, peep:BattlePeep, stat:Stat):
