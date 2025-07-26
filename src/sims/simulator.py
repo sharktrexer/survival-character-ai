@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, get_peeps
 from battle.stats import Stat
 from battle.battle_peep import BattlePeep
+from battle.peep_manager import PeepManager
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -134,6 +135,48 @@ class Simulator(ABC):
             
         self.funcs[choice]()
         return 1
+    
+    def obtain_number_inputs(self, req_num_of_ins: int):
+        
+        inputs = []
+        
+        while True:
+            print("Enter " + str(req_num_of_ins) + " numbers separated by spaces: ")
+            user_nums = input().split()
+            
+            if user_nums == []:
+                print("No input received.")
+                continue
+            
+            if user_nums[0] == self.EXIT_KEY:
+                return None
+            
+            if len(user_nums) < req_num_of_ins:
+                print("Incorrect number of inputs received: " + str(len(user_nums)) + " instead of " + str(req_num_of_ins))
+                continue
+            
+            for i in range(0, req_num_of_ins):
+                try:
+                    inputs.append(float(user_nums[i]))
+                except:
+                    print("Non-number input recieved.")
+                    continue
+                
+            break
+            
+        
+        return inputs
+    
+    def mini_sim(self, func_list:list[function], args:list, prompt: str = ""):    
+        while True:
+            # choose different funcs to pass args to
+            print(prompt)
+            chosen_func = self.get_choice_with_exit(func_list, prompt) 
+            
+            if chosen_func is None:
+                return
+                
+            chosen_func(*args)     
  
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -328,9 +371,10 @@ class StatManipulationSimulator(Simulator):
     def __init__(self):
         self.name = "Stat Manipulation Simulator"
         self.peeps = copy.deepcopy(get_peeps())
-        self.funcs = [self.play_with_peep_stats, self.play_with_equations] 
+        self.funcs = [self.play_with_peep_stats, self.view_stats_of_all_peeps, self.play_with_equations] 
         
         self.peep_funcs = [self.manipulate_a_stat, self.manipulate_all_stats, 
+                           self.compare_peep,
                            self.manage_every_alteration_on_peep, 
                            self.get_peep_info,
                            self.reset_peep_to_default]
@@ -346,6 +390,10 @@ class StatManipulationSimulator(Simulator):
               "how stat values are calcuated.",
               "You can also view a deep dive of different equations used for stat calcuations.") 
         t.sleep(0.5)      
+    
+    def view_stats_of_all_peeps(self):
+        for peep in self.peeps:
+            self.get_peep_info(peep)
     
     def play_with_peep_stats(self):
         while True:
@@ -369,9 +417,16 @@ class StatManipulationSimulator(Simulator):
     def get_peep_info(self, peep):
         pass
     
-    def reset_peep_to_default(self, peep):
-        peep = copy.deepcopy([p for p in get_peeps() if p.name == peep.name][0])
+    def compare_peep(self, peep):
         pass
+    
+    def reset_peep_to_default(self, peep):
+        # priny previous peep info
+        
+        PeepManager.reset_peep_to_default(peep)
+        
+        # print new peep info
+        
     
     def manage_every_alteration_on_peep(self, peep):
         pass
@@ -435,7 +490,7 @@ class StatManipulationSimulator(Simulator):
         print("\nPrevious Values: ")
         print(stat)
         
-        peep.stats.set_cur_stat_to_mem_stat(stat.name)
+        PeepManager.reset_stat_to_default(peep, stat)
         
         print("\nValues after reset: ")
         print(stat)

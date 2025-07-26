@@ -117,7 +117,12 @@ class Stat:
     
     ''' 
                             ACTIVE VALUE CALCULATION
-    '''   
+    '''
+    def reset_to(self, val:int, apt:int):
+        self.buffs = []
+        self.debuffs = []
+        self.set_new_vals(val, apt)
+       
     def set_new_vals(self, val:int, apt:int):
         self.value = val
         self.apt = apt
@@ -348,7 +353,7 @@ class StatBoard:
         
         if recalc:
             self.cur_stats[stat_name].calc_active_value()
-            
+        
     def remove_alteration(self, alteration: Alteration):
         for s in self.cur_stats.values():
             if s.name == sn(alteration.ef_stat):
