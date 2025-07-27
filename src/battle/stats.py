@@ -98,6 +98,8 @@ class Stat:
         self.buffs = []
         self.debuffs = []
         
+        #TODO: should this class have a way to point to its battlepeep owner?
+        
     def __str__(self):
         return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.av:<4}" 
                 + f"\nCurrent Modifier - {self.multiplier:<4}"
@@ -106,6 +108,8 @@ class Stat:
     ''' 
                                 HELPER FUNCTIONS
     ''' 
+    def print_simple_str(self):
+        return f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.av:<4}" 
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
@@ -124,8 +128,8 @@ class Stat:
         self.set_new_vals(val, apt)
        
     def set_new_vals(self, val:int, apt:int):
-        self.value = val
-        self.apt = apt
+        self.value = int(val)
+        self.apt = int(apt)
         self.calc_active_value()
     
     def calc_active_value(self):

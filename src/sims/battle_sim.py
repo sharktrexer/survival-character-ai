@@ -93,7 +93,7 @@ class BattleSimulator(Simulator):
         print(f"Welcome to the {self.name}!\n", 
               "Here you can simulate a battle between characters.",
               "There are many different things to do so have fun!")
-        t.sleep(1)
+        t.sleep(0.2)
         
     def toggle_init_debug(self):
         self.show_init_debug = not self.show_init_debug

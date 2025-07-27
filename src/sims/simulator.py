@@ -4,6 +4,7 @@ import copy
 import peep_data.combo_db as cdb
 
 from abc import ABC, abstractmethod
+from typing import Callable
 
 from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, get_peeps
 from battle.stats import Stat
@@ -30,21 +31,21 @@ class Simulator(ABC):
             exit_code = self.choose_func()
             if exit_code == 0:
                 return
-            t.sleep(0.5)
+            t.sleep(0.2)
     
     @abstractmethod
     def welcome(self):
         raise NotImplementedError("Welcome method must be implemented in simulator subclass.")
         
     def notify_of_option_to_exit(self):
-        print(f"Enter {self.EXIT_KEY} to exit this simulation.")
+        print(f"Enter {self.EXIT_KEY} to exit.")
     
     def validate_exit(self, user_in: str):
         return user_in.lower().strip() == self.EXIT_KEY
     
     def goodbye(self):
         print(f"\nExiting {self.name}. Goodbye!")
-        t.sleep(1)
+        t.sleep(0.2)
     
     def get_character_choice(self):
         return self.get_choice([p.name for p in SIMPLE_PEOPLE],
@@ -136,9 +137,27 @@ class Simulator(ABC):
         self.funcs[choice]()
         return 1
     
-    def obtain_number_inputs(self, req_num_of_ins: int):
+    def obtain_number_inputs(self, input_form_dict:dict, conds:list[Callable[[float], bool]] = []):
         
-        inputs = []
+        """
+        Asks user to enter a certain number of numbers separated by spaces. Can specify 
+        conditions for each input number. If user enters self.EXIT_KEY, ends the input process 
+        and returns False. If user enters an invalid number of inputs, or if any of the inputs 
+        do not meet the associated condition, asks user again. If user enters valid inputs, 
+        updates the input_form_dict with the inputs.
+        
+        Parameters:
+            input_form_dict (dict): dictionary to store the inputs. Keys are the names of the inputs
+            conds (list[function]): list of functions to check the inputs against. The i-th function takes
+                the i-th input as an argument and returns a boolean
+        Returns:
+            bool: True if inputs are valid, False if user wants to exit
+        """
+        
+        if len(input_form_dict.keys()) != len(conds):
+            raise ValueError("Number of inputs and conditions must be equal. Use None for no condition.")
+        
+        req_num_of_ins = len(input_form_dict.keys())
         
         while True:
             print("Enter " + str(req_num_of_ins) + " numbers separated by spaces: ")
@@ -149,25 +168,48 @@ class Simulator(ABC):
                 continue
             
             if user_nums[0] == self.EXIT_KEY:
-                return None
-            
-            if len(user_nums) < req_num_of_ins:
+                return False
+                        
+            if len(user_nums) < req_num_of_ins or len(user_nums) > req_num_of_ins:
                 print("Incorrect number of inputs received: " + str(len(user_nums)) + " instead of " + str(req_num_of_ins))
                 continue
             
-            for i in range(0, req_num_of_ins):
+            valid = True
+            for i, key in enumerate(input_form_dict.keys()):
                 try:
-                    inputs.append(float(user_nums[i]))
+                    cast = float(user_nums[i])
+                    
+                    # check associated condition
+                    if conds[i] is not None:
+                        valid = conds[i](cast)
+                        if not valid:
+                            print("Input does not meet conditions.")
+                            valid = False
+                            break
+                    
+                    input_form_dict[key] = cast
                 except:
                     print("Non-number input recieved.")
-                    continue
-                
-            break
+                    valid = False
+                    break
             
-        
-        return inputs
+            if not valid:
+                continue
+                
+            return True
     
-    def mini_sim(self, func_list:list[function], args:list, prompt: str = ""):    
+    def mini_sim(self, *, func_list:list[Callable], args:list, prompt: str = ""):    
+        """
+        Run a mini simulation where the user is given a list of functions
+        to choose from. The chosen function is then called with the provided
+        arguments. If the user chooses to exit, the function returns None.
+        
+        Parameters:
+            func_list (list[function]): list of functions to choose from
+            args (list): arguments to pass to the chosen function
+            prompt (str, optional): prompt to display when asking for user input. Defaults to "".
+        """
+
         while True:
             # choose different funcs to pass args to
             print(prompt)
@@ -181,6 +223,9 @@ class Simulator(ABC):
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 '''   
     
@@ -201,15 +246,18 @@ class GraphSimulator(Simulator):
         gd.show_spider_specific(choice)
         
     def welcome(self):
-        print(f"Welcome to the {self.name}!\n", 
-              "Here you will be able to see a visualization of each character's stats.",
+        print(f"Welcome to the {self.name}!", 
+              "\nHere you will be able to see a visualization of each character's stats.",
               "You can choose to see spider charts of all character's Emotional, Physical,",
               "or ALL stats, or each of those charts for a specific character.")
-        t.sleep(1)
+        t.sleep(0.2)
  
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 '''   
 
@@ -222,12 +270,12 @@ class WhoAreYouSimulator(Simulator):
         self.history = []
 
     def welcome(self):
-        print(f"Welcome to the {self.name}!\n", 
-              "Here you will choose a stat you value the most and the stat you value the least.",
+        print(f"Welcome to the {self.name}!", 
+              "\nHere you will choose a stat you value the most and the stat you value the least.",
               "Based on those choices, you will obtain a character that fits your preferences.",
               "Specifically, the given character will have the highest difference between your chosen stats.",
               "Before you get started, you can choose to play normally or with extra information detailing how the character was chosen.",)
-        t.sleep(1)
+        t.sleep(0.2)
     
     def who_are_you(self, verbose: bool = False):
         while True:
@@ -269,7 +317,7 @@ class WhoAreYouSimulator(Simulator):
             # Final answer
             print("You got: " + str(winner))
             self.obtained[winner] += 1
-            t.sleep(0.8)
+            t.sleep(0.2)
             
             # log choices
             self.history.append((most_choice, least_choice, winner.name))
@@ -281,7 +329,6 @@ class WhoAreYouSimulator(Simulator):
                     continue
                 time_word_str = "times" if self.obtained[p] > 1 else "time"
                 print(p.name + ": " + str(self.obtained[p]) + f" {time_word_str}!")
-            t.sleep(1)
               
             # ask to play again or show history  
             continue_choice = 2      
@@ -309,6 +356,9 @@ class WhoAreYouSimulator(Simulator):
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 '''   
             
@@ -359,13 +409,16 @@ class DistSimulator(Simulator):
               "These combos can be grouped by character, desired stat, or undesired stat.",
               "You can also view the count of how many combos there are to obtain each character.",
               "If you like looking at lots of data at once, you can view every permutation of combos grouped by your choosing.")
-        t.sleep(1)    
+        t.sleep(0.2)    
         
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-'''   
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+'''  
 
 class StatManipulationSimulator(Simulator):
     def __init__(self):
@@ -389,7 +442,7 @@ class StatManipulationSimulator(Simulator):
               "Here you can manually change the stats of a character to get a feel for",
               "how stat values are calcuated.",
               "You can also view a deep dive of different equations used for stat calcuations.") 
-        t.sleep(0.5)      
+        t.sleep(0.2)      
     
     def view_stats_of_all_peeps(self):
         for peep in self.peeps:
@@ -458,6 +511,9 @@ class StatManipulationSimulator(Simulator):
             
             stat = peep.get_stat(stat_name)
             
+            prompt = f"What would you like to do with the {stat_name} stat?"
+            self.mini_sim(func_list=self.stat_funcs, args=[peep, stat], prompt=prompt)
+            '''
             while True:
                 # choose different funcs of manipulating the stat
                 prompt = f"What would you like to do with the {stat_name} stat?"
@@ -466,11 +522,26 @@ class StatManipulationSimulator(Simulator):
                 if chosen_func is None:
                     break
                 
-                chosen_func(peep, stat)     
+                chosen_func(peep, stat)     '''
     
        
     def set_stat_values_directly(self, peep:BattlePeep, stat:Stat):
-        pass
+        print("\nCurrent Values: ")
+        print(stat.print_simple_str())
+        
+        print(f"Choose a new number for both the aptitude and the stat value.",
+              'The aptitude must be between -4 and 8 (inclusive).')
+        
+        change_in = { "apt": 0, "value": 0}
+        conditions = [lambda x: x >= -4 and x <= 8, None]
+        
+        self.obtain_number_inputs(input_form_dict=change_in, conds=conditions)
+        
+        stat.set_new_vals(change_in['value'], change_in['apt'])
+        
+        print("\nWith Your Set Values: ")
+        print(stat.print_simple_str())
+        
     
     def grow_or_shrink_stat(self, peep:BattlePeep, stat:Stat):
         pass
