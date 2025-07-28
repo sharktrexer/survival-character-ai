@@ -434,7 +434,7 @@ class StatManipulationSimulator(Simulator):
         
         self.stat_funcs = [self.show_stat_info, self.grow_or_shrink_stat, 
                            self.set_stat_values_directly, self.manipulate_apt_level_by_xp,
-                           self.manage_stat_alterations,
+                           self.manipulate_extra_modifiers, self.manage_stat_alterations,
                            self.reset_stat_to_default]
         
     def welcome(self):
@@ -474,7 +474,7 @@ class StatManipulationSimulator(Simulator):
         pass
     
     def reset_peep_to_default(self, peep):
-        # priny previous peep info
+        # TODO: print previous peep info
         
         PeepManager.reset_peep_to_default(peep)
         
@@ -544,13 +544,40 @@ class StatManipulationSimulator(Simulator):
         
     
     def grow_or_shrink_stat(self, peep:BattlePeep, stat:Stat):
-        pass
+        print("\nCurrent Values: ")
+        print(stat.print_simple_str())
+        
+        change_in = {"val_change": 0}
+        conditions = [None]
+        
+        self.obtain_number_inputs(input_form_dict=change_in, conds=conditions)
+        
+        new_val = self.val + change_in['val_change']
+        
+        stat.set_new_vals(new_val, stat.apt)
+        
+        print("\nWith Your Set Values: ")
+        print(stat.print_simple_str())
     
     def manipulate_apt_level_by_xp(self, peep:BattlePeep, stat:Stat):
-        pass
+        print("\nCurrent Stat Info: ")
+        print(stat)
+        
+        change_in = {"xp_change": 0}
+        conditions = [None]
+        
+        self.obtain_number_inputs(input_form_dict=change_in, conds=conditions)
+        
+        stat.change_aptitude_xp(change_in['xp_change'])
+        
+        print("\nAfter your aptitude xp change: ")
+        print(stat.print_simple_str())
     
     def show_stat_info(self, peep:BattlePeep, stat:Stat):
         print(stat, "\n")
+        pass
+    
+    def manipulate_extra_modifiers(self, peep:BattlePeep, stat:Stat):
         pass
     
     def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):

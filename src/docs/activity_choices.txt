@@ -40,59 +40,97 @@ Tags:
 
 
                                         Activities Available
-Living Room:
-    Play Games  (Dex Apt+)
-        Dating Sim
-        FPS
+Living Room: (AP Apt+)
+    Play Games  (Int Apt+)
+        Dating Sim (Cha+)
+        FPS (Dex+)
         Party-type
         Puzzle      
+        1 vs Many:
+            As 1 (Itmd+)
+            As Many 
     Watch TV (Tress Apt+)
-        Romance
-        Action
-        Horror
+        Romance (Cha+)
+        Action ()
+        Horror (Fear+)
+    Clean: (Dex Apt+)
+        Take out trash (Def++)
+        Dust
 
     Socialize (Cha Apt+)
-    Gossip about people's likes & dislikes
+        Gossip about people's likes & dislikes
+        Casual Convo
 
-Gym:
-    Cardio
-    Heavyweight Training
-    Bodyweight Training
-    Yoga
+Gym: (Str Apt+)
+    Workout: (Str+, Def+, Hun-)
+        Cardio (Eva, HP+)
+        Heavyweight Training (Str++, HP-)
+        Bodyweight Training (HP++)
+    Stretch: (Eva+)
+        Basic Stretching 
+        Flexability Training (Eva++, Str-)
+        Yoga (Rec+, Tres+)
 
-Lockeroom:
-    Shower
-    Bathe
-    Play a Prank
+Lockeroom: (Itmd Apt+)
+    Clean Self: (Rec+, HP+)
+        Shower (Eva+)
+        Bathe (Tres+)
+    Mischief:
+        Play a Prank (itmd+, tres+)
 
-Kitchen:
-    Grab a Snack
-    Eat a Meal
-    Drink some booze
-    Do the dishes
-    Gossip about people's eating habites
+
+Kitchen: (Cre Apt+)
+    Eat: (HP Apt+, Hun+)
+        Grab a Snack
+        Eat a Meal
+    Clean: (Dex+)
+        Do the dishes
+        Take out trash (Def++)
+    Cook: (Cre+)
+        Make a meal
+        Make dinner for all (Cha+)
+    Bar: (Tres Apt+)
+        Drink (HP-)
+        Man the bar (Cha+)
+    Socialize: (Cha+)
+        Gossip about people's eating habits
+        Casual Convo
+    Relax by mulling over recipes (Tres++, Cre+, Int+)
     
-Garden:
-    Plant seeds
-    Tend garden
-    Harvest
-    Relax by meditating with nature
+Garden: (Rec Apt+)
+    Plant seeds (Str++)
+    Tend garden (Rec++)
+    Harvest (Dex++)
+    Relax by meditating with nature (Tres++, Rec+)
 
-Outside:
-    Patrol
-    Relax by looking at the foggy view
+Outside: (Eva Apt+)
+    Patrol (Eva++)
+    Forage (Int++)
+    Relax by looking at the foggy view (Tres++, Itmd+, Fear+)
 
 Foyer:
-    Barricade:
-        Build
-        Upgrade
-        Repair
+    Barricade: (Def Apt+)
+        Build (Str+)
+        Upgrade (Int+, Dex+)
+        Repair (Def+)
+    Clean: (Dex Apt+)
+        Dust
+        Prevent/Dispose of bugs (Fear+)
 
-Bedroom:
+Bedroom: 
     Shut self out (Tres+, Cha-)
     Relax by having some me time, visitors welcome!
+    Visit another's bedroom
+    Prank someone's bedroom (Itmd+, Tres+)
     Sleep
 
+Dungeon (Fear Apt+):
+    Fight
+    Forage
+
+No Location:
+    Spend time not eating (Hun Apt+)
+    Time spent eating more frequently (Hun Apt-)
 
 ``````````````````````````````````````````````Time Limit``````````````````````````````````````````````
 Depending on a character's Energy Aptitude, they can only stay awake for so long and 
