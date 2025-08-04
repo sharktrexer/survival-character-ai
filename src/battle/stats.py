@@ -89,6 +89,7 @@ class Stat:
         
         # Numericals
         self.value = val
+        self.resource_val = val
         self.apt = apt
         self.apt_exp = 0 
         self.av = 0
@@ -122,16 +123,16 @@ class Stat:
     ''' 
                             ACTIVE VALUE CALCULATION
     '''
-    def reset_to(self, val:int, apt:int):
-        self.buffs = []
-        self.debuffs = []
-        self.set_new_vals(val, apt)
-       
     def set_new_vals(self, val:int, apt:int):
         self.value = int(val)
         self.apt = int(apt)
         self.calc_active_value()
-    
+        
+    def reset_to(self, val:int, apt:int):
+        self.buffs = []
+        self.debuffs = []
+        self.set_new_vals(val, apt)
+        
     def calc_active_value(self):
         # reset
         self.multiplier = 1
@@ -159,6 +160,23 @@ class Stat:
         
         # TODO: incorporate Hunger apt mult here
         return buff_val * debuff_val
+    
+    ''' 
+                            RESOURCE VALUE FUNCS
+    '''
+    def restore_resource(self):
+        self.resource_val = self.av
+        
+    def change_resource_value(self, amount:int):
+        
+        self.resource_val += amount
+        
+        # cap
+        if self.resource_val > self.av:
+            self.resource_val = self.av
+        elif self.resource_val < 0:
+            self.resource_val = 0
+    
     
     ''' 
                             PERM CHANGE FUNCS
@@ -303,6 +321,7 @@ def make_stat(name, val, apt):
         stat.value = val
         stat.apt_exp = XP_REQURED_PER_APT[stat.apt]
         stat.calc_active_value()
+        stat.resource_val = stat.av
         return stat
 
 ''' 
@@ -326,10 +345,67 @@ class StatBoard:
         return None
     
     def set_cur_stat_to_mem_stat(self, name):
-        for s in self.cur_stats.values():
-            if s.name == sn(name):
-                self.cur_stats[s.name].val = self.mem_stats[s.name].val
-                self.cur_stats[s.name].apt = self.mem_stats[s.name].apt
+        name = sn(name)
+        self.cur_stats[name].set_new_vals(self.mem_stats[name].value, self.mem_stats[name].apt)
+                
+    '''
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MANIPULATING PERM & CUR STATS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    '''
+    
+    def change_apt_xp(self, stat_name, xp):
+        self.perm_stats[sn(stat_name)].change_apt_xp(xp)
+        self.set_cur_stat_to_mem_stat(stat_name)
+    
+    def grow_stat(self, stat_name, amount):
+        self.mem_stats[sn(stat_name)].change_base_val(amount)
+        self.set_cur_stat_to_mem_stat(stat_name)
+    
+    '''
+        Reserved for stats like Hunger, Energy, Health, Stress, & Fear
+    '''   
+    def change_resource(self, stat_name, amount):
+        self.cur_stats[sn(stat_name)].change_resource(amount)
+    
+    def restore_resource(self, stat_name):
+        self.cur_stats[sn(stat_name)].restore_resource()
+        
+    def get_resource_by_chunk(self, stat_name, divisor):
+        
+        if divisor < 1:
+            return 0
+        
+        return int(self.cur_stats[sn(stat_name)].av / divisor)
+    
+    def calc_hrs_req_to_sleep(self):
+        if self.cur_stats["energy"].apt >= 0:
+            return 8
+        else:
+            return 8 + abs(self.cur_stats["energy"].apt)
+    
+    def sleep_by_min(self):
+        #TODO: affect stress, fear, and hunger in different ways
+        
+        energy_stat = sn("ap")
+        self.cur_stats[energy_stat].change_resource(self.get_resource_by_chunk(energy_stat, self.calc_hrs_req_to_sleep() * 60))
+        
+        health_stat = sn("health")
+        self.cur_stats[health_stat].change_resource(self.get_resource_by_chunk(health_stat, self.calc_hrs_req_to_sleep() * 60))
+        
+    
+    '''
+    Time Spent Asleep:
+    With 0 Energy Aptitude or Higher: 
+        peeps need 8 hours of sleep.
+    Per point of Energy Apt below 0: 
+        peeps need +1 more hrs of sleep (12 max)'''
+         
+    '''
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    '''
             
     def get_stat_apts(self):
         return {stat.name: stat.apt for stat in self.cur_stats.values()}
@@ -339,6 +415,12 @@ class StatBoard:
      
     def initiative(self):
         return self.cur_stats["dexterity"].av + self.cur_stats["evasion"].av
+    
+    '''
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ALTERATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    '''
     
     def apply_init_ap_bonus(self):
         self.apply_alteration(ap_buff)
@@ -379,7 +461,6 @@ class StatBoard:
                     print("Removed debuff: " + d.name)
                     s.debuffs.remove(d)
       
-       
                     
     def get_all_buffs(self):
         all_buffs = {}

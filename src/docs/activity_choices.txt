@@ -86,13 +86,13 @@ Kitchen: (Cre Apt+)
     Clean: (Dex+)
         Do the dishes
         Take out trash (Def++)
-    Cook: (Cre+)
+    Cook: (Cre++)
         Make a meal
         Make dinner for all (Cha+)
     Bar: (Tres Apt+)
         Drink (HP-)
         Man the bar (Cha+)
-    Socialize: (Cha+)
+    Socialize: (Cha++)
         Gossip about people's eating habits
         Casual Convo
     Relax by mulling over recipes (Tres++, Cre+, Int+)
@@ -114,15 +114,15 @@ Foyer:
         Upgrade (Int+, Dex+)
         Repair (Def+)
     Clean: (Dex Apt+)
-        Dust
-        Prevent/Dispose of bugs (Fear+)
+        Dust (Rec+)
+        Prevent/Dispose of bugs (Fear+, Rec-)
 
 Bedroom: 
-    Shut self out (Tres+, Cha-)
-    Relax by having some me time, visitors welcome!
-    Visit another's bedroom
+    Shut self out (Tres++, Cha--)
+    Relax by having some me time, visitors welcome! (Tres++, Cha+)
+    Visit another's bedroom (Cha+)
     Prank someone's bedroom (Itmd+, Tres+)
-    Sleep
+    Sleep (Tres+, Hun+, HP+)
 
 Dungeon (Fear Apt+):
     Fight

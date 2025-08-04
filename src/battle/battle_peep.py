@@ -42,24 +42,35 @@ class BattlePeep():
         
         self.stats.tick_alterations()
         
+        self.stats.reset_stat("ap")
+        if self.gained_ap_bonus: self.stats.apply_init_ap_bonus()
+        
         # temp print to test debuffs and buffs on one stat
         '''
         buffs = self.stats.get_all_buffs().values()
         if buffs:
             str_buffs = buffs[sn("Strength")]
-            print("this is my most potent strength buff: ", 
-                self.stats.str_buffs[0],
-                "\n",
-                "Rest: ", *str_buffs)
+            if str_buffs:
+                print("this is my most potent strength buff: ", 
+                    self.stats.str_buffs[0],
+                    "\n",
+                    "Rest: ", *str_buffs)
         
         debuffs = self.stats.get_all_debuffs()
         if debuffs:
             str_debuffs = debuffs[sn("Strength")]
-            print("this is my most potent strength debuff: ", 
-                self.stats.str_debuffs[0],
-                "\n",
-                "Rest: ", *str_debuffs)
+            if str_debuffs:
+                print("this is my most potent strength debuff: ", 
+                    self.stats.str_debuffs[0],
+                    "\n",
+                    "Rest: ", *str_debuffs)
                 '''
+     
+     
+    def end_turn(self):
+        # revert energy bonus
+        self.gained_ap_bonus = False
+        
      
     ''' Gained extra energy from initiative calculations. 
     Reset vars and obtain an energy bonus
