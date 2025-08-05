@@ -89,10 +89,10 @@ class Stat:
         
         # Numericals
         self.value = val
-        self.resource_val = val
+        self.val_resource = val
         self.apt = apt
         self.apt_exp = 0 
-        self.av = 0
+        self.val_active = 0
         self.multiplier = 1.0
         
         # Alterations
@@ -100,9 +100,14 @@ class Stat:
         self.debuffs = []
         
         #TODO: should this class have a way to point to its battlepeep owner?
+     
+    def __eq__(self, other):
+        if isinstance(other, Stat):
+            return self.name == other.name and self.apt == other.apt and self.value == other.value
+        return False
         
     def __str__(self):
-        return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.av:<4}" 
+        return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.val_active:<4}" 
                 + f"\nCurrent Modifier - {self.multiplier:<4}"
                 + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
     
@@ -110,7 +115,7 @@ class Stat:
                                 HELPER FUNCTIONS
     ''' 
     def print_simple_str(self):
-        return f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.av:<4}" 
+        return f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.val_active:<4}" 
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
@@ -128,10 +133,22 @@ class Stat:
         self.apt = int(apt)
         self.calc_active_value()
         
-    def reset_to(self, val:int, apt:int):
+    def set_new_vals_as_reset(self, val:int, apt:int):
+        """
+        Resets a stat to a new value and aptitude, restting the resource value,
+        deleting all buffs and debuffs, and setting the apt exp to the exp amount
+        of the corresponding aptitude level. 
+        """
+        
         self.buffs = []
         self.debuffs = []
         self.set_new_vals(val, apt)
+        self.apt_exp = XP_REQURED_PER_APT[self.apt]
+        self.val_resource = self.val_active
+        
+    def set_new_vals_as_update(self, val:int, apt:int, apt_exp:int):
+        self.set_new_vals(val, apt)
+        self.apt_exp = apt_exp
         
     def calc_active_value(self):
         # reset
@@ -146,7 +163,7 @@ class Stat:
         # Alteration multiplier
         self.multiplier *= self.get_alteration_mult()
         
-        self.av = int(self.value * self.multiplier)
+        self.val_active = int(self.value * self.multiplier)
     
     
     def get_alteration_mult(self):
@@ -165,17 +182,17 @@ class Stat:
                             RESOURCE VALUE FUNCS
     '''
     def restore_resource(self):
-        self.resource_val = self.av
+        self.val_resource = self.val_active
         
     def change_resource_value(self, amount:int):
         
-        self.resource_val += amount
+        self.val_resource += amount
         
         # cap
-        if self.resource_val > self.av:
-            self.resource_val = self.av
-        elif self.resource_val < 0:
-            self.resource_val = 0
+        if self.val_resource > self.val_active:
+            self.val_resource = self.val_active
+        elif self.val_resource < 0:
+            self.val_resource = 0
     
     
     ''' 
@@ -321,8 +338,14 @@ def make_stat(name, val, apt):
         stat.value = val
         stat.apt_exp = XP_REQURED_PER_APT[stat.apt]
         stat.calc_active_value()
-        stat.resource_val = stat.av
+        stat.val_resource = stat.val_active
         return stat
+
+def divide_resource_max_by(self, stat:Stat, divisor:int):
+        if divisor < 1:
+            return 0
+        #TODO: cast into float with 2 decimal places
+        return stat.val_active / divisor
 
 ''' 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -338,45 +361,47 @@ class StatBoard:
         # and are only affected by permanent upgrades/effects
         self.mem_stats = stats_dict
         
-    def get_stat(self, name):
+    def get_stat_cur(self, name):
         for s in self.cur_stats.values():
             if s.name == sn(name):
                 return s
         return None
     
-    def set_cur_stat_to_mem_stat(self, name):
-        name = sn(name)
-        self.cur_stats[name].set_new_vals(self.mem_stats[name].value, self.mem_stats[name].apt)
-                
+    def get_stat_mem(self, name):
+        for s in self.mem_stats.values():
+            if s.name == sn(name):
+                return s
+        return None
+    
+
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MANIPULATING PERM & CUR STATS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     '''
     
-    def change_apt_xp(self, stat_name, xp):
-        self.perm_stats[sn(stat_name)].change_apt_xp(xp)
-        self.set_cur_stat_to_mem_stat(stat_name)
+    def set_cur_stat_to_mem_stat(self, mem_stat:Stat):
+        name = mem_stat.name
+        self.cur_stats[name].set_new_vals_as_update(mem_stat.value, mem_stat.apt, mem_stat.apt_exp)
+        
+    def change_apt_xp(self, stat_name:str, xp:int):
+        stat = self.get_stat_mem(stat_name)
+        stat.change_apt_xp(xp)
+        stat.set_cur_stat_to_mem_stat(stat.name)
     
-    def grow_stat(self, stat_name, amount):
-        self.mem_stats[sn(stat_name)].change_base_val(amount)
-        self.set_cur_stat_to_mem_stat(stat_name)
+    def change_stat_base_val(self, stat_name:str, amount:int):
+        stat = self.get_stat_mem(stat_name)
+        stat.change_base_val(amount)
+        self.set_cur_stat_to_mem_stat(stat.name)
     
     '''
         Reserved for stats like Hunger, Energy, Health, Stress, & Fear
     '''   
-    def change_resource(self, stat_name, amount):
+    def resource_change(self, stat_name, amount):
         self.cur_stats[sn(stat_name)].change_resource(amount)
     
-    def restore_resource(self, stat_name):
+    def resource_restore(self, stat_name):
         self.cur_stats[sn(stat_name)].restore_resource()
-        
-    def get_resource_by_chunk(self, stat_name, divisor):
-        
-        if divisor < 1:
-            return 0
-        
-        return int(self.cur_stats[sn(stat_name)].av / divisor)
     
     def calc_hrs_req_to_sleep(self):
         if self.cur_stats["energy"].apt >= 0:
@@ -387,11 +412,8 @@ class StatBoard:
     def sleep_by_min(self):
         #TODO: affect stress, fear, and hunger in different ways
         
-        energy_stat = sn("ap")
-        self.cur_stats[energy_stat].change_resource(self.get_resource_by_chunk(energy_stat, self.calc_hrs_req_to_sleep() * 60))
-        
         health_stat = sn("health")
-        self.cur_stats[health_stat].change_resource(self.get_resource_by_chunk(health_stat, self.calc_hrs_req_to_sleep() * 60))
+        self.cur_stats[health_stat].change_resource(self.resource_divide_by(health_stat, self.calc_hrs_req_to_sleep() * 60))
         
     
     '''
@@ -410,11 +432,11 @@ class StatBoard:
     def get_stat_apts(self):
         return {stat.name: stat.apt for stat in self.cur_stats.values()}
     
-    def get_stat_avs(self):
-        return {stat.name: stat.av for stat in self.cur_stats.values()}
+    def get_stat_active_value(self):
+        return {stat.name: stat.val_active for stat in self.cur_stats.values()}
      
     def initiative(self):
-        return self.cur_stats["dexterity"].av + self.cur_stats["evasion"].av
+        return self.cur_stats["dexterity"].val_active + self.cur_stats["evasion"].val_active
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

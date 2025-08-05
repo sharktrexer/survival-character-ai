@@ -16,13 +16,13 @@ class BattlePeep():
         return self.name 
     
     def get_stat(self, name:str):
-        return self.stats.get_stat(name)
+        return self.stats.get_stat_cur(name)
     
     def get_stat_apts(self):
         return self.stats.get_stat_apts()
     
     def get_stat_avs(self):
-        return self.stats.get_stat_avs
+        return self.stats.get_stat_active_value
      
     def initiative(self):
         return self.stats.initiative()

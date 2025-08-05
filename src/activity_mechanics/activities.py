@@ -1,5 +1,8 @@
 from enum import Enum, auto
 
+from battle.battle_peep import BattlePeep
+from activity_mechanics.resources import Resource, ResourceManager
+
 class Tag(Enum):
     WORK = auto()
     LEISURE = auto()   
@@ -19,23 +22,7 @@ class Tag(Enum):
     MIXED = auto()
     
     
-class ResourcesTypes(Enum):
-    SEEDS = auto()
-    INGREDIENTS = auto()
-    FOOD = auto()
-    
-    MATERIALS = auto()
-    DEFENSE = auto()
-    
-class Resource():
-    def __init__(self, r_type:ResourcesTypes, amount:int):
-        self.type = r_type
-        self.amount = amount
-        
-    def __eq__(self, other):
-        return isinstance(other, Resource) and self.type == other.type
 
-RESOURCE_LIST = [Resource(r_type, 0) for r_type in ResourcesTypes]
 
 class ResourceExchanger():
     def __init__(self, costs:list[Resource], produces:list[Resource]):
@@ -102,10 +89,10 @@ class ResourceExchanger():
         return True
 
 class StatChange():
-    def __init__(self, stat_name:str, val_amount:int, apt_amount:int):
+    def __init__(self, stat_name:str, val_amount:int, apt_xp_amount:int):
         self.name = stat_name
         self.val_amount = val_amount
-        self.apt_amount = apt_amount
+        self.apt_xp_amount = apt_xp_amount
 
 class Activity():
     
@@ -121,3 +108,25 @@ class Activity():
         self.stress_effect = stress_effect
         self.exchanger = exchanger
     
+    def affect_peep(self, peep:BattlePeep):
+        
+        # stat effects
+        for stat_change in self.stat_changes:
+            #TODO: multiply by status effects on peep
+            peep.stats.change_apt_xp(stat_change.name, stat_change.apt_xp_amount)
+            peep.stats.change_stat_base_val(stat_change.name, stat_change.val_amount)
+            
+        # stress resource effect
+        peep.stats.resource_change("stress", self.stress_effect)
+        
+        # hunger resource effect
+        #TODO: mult of hunger resource consumption due to activity
+            
+    def do(self, peep:BattlePeep):
+        
+        do = self.exchanger.exchange(peep.resources)
+        if do:
+            #TODO: affect stress, 
+            self.affect_peep(peep)
+        
+        return do

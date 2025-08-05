@@ -10,7 +10,7 @@ class PeepManager:
     @staticmethod
     def reset_stat_to_default(peep:BattlePeep, stat:Stat):
         default_stat = PEEPS[peep.name].get_stat(stat.name)
-        stat.reset_to(default_stat.value, default_stat.apt)
+        stat.set_new_vals_as_reset(default_stat.value, default_stat.apt)
         
     def reset_peep_to_default(peep:BattlePeep):
         peep = copy.deepcopy(PEEPS[peep.name])

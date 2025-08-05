@@ -83,3 +83,9 @@ class BattleManager():
             
             return gain_bonus
     
+
+class BattleHandler():
+    def __init__(self):
+        pass
+    
+    #deal with stuff like status effects, temp health, evasion hp of peep, etc
