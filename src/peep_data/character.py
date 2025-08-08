@@ -12,6 +12,10 @@ class Character:
         #stringify apt dict
         stringified_apt_dict = ""
         for name, apt in self.stat_apts.items():
+            # format non negatives to take same space as negatives
+            if apt >= 0:
+                apt = " " + str(apt)
+                
             stringified_apt_dict += f"{name:<13}= {apt:<3}\n"
         
         return (self.name + ", the " + self.desc + "\nStat Details:\n"+ f"{'Name':<12} | {'Value':<3}" 

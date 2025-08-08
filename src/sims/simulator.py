@@ -265,9 +265,25 @@ class WhoAreYouSimulator(Simulator):
     
     def __init__(self):
         self.name = "Who Are You Simulator"
-        self.funcs = [self.who_are_you, self.who_are_you_with_extra_info]
+        self.funcs = [self.who_are_you, self.who_are_you_with_extra_info, self.explain_each_stat]
         self.obtained = {key: 0 for key in SIMPLE_PEOPLE}
         self.history = []
+        self.stat_desc = {
+            "strength": "hit harder with melee attacks and pickup heavier objects.",
+            "defense": "withstand harder hits and block better.",
+            "evasion": "dodge attacks and move larger distances.",
+            "dexterity": "hit targets accurately and craft items faster.",
+            "recovery": "heal better and resist negative status effects.",
+            "intelligence": "percieve hidden objects or routes and use spells.",
+            "creativity": "make better items and food and invent new moves.",
+            "fear": "resist scary enemies and situations before losing control.",
+            "intimidation": "scare enemies and control others through aggression",
+            "charisma": "persuade others and resist psychological effects.",
+            "stress": "withstand situtations or activites that are hard work for longer.",
+            "health": "take more damage before getting knocked out and improve regenerative effects upon self.",
+            "hunger": "consume less food and resist stat debuffs.",
+            "energy": "do more actions in combat and stay awake longer.",
+        }
 
     def welcome(self):
         print(f"Welcome to the {self.name}!", 
@@ -283,6 +299,8 @@ class WhoAreYouSimulator(Simulator):
             most_choice = ""
             least_choice = ""
 
+            #TODO: explain each stat and its purpose
+            
             # input of desired stat         
             p = "Of these stat types, which do you value the most?"   
             most_choice = self.get_choice(STAT_CHOICES, get_index=False, prompt=p)
@@ -300,7 +318,16 @@ class WhoAreYouSimulator(Simulator):
                 
             results = cdb.get_specific_combo_n_runner_ups(most_choice, least_choice)
             
-            #TODO: check for and communicate ties.
+            # check for ties.
+            ties = []
+            winning_diff = results[0]["diff"]
+            
+            for r in results[1:]:
+                if r["diff"] == winning_diff:
+                    ties.append(r["name"])
+                else:
+                    break
+                
             
             winner = [p for p in SIMPLE_PEOPLE if p.name == results[0]["name"]][0]
             
@@ -314,13 +341,33 @@ class WhoAreYouSimulator(Simulator):
                 print()
 
             # TODO: perhaps only show the stats that the user chose?
-            # Final answer
+            # FINAL ANSWER
             print("You got: " + str(winner))
             self.obtained[winner] += 1
             t.sleep(0.2)
             
+            # communicate & store ties.
+            if ties != []:
+                print("You also could be...")
+                for tie in ties:
+                    peep = [p for p in SIMPLE_PEOPLE if p.name == tie][0]
+                    
+                    # to print more peep info or not
+                    if not verbose:
+                        print(tie)
+                    else:
+                        print(peep)
+                        
+                    self.obtained[peep] += 1
+                print()
+            
             # log choices
             self.history.append((most_choice, least_choice, winner.name))
+            
+            # log ties
+            if ties != []:
+                for tie in ties:
+                    self.history.append((most_choice, least_choice, tie))
             
             # print
             print("You have so far obtained:")
@@ -352,6 +399,11 @@ class WhoAreYouSimulator(Simulator):
     
     def who_are_you_with_extra_info(self):
         self.who_are_you(True)
+        
+    def explain_each_stat(self):
+        print("\nHere are the different stats and what they do: ")
+        for stat in STAT_CHOICES:
+            print(stat, "-",self.stat_desc[stat])
             
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
