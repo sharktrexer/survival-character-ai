@@ -23,4 +23,16 @@ And finally, something I am proud of, is that you can see each of the differentl
 
 
 ## Who are you?
-You can choose one stat you desire to be strong and one you care less about. This will determine which character you play as, prioritizing a character with the highest desired stat and the biggest difference between highest and lowest stat. For devleopers you can inspect which characters have a higher chance of being picked than others based on the 2 questions.
+You can choose one stat you desire to be strong and one you care the least about. This will determine which character you would be given to play as, prioritizing a character with the biggest difference between highest and lowest stat. 
+
+<img width="415" height="672" alt="image" src="https://github.com/user-attachments/assets/91f98091-9392-40d6-9509-0fa2ef1de67f" />
+
+After you get your character, you can see their stat details, who else you obtained based on tied differences, and who you have obtained before.
+
+<img width="320" height="438" alt="image" src="https://github.com/user-attachments/assets/b4be4480-4144-4ad9-a586-72c39632a8ba" />
+
+And finally, you can keep track of which stat combos got you who using the history option.
+
+<img width="255" height="64" alt="image" src="https://github.com/user-attachments/assets/992649e0-708c-4628-8134-870e1976de1b" />
+
+Now you know what character you want to play based on your stat preferences!
