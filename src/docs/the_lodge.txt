@@ -1,0 +1,40 @@
+`````````````````````````````````````````````````````````````TIME`````````````````````````````````````````````````````````````
+Every action in combat and activity done in the lodge passes time in minutes.
+
+    >Activities pass time in relation to how many minutes they take.
+        If stopped prematurely, the user only gains a proportionate amount of reward
+
+    >Every turn in combat has 15 minutes pass
+
+    >Every second that passes in real life while in the lodge, a in-game minute passes
+
+                                                DAY AND NIGHT HOURS
+Fall & Spring hrs
+split = 12 12
+
+    night
+    0 - 5
+    18-23
+
+    day
+    6-17
+
+Summer hrs
+split = 16 8
+
+    night
+    0-3
+    20-23
+
+    day
+    4-19
+
+Winter hrs
+split = 8 16
+
+    night
+    0-7
+    16-23
+
+    day
+    8-15

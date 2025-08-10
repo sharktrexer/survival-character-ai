@@ -77,6 +77,8 @@ Lockeroom: (Itmd Apt+)
         Bathe (Tres+)
     Mischief:
         Play a Prank (itmd+, tres+)
+    Relieve Self:
+        Go bathroom (Tres++, Cha-)
 
 
 Kitchen: (Cre Apt+)
@@ -132,7 +134,14 @@ No Location:
     Spend time not eating (Hun Apt+)
     Time spent eating more frequently (Hun Apt-)
 
-``````````````````````````````````````````````Time Limit``````````````````````````````````````````````
+
+``````````````````````````````````````````````Rewards & Timing``````````````````````````````````````````````
+
+>Activities pass time in relation to how many minutes they take.
+    If stopped prematurely, the user only gains a proportionate amount of reward
+        EX: If activity lasts 1hr and gives +10 str, but a peep only does 30min, then they only get +5str
+
+``````````````````````````````````````````````Sleeping``````````````````````````````````````````````
 Depending on a character's Energy Aptitude, they can only stay awake for so long and 
 require a certain amount of sleep.
 

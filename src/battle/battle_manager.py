@@ -83,9 +83,14 @@ class BattleManager():
             
             return gain_bonus
     
-
+'''
+    Is a part of a battle peep to store and manipulate extra situational info
+''' 
 class BattleHandler():
     def __init__(self):
-        pass
+        self.temp_health = 0
+        self.evasion_health = 0
+        self.status_effects = []
+        self.stance = 0 # prone, hanging, standing, dancing(?)
     
-    #deal with stuff like status effects, temp health, evasion hp of peep, etc
+   

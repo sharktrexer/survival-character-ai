@@ -158,7 +158,7 @@ class Stat:
         self.multiplier *= get_mult_of_aptitude(self.apt)
         
         # ADD OTHER MULTIPLIERS HERE
-        # perhaps store mult funcs in a lits and iterate over them
+        # perhaps store mult funcs in a list and iterate over them
         
         # Alteration multiplier
         self.multiplier *= self.get_alteration_mult()

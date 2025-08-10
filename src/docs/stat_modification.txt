@@ -329,11 +329,11 @@ class Alteration
             
 
 
-How the alterataion remove itself from the Character's list when it expires:
+How the alteration remove itself from the Character's list when it expires:
 
 The statboard class should check the alterations if they have expired and calls a removal
 function to delete the alteration from the character's list and recalculate's their cur stats
 
 
-                                        ~Time~
+                                        ~Time of Duration~
 Describes what event the effect is looking for and for how many triggers.
