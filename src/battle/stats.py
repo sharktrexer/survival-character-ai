@@ -253,8 +253,31 @@ STAT_TYPES = {
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
 
-def convert_base_number_to_multiplier(number:int, base_stat:int):
-    return number / base_stat + 1
+def convert_whole_number_to_multiplier(whole_num:int, affected_number:int):
+    '''
+    Converts a whole positive or negative number to a multiplier to apply to the affected number
+    
+    Example:
+        With a whole number of 5 and an affected number of 10,
+        the multiplier will be 1.5
+    
+    Returns:
+        float: The multiplier
+    '''
+    return whole_num / affected_number + 1
+
+def convert_muliplier_to_whole_number(multiplier:float, affected_number:int):
+    '''
+    Converts a multiplier into a positive or negative number to be added to the affected number
+    
+    Example:
+        With a multiplier of 1.5 and an affected number of 10,
+        the whole number will be 5
+    
+    Returns:
+        int: The whole number
+    '''
+    return affected_number * multiplier - affected_number
 
 def reduce_decreasing_modifier(apt_mult:float, modifier:float):
     '''
@@ -355,7 +378,7 @@ def divide_resource_max_by(self, stat:Stat, divisor:int):
 
 class StatBoard:
     
-    def __init__(self, stats_dict: dict):
+    def __init__(self, stats_dict: dict[str, Stat]):
         self.cur_stats = stats_dict
         # These stats dont ever have Alterations applied to them
         # and are only affected by permanent upgrades/effects
@@ -402,7 +425,8 @@ class StatBoard:
     
     def resource_restore(self, stat_name):
         self.cur_stats[sn(stat_name)].restore_resource()
-    
+ 
+#TODO: these should be in a higher level class. Statboard doesn't need to know about sleeping
     def calc_hrs_req_to_sleep(self):
         if self.cur_stats["energy"].apt >= 0:
             return 8
@@ -410,19 +434,20 @@ class StatBoard:
             return 8 + abs(self.cur_stats["energy"].apt)
     
     def sleep_by_min(self):
-        #TODO: affect stress, fear, and hunger in different ways
+        #TODO: affect stress, fear, and hunger
         
-        health_stat = sn("health")
-        self.cur_stats[health_stat].change_resource(self.resource_divide_by(health_stat, self.calc_hrs_req_to_sleep() * 60))
+        health_stat = self.cur_stats[health_stat]
+        amnt_per_min = divide_resource_max_by (health_stat, self.calc_hrs_req_to_sleep() * 60)
+        health_stat.resource_change(amnt_per_min)
+        
+        '''
+        Time Spent Asleep:
+        With 0 Energy Aptitude or Higher: 
+            peeps need 8 hours of sleep.
+        Per point of Energy Apt below 0: 
+            peeps need +1 more hrs of sleep (12 max)'''
         
     
-    '''
-    Time Spent Asleep:
-    With 0 Energy Aptitude or Higher: 
-        peeps need 8 hours of sleep.
-    Per point of Energy Apt below 0: 
-        peeps need +1 more hrs of sleep (12 max)'''
-         
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

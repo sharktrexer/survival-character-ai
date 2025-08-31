@@ -3,11 +3,18 @@ from peep_data.data_reader import STAT_TYPES, get_peeps
 
 STAT_NAMES = STAT_TYPES.keys()
 
-# List of all the character descriptions
-CHAR_DESC = ["Nourishing Paladin", "Benevolent Assassin", "Vengeful Tinkerer",
-             "Unserious Wrestler", "Manipulating Incubus", "Uncouth Coward",
+#TODO: pull this info from sheets
+# List of all the character titles
+CHAR_TITLE = ["Nourishing Paladin", "Benevolent Assassin", "Vengeful Tinkerer",
+             "Laidback Wrestler", "Manipulating Incubus", "Uncouth Coward",
              "Promiscuous Dancer", "Protector of Parties", "Calm Sorcerer",
              "Domineering Barbarian"]
+
+# List of all the character descriptions
+CHAR_DESC = ["You take stuff too seriously but have a creative eye.", "You prefer doing things your way but have a strong emphasis on chosen family.", "You have trouble letting things go but you desire equity.",
+             "You have a big ego but want camraderie", "You enjoy controlling others but enjoy freedom.", "You feel out of place but have lots of potential.",
+             "You don't let things go, even mistakes, yet you can provide ample support.", "Your desires lie in all the wrong places but can be counted on to lift others up.", "You let others walk over you but will one day set healthy boundaries.",
+             "You take out your bottled up emotions on others but truly want glory and praise."]
 
 # Max amount of points that can be distributed amongst character stats
 MAX_STAT_VAL = 18
@@ -16,17 +23,15 @@ MAX_STAT_VAL = 18
 SIMPLE_PEOPLE = []
 
 
-def make_peep(name: str, desc: str, stats: dict):
-    '''Easily creates characters while verifying they have the right amount of stat distribution'''
-    val_total = sum(stats.values())
+def check_peep(peep: Character):
+    '''Verifies characters have the right amount of stat distribution'''
+    val_total = sum(peep.stat_apts.values())
     
     # Rebecca has a special case
-    val_total = MAX_STAT_VAL if name == "Rebecca" and val_total == 0 else val_total
+    val_total = MAX_STAT_VAL if peep.name == "Rebecca" and val_total == 0 else val_total
     
     if val_total != MAX_STAT_VAL:
-        raise Exception(f"Character \"{name}\" does not have a total of {MAX_STAT_VAL} points in their stats, but instead {val_total}")
-    
-    return Character(name, desc, stats)
+        raise Exception(f"Character \"{peep.name}\" does not have a total of {MAX_STAT_VAL} points in their stats, but instead {val_total}")
 
 def get_peeps_as_simple():
     """
@@ -38,7 +43,8 @@ def get_peeps_as_simple():
     """
     complex_peeps = get_peeps()
     for i, bp in enumerate(complex_peeps):
-        SIMPLE_PEOPLE.append(make_peep(bp.name, CHAR_DESC[i], 
+        check_peep(bp)
+        SIMPLE_PEOPLE.append(Character(bp.name, CHAR_TITLE[i], CHAR_DESC[i], 
                                 bp.get_stat_apts()))
     
 
