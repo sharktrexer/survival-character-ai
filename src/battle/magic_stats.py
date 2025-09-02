@@ -2,6 +2,7 @@ from enum import Enum
 
 COUNTER_MAGIC_MULTS = [0.5, 0.25, 0.1]
 SAME_MAGIC_MULTS = [0.25, 0.1, 0.05]
+# magic of the same type will have half of much resistance as counters
 
 class Magic:
     def __init__(self, name:str, resistance:float, strength:int):
@@ -45,7 +46,7 @@ def get_res_value(priority:int, magic_name:str):
     
     return [(vuln_mag, COUNTER_MAGIC_MULTS[priority]), 
             (magic_name, SAME_MAGIC_MULTS[priority]),
-            (countered_mag, SAME_MAGIC_MULTS[priority])]
+            (countered_mag, COUNTER_MAGIC_MULTS[priority])]
     
 
     

@@ -26,12 +26,10 @@ RANGE_NAME = "data!A1:AC"
 PATH = os.getcwd() + "\\sheet_credentials.json"
 # Token path
 TOKEN_PATH = os.getcwd() + "\\token.json"
-# csv path
-CSV_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 
-                        'char_data.csv')
+# cur path
+CUR_PATH = os.path.dirname(os.path.realpath(__file__))
 
-
-def fetch_sheet_data():
+def fetch_sheet_data(sheet_range:str):
   """Basic usage of the Sheets API.
   """
   creds = None
@@ -64,7 +62,7 @@ def fetch_sheet_data():
     sheet = service.spreadsheets()
     result = (
         sheet.values()
-        .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+        .get(spreadsheetId=SPREADSHEET_ID, range=sheet_range)
         .execute()
     )
     values = result.get("values", [])
@@ -78,19 +76,34 @@ def fetch_sheet_data():
   except HttpError as err:
     print(err)
 
-def create_csv_from_sheet():
-  data = fetch_sheet_data()
+def create_csv_from_sheet(path:str, sheet_range:str):
+  data = fetch_sheet_data(sheet_range)
   
   print("\n SHEET DATA FETCHED SUCCESSFULLY \n")
   
-  with open(CSV_PATH, 'w', newline='') as csvf:
+  path = os.path.join(CUR_PATH, path)
+  
+  with open(path, 'w', newline='') as csvf:
     writer = csv.writer(csvf)
     writer.writerows(data)
     
   print("\n CSV UPDATED SUCCESSFULLY \n")
     
 def main():
-  create_csv_from_sheet()
+  # Obtain character stat data
+  char_stats_path = 'char_data.csv'
+  char_stats_range = "data!A1:AC"
+  create_csv_from_sheet(char_stats_path, char_stats_range)
+  
+  # Obtain character title & descs
+  char_desc_path = 'char_desc.csv'
+  char_desc_range = "desc!A1:C"
+  create_csv_from_sheet(char_desc_path, char_desc_range)
+  
+  # Obtain character's magic types
+  char_magic_path = 'char_magic.csv'
+  char_magic_range = "magics!A1:D"
+  create_csv_from_sheet(char_magic_path, char_magic_range)
 
 if __name__ == "__main__":
   main()

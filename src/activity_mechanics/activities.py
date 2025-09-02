@@ -2,6 +2,7 @@ from enum import Enum, auto
 
 from battle.battle_peep import BattlePeep
 from activity_mechanics.resources import Resource, ResourceManager
+from battle.stats import StatChange
 
 class Tag(Enum):
     WORK = auto()
@@ -20,13 +21,6 @@ class Tag(Enum):
     PHYSICAL = auto()
     EMOTIONAL = auto()
     MIXED = auto()
-    
-
-class StatChange():
-    def __init__(self, stat_name:str, val_amount:int, apt_xp_amount:int):
-        self.name = stat_name
-        self.val_amount = val_amount
-        self.apt_xp_amount = apt_xp_amount
 
 class Activity():
     

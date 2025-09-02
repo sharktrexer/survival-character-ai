@@ -1,7 +1,6 @@
 from peep_data.char_data import get_peeps_as_simple
 from sims.available import AVAIL_SIMS, get_available_sims
 
-
 # read character data and populate SIMPLE_PEOPLE
 get_peeps_as_simple()
 # obtain all available sims
@@ -12,11 +11,6 @@ c.initialize_combos_db()
 
 def main():
         
-    """
-    Displays a welcome message for the peep simulator and prompts the user to select a 
-    simulation to from AVAIL_SIMS where the user can choose one by inputting a number. 
-    Validates user input to ensure a correct choice is made, then executes the selected simulation.
-    """
     print("\n\nWelcome to the peep simulator!\n" +
           "Here you can choose different simulations to run," 
           "from displaying data, or controlling a battle.")

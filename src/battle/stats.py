@@ -232,10 +232,16 @@ class Stat:
 
 ''' 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        GENERIC FUNCTIONS, EQUATIONS & CONSTANTS
+                        GENERIC FUNCTIONS, CLASSES, EQUATIONS & CONSTANTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
-  
+
+class StatChange():
+    def __init__(self, stat_name:str, val_amount:int, apt_xp_amount:int):
+        self.name = stat_name
+        self.val_amount = val_amount
+        self.apt_xp_amount = apt_xp_amount
+
 STAT_TYPES = {
         "strength": Stat("strength", 0, 0, "str", ["s", "fuerza"]),
         "defense": Stat("defense", 0, 0, "def", ["d", "defensa"]),
