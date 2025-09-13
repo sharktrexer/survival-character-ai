@@ -1,7 +1,8 @@
 import sqlite3
 import os.path
 
-from peep_data.char_data import SIMPLE_PEOPLE, STAT_NAMES
+from peep_data.data_reader import SIMPLE_PEEPS
+from battle.stats import STAT_TYPES
 
 DB_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 
                        'all_combos.db')
@@ -40,9 +41,9 @@ def create_db():
             )
         ''')
 
-    for p in SIMPLE_PEOPLE:
-        for m_stat in STAT_NAMES:
-            for l_stat in STAT_NAMES:
+    for p in SIMPLE_PEEPS:
+        for m_stat in STAT_TYPES.keys():
+            for l_stat in STAT_TYPES.keys():
                 if m_stat == l_stat:
                     continue
                 cursor.execute(('INSERT INTO combos' 

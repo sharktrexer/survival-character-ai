@@ -35,14 +35,13 @@ class BattlePeep():
         
     def start(self):
         #TODO: Add start logic
-        #TODO: a battle info obj should be passed in instead of just the anchor_init val
         pass 
     
     def turn(self):
         
         self.stats.tick_alterations()
         
-        self.stats.reset_stat("ap")
+        self.stats.resource_restore("ap")
         if self.gained_ap_bonus: self.stats.apply_init_ap_bonus()
         
         # temp print to test debuffs and buffs on one stat

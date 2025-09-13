@@ -6,8 +6,8 @@ import peep_data.combo_db as cdb
 from abc import ABC, abstractmethod
 from typing import Callable
 
-from peep_data.char_data import STAT_TYPES, SIMPLE_PEOPLE, get_peeps
-from battle.stats import Stat
+from peep_data.data_reader import SIMPLE_PEEPS, PEEPS
+from battle.stats import Stat, STAT_TYPES
 from battle.battle_peep import BattlePeep
 from battle.peep_manager import PeepManager
 
@@ -48,7 +48,7 @@ class Simulator(ABC):
         t.sleep(0.2)
     
     def get_character_choice(self):
-        return self.get_choice([p.name for p in SIMPLE_PEOPLE],
+        return self.get_choice([p.name for p in SIMPLE_PEEPS],
                                get_index=False)
     
     def get_choice(self, choices:list, get_index: bool = True, prompt: str = ""):
@@ -266,7 +266,7 @@ class WhoAreYouSimulator(Simulator):
     def __init__(self):
         self.name = "Who Are You Simulator"
         self.funcs = [self.who_are_you, self.who_are_you_with_extra_info, self.explain_each_stat]
-        self.obtained = {key: 0 for key in SIMPLE_PEOPLE}
+        self.obtained = {key: 0 for key in SIMPLE_PEEPS}
         self.history = []
         self.stat_desc = {
             "strength": "hit harder with melee attacks and pickup heavier objects.",
@@ -329,7 +329,7 @@ class WhoAreYouSimulator(Simulator):
                     break
                 
             
-            winner = [p for p in SIMPLE_PEOPLE if p.name == results[0]["name"]][0]
+            winner = [p for p in SIMPLE_PEEPS if p.name == results[0]["name"]][0]
             
             # print sorted people
             if verbose:
@@ -350,7 +350,7 @@ class WhoAreYouSimulator(Simulator):
             if ties != []:
                 print("You also could be...")
                 for tie in ties:
-                    peep = [p for p in SIMPLE_PEOPLE if p.name == tie][0]
+                    peep = [p for p in SIMPLE_PEEPS if p.name == tie][0]
                     
                     # to print more peep info or not
                     if not verbose:
@@ -424,7 +424,7 @@ class DistSimulator(Simulator):
                       ]
     
     def view_combos_by_peep(self):
-        self.view_combos_by([p.name for p in SIMPLE_PEOPLE], "name")
+        self.view_combos_by([p.name for p in SIMPLE_PEEPS], "name")
         
     def view_combos_by_major_stat(self):
         self.view_combos_by(STAT_CHOICES, "m_stat_name")
@@ -475,7 +475,7 @@ class DistSimulator(Simulator):
 class StatManipulationSimulator(Simulator):
     def __init__(self):
         self.name = "Stat Manipulation Simulator"
-        self.peeps = copy.deepcopy(get_peeps())
+        self.peeps = copy.deepcopy(PEEPS)
         self.funcs = [self.play_with_peep_stats, self.view_stats_of_all_peeps, self.play_with_equations] 
         
         self.peep_funcs = [self.manipulate_a_stat, self.manipulate_all_stats, 
@@ -509,13 +509,14 @@ class StatManipulationSimulator(Simulator):
                 return
             
             # get user choice of peep func
-            prompt = f"What would you like to do with {peep.name}"
-            peep_func = self.get_choice_with_exit(self.peep_funcs, prompt=prompt)
-            
-            if peep_func is None:
-                continue
-            
-            peep_func(peep)
+            while True:
+                prompt = f"What would you like to do with {peep.name}"
+                peep_func = self.get_choice_with_exit(self.peep_funcs, prompt=prompt)
+                
+                if peep_func is None:
+                    break
+                
+                peep_func(peep)
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PEEP FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''        
@@ -584,6 +585,7 @@ class StatManipulationSimulator(Simulator):
         print(f"Choose a new number for both the aptitude and the stat value.",
               'The aptitude must be between -4 and 8 (inclusive).')
         
+        # input form
         change_in = { "apt": 0, "value": 0}
         conditions = [lambda x: x >= -4 and x <= 8, None]
         
@@ -599,6 +601,7 @@ class StatManipulationSimulator(Simulator):
         print("\nCurrent Values: ")
         print(stat.print_simple_str())
         
+        # input form
         change_in = {"val_change": 0}
         conditions = [None]
         
@@ -615,6 +618,7 @@ class StatManipulationSimulator(Simulator):
         print("\nCurrent Stat Info: ")
         print(stat)
         
+        # input form
         change_in = {"xp_change": 0}
         conditions = [None]
         

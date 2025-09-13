@@ -1,8 +1,9 @@
 ''' Character used for data analysis '''
 class Character:
     
-    def __init__(self, name: str, desc: str, stats_dict: dict):
+    def __init__(self, name: str, title: str, desc: str, stats_dict: dict):
         self.name = name
+        self.title = title
         self.desc = desc
         self.stat_apts = stats_dict
         self.avg_stat_diffs = dict()
@@ -18,7 +19,7 @@ class Character:
                 
             stringified_apt_dict += f"{name:<13}= {apt:<3}\n"
         
-        return (self.name + ", the " + self.desc + "\nStat Details:\n"+ f"{'Name':<12} | {'Value':<3}" 
+        return (self.name + ", the " + self.title + "\nStat Details:\n"+ f"{'Name':<12} | {'Value':<3}" 
                 + "\n" + stringified_apt_dict)
     
     ''' Prints the formatted difference between two stats'''

@@ -35,6 +35,19 @@ def get_magics_vul_and_countered_relation(magic_name:str):
     return (vuln_name, countered_name)
 
 def get_res_value(priority:int, magic_name:str):
+    '''
+    
+    Returns:
+        list[tuple[str, float]] as [(magic_name, resist multiplier)]
+        
+        Where names are in the following order
+        
+        1. magic I am vulnerable to (previous MAGIC_NAMES element), 
+        
+        2. my same type, 
+        
+        3. magic that I counter (next MAGIC_NAMES element)
+    '''
     
     if priority > 3 or priority < 1:
         raise ValueError(('Priority must be between 1 and 3,' 
@@ -44,9 +57,9 @@ def get_res_value(priority:int, magic_name:str):
     
     vuln_mag, countered_mag = get_magics_vul_and_countered_relation(magic_name)
     
-    return [(vuln_mag, COUNTER_MAGIC_MULTS[priority]), 
+    return [(vuln_mag, -COUNTER_MAGIC_MULTS[priority]), 
             (magic_name, SAME_MAGIC_MULTS[priority]),
             (countered_mag, COUNTER_MAGIC_MULTS[priority])]
     
-
+#TODO: func to get and store all magic resists from a character's 3 different magics
     

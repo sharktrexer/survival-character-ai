@@ -1,8 +1,5 @@
-from peep_data.char_data import get_peeps_as_simple
 from sims.available import AVAIL_SIMS, get_available_sims
 
-# read character data and populate SIMPLE_PEOPLE
-get_peeps_as_simple()
 # obtain all available sims
 get_available_sims()
 # initialize db after char data is loaded

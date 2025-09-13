@@ -5,8 +5,6 @@ import typing_extensions as typing
 
 from dotenv import load_dotenv
 
-from peep.char_data import STAT_NAMES
-
 load_dotenv()
 
 KEY = os.environ['API_KEY']
