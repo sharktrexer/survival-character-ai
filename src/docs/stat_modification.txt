@@ -149,11 +149,14 @@ Current Stats are changed by, in order:
     Perm stats updating
 
     Aptitude modifier
-    Character Passives
-    Equipment
-    Relationship Passives
-    Food
-    Stat affecting Status Effects
+
+    Mult Manipulators:
+        Character Passives
+        Equipment
+        Relationship Passives
+        Food
+        Stat affecting Status Effects
+
     Alterations
 
     METHOD:
@@ -235,6 +238,33 @@ Current Stats are changed by, in order:
     +10% alteration = x1.1 modifier
     total mult = 1.1 * 2.66 = x2.926
     
+
+                                    -Extra Multipliers-
+To get any stat changes from equipment and other sources, Statboard collects all MultManipulators
+on peep and obtain their mult changes and store in a list. Then from the mult change list
+the Statboard wil combine and apply those mults to the respective stats. Whenever the mult change list is
+altered, all affected stats have their extra mult value modified, getting new mults from the modified list
+and then recalculating their active value.
+
+Ex mults are obtained from ~MultManipulators~ which when using the get_mult_effect function, 
+passing in the affected peep, will return a list of MultChanges. Each MultManipulator's func can be custom
+in how the MultChanges are calculated. When providing negative multipliers, they will have to
+take the positive aptitude in consideration and vise versa.
+
+CONDITIONAL
+if there are conditiional effects, what will turn the effect on or off?
+Answer
+    An event manager! They can add mult changes from items to a peep when something triggers.
+    Then update when another trigger happens. EX: getting in water vs getting out.
+
+PEEP MANIPULATOR
+Could work similarly but for more complex peep effects.
+can change any aspect of a peep with a custom function.
+How are the peeps affected when there are multiple manipulator effects, and one stops or starts?
+    After all peep manipulators are collected, checks can be done to prioritze effects over others.
+    Like how Dr. Fetus completely ignores piercing effects.
+
+
 
                                        -Alterations-
 Percentage changes of a stat are represented by <Alteration> classes, and are stored in
