@@ -1,7 +1,7 @@
 import copy
-import math
 
 from battle.alteration import Alteration, ap_buff
+#from battle.multipliers import MultChange
 
 '''
                          APTITUDE UTILITIES
@@ -94,10 +94,14 @@ class Stat:
         self.apt_exp = 0 
         self.val_active = 0
         self.multiplier = 1.0
+        '''separate mult modifier that is effected by everything else 
+        other than aptitude and alterations'''
+        self.ex_mults = 1.0 
         
-        # Alterations
+        # Alterations 
         self.buffs = []
         self.debuffs = []
+        
         
         #TODO: should this class have a way to point to its battlepeep owner?
      
@@ -125,6 +129,14 @@ class Stat:
         
         return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
     
+    def print_alterations(self):
+        print("\nBuffs:")
+        for buff in self.buffs:
+            print(buff)
+        print("\nDebuffs:")
+        for debuff in self.debuffs:
+            print(debuff)
+    
     ''' 
                             ACTIVE VALUE CALCULATION
     '''
@@ -135,13 +147,14 @@ class Stat:
         
     def set_new_vals_as_reset(self, val:int, apt:int):
         """
-        Resets a stat to a new value and aptitude, restting the resource value,
-        deleting all buffs and debuffs, and setting the apt exp to the exp amount
+        Resets a stat to a new value and aptitude, resetting the resource value,
+        deleting all buffs, debuffs, extra mults, and setting the apt exp to the exp amount
         of the corresponding aptitude level. 
         """
         
         self.buffs = []
         self.debuffs = []
+        self.ex_mults = 1.0
         self.set_new_vals(val, apt)
         self.apt_exp = XP_REQURED_PER_APT[self.apt]
         self.val_resource = self.val_active
@@ -149,6 +162,14 @@ class Stat:
     def set_new_vals_as_update(self, val:int, apt:int, apt_exp:int):
         self.set_new_vals(val, apt)
         self.apt_exp = apt_exp
+        
+    def set_extra_mult(self, mult:float):
+        '''
+        Sets the extra multiplier of the stat
+        and recalcs the active value
+        '''
+        self.ex_mults = mult
+        self.calc_active_value()
         
     def calc_active_value(self):
         # reset
@@ -159,6 +180,7 @@ class Stat:
         
         # ADD OTHER MULTIPLIERS HERE
         # perhaps store mult funcs in a list and iterate over them
+        self.multiplier *= self.ex_mults
         
         # Alteration multiplier
         self.multiplier *= self.get_alteration_mult()
@@ -168,7 +190,7 @@ class Stat:
     
     def get_alteration_mult(self):
         '''
-        Applies highest potency buff and debuff to stat mult
+        Returns the combined mult of the highest potency buff and debuff
         '''
 
         # Prevent index out of bounds, Get values if they exist
@@ -181,10 +203,10 @@ class Stat:
     ''' 
                             RESOURCE VALUE FUNCS
     '''
-    def restore_resource(self):
+    def resource_restore(self):
         self.val_resource = self.val_active
         
-    def change_resource_value(self, amount:int):
+    def resource_change(self, amount:int):
         
         self.val_resource += amount
         
@@ -237,11 +259,14 @@ class Stat:
 '''
 
 class StatChange():
+    '''
+    Simple class to represent a permanent stat change
+    '''
     def __init__(self, stat_name:str, val_amount:int, apt_xp_amount:int):
-        self.name = stat_name
+        self.name = sn(stat_name)
         self.val_amount = val_amount
         self.apt_xp_amount = apt_xp_amount
-
+        
 STAT_TYPES = {
         "strength": Stat("strength", 0, 0, "str", ["s", "fuerza"]),
         "defense": Stat("defense", 0, 0, "def", ["d", "defensa"]),
@@ -259,7 +284,7 @@ STAT_TYPES = {
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
 
-def convert_whole_number_to_multiplier(whole_num:int, affected_number:int):
+def convert_whole_number_to_multiplier(whole_num:int, affected_number:int) -> float:
     '''
     Converts a whole positive or negative number to a multiplier to apply to the affected number
     
@@ -272,7 +297,7 @@ def convert_whole_number_to_multiplier(whole_num:int, affected_number:int):
     '''
     return whole_num / affected_number + 1
 
-def convert_muliplier_to_whole_number(multiplier:float, affected_number:int):
+def convert_muliplier_to_whole_number(multiplier:float, affected_number:int) -> int:
     '''
     Converts a multiplier into a positive or negative number to be added to the affected number
     
@@ -282,10 +307,10 @@ def convert_muliplier_to_whole_number(multiplier:float, affected_number:int):
     
     Returns:
         int: The whole number
-    '''
+    '''    
     return affected_number * multiplier - affected_number
 
-def reduce_decreasing_modifier(apt_mult:float, modifier:float):
+def reduce_decreasing_modifier(apt:int, modifier:float):
     '''
     When a stat has a decreasing modifier (debuff), it should be reduced based on the increasing
     aptitude multiplier of the stat.
@@ -303,6 +328,8 @@ def reduce_decreasing_modifier(apt_mult:float, modifier:float):
     Returns:
         float: Reduced modifier
     '''
+    apt_mult = get_mult_of_aptitude(apt)
+    
     if apt_mult < 1:
         raise ValueError("Aptitude multiplier must be greater than 1, an increasing multiplier")
     
@@ -313,7 +340,7 @@ def reduce_decreasing_modifier(apt_mult:float, modifier:float):
     m = 1 - modifier
     return 1 - (m * a)
 
-def reduce_increasing_modifier(apt_mult:float, modifier:float):
+def reduce_increasing_modifier(apt:int, modifier:float):
     '''
     When a stat has an increasing modifier (buff), it should be reduced based on the decreasing 
     aptitude multiplier of the stat.
@@ -331,6 +358,8 @@ def reduce_increasing_modifier(apt_mult:float, modifier:float):
     Returns:
         float: Reduced modifier
     '''
+    apt_mult = get_mult_of_aptitude(apt)
+    
     if apt_mult > 1:
         raise ValueError("Aptitude multiplier must be less than 1, a decreasing multiplier")
     
@@ -390,17 +419,19 @@ class StatBoard:
         # and are only affected by permanent upgrades/effects
         self.mem_stats = stats_dict
         
+        # list of mult changes to apply to stats. 
+        # one entry equals the total mult change of one stat
+        # default mult change for every stat is 1
+        '''self.mult_changes = dict(zip(STAT_TYPES.keys(), 
+                                     [MultChange(name, 1) for name in STAT_TYPES.keys()]
+                                    )
+                                )'''
+        
     def get_stat_cur(self, name):
-        for s in self.cur_stats.values():
-            if s.name == sn(name):
-                return s
-        return None
+        return self.cur_stats[sn(name)]
     
     def get_stat_mem(self, name):
-        for s in self.mem_stats.values():
-            if s.name == sn(name):
-                return s
-        return None
+        return self.mem_stats[sn(name)]
     
 
     '''
@@ -422,15 +453,26 @@ class StatBoard:
         stat = self.get_stat_mem(stat_name)
         stat.change_base_val(amount)
         self.set_cur_stat_to_mem_stat(stat.name)
+        
+    def mults_apply(self):
+        '''
+        Call to apply all multiplier changes to stats
+        '''
+        for change in self.mult_changes:
+            self.get_stat_cur(change.stat_name).set_extra_mult(change.mult)
+            
+    def mults_reset(self):
+        for change in self.mult_changes:
+            change.mult = 1
     
     '''
         Reserved for stats like Hunger, Energy, Health, Stress, & Fear
     '''   
     def resource_change(self, stat_name, amount):
-        self.cur_stats[sn(stat_name)].change_resource(amount)
+        self.cur_stats[sn(stat_name)].resource_change(amount)
     
     def resource_restore(self, stat_name):
-        self.cur_stats[sn(stat_name)].restore_resource()
+        self.cur_stats[sn(stat_name)].resource_restore()
  
 #TODO: these should be in a higher level class. Statboard doesn't need to know about sleeping
     def calc_hrs_req_to_sleep(self):
@@ -468,6 +510,12 @@ class StatBoard:
      
     def initiative(self):
         return self.cur_stats["dexterity"].val_active + self.cur_stats["evasion"].val_active
+    
+    def get_stats_as_str(self):
+        stats_2_str = ""
+        for stat in self.cur_stats.values():
+            stats_2_str += str(stat) + "\n---------------------------\n"
+        return stats_2_str
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

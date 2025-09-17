@@ -499,6 +499,7 @@ class StatManipulationSimulator(Simulator):
     def view_stats_of_all_peeps(self):
         for peep in self.peeps:
             self.get_peep_info(peep)
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     
     def play_with_peep_stats(self):
         while True:
@@ -520,13 +521,29 @@ class StatManipulationSimulator(Simulator):
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PEEP FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''        
-    def get_peep_info(self, peep):
-        pass
+    def get_peep_info(self, peep:BattlePeep):
+        print(peep.get_info_as_str())
     
-    def compare_peep(self, peep):
-        pass
+    def compare_peep(self, peep:BattlePeep):
+        
+        peeps_minus_this = copy.deepcopy(self.peeps)
+        peeps_minus_this = [p for p in peeps_minus_this if p.name != peep.name]
+        
+        # get user choice of peep to compare
+        while True:
+            prompt = f"Who would you like to compare {peep.name} to?"
+            comparer = self.get_choice_with_exit(peeps_minus_this, prompt=prompt)
+            
+            if comparer is None:
+                break
+            
+            for stat_name in STAT_CHOICES:
+                print(f"{peep.name}'s {stat_name}:", peep.get_stat(stat_name).print_simple_str())
+                print(f"{comparer.name}'s {stat_name}:", comparer.get_stat(stat_name).print_simple_str())
+                print()
+            
     
-    def reset_peep_to_default(self, peep):
+    def reset_peep_to_default(self, peep:BattlePeep):
         # TODO: print previous peep info
         
         PeepManager.reset_peep_to_default(peep)
@@ -534,10 +551,10 @@ class StatManipulationSimulator(Simulator):
         # print new peep info
         
     
-    def manage_every_alteration_on_peep(self, peep):
+    def manage_every_alteration_on_peep(self, peep:BattlePeep):
         pass
     
-    def manipulate_all_stats(self, peep):
+    def manipulate_all_stats(self, peep:BattlePeep):
         while True:
             # choose different funcs of manipulating the stat
             prompt = f"What would you like to do with all of {peep.name}'s stat?"
@@ -553,7 +570,7 @@ class StatManipulationSimulator(Simulator):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STAT MANIPULATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''
     
-    def manipulate_a_stat(self, peep):
+    def manipulate_a_stat(self, peep:BattlePeep):
         
         while True:
             prompt = f"Which stat of {peep.name} would you like to manipulate"
@@ -631,12 +648,16 @@ class StatManipulationSimulator(Simulator):
     
     def show_stat_info(self, peep:BattlePeep, stat:Stat):
         print(stat, "\n")
-        pass
+        
     
     def manipulate_extra_modifiers(self, peep:BattlePeep, stat:Stat):
         pass
     
     def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
+        print(f"Current alterations for {stat.name}: ")
+        
+        stat.print_alterations()
+        
         pass
     
     def reset_stat_to_default(self, peep:BattlePeep, stat:Stat):
