@@ -544,15 +544,23 @@ class StatManipulationSimulator(Simulator):
             
     
     def reset_peep_to_default(self, peep:BattlePeep):
-        # TODO: print previous peep info
+        self.print_peep_info(peep)
         
         PeepManager.reset_peep_to_default(peep)
         
-        # print new peep info
+        self.print_peep_info(peep)
         
     
     def manage_every_alteration_on_peep(self, peep:BattlePeep):
         pass
+    '''
+        See all alterations, sorted by stat
+        Choose stat to view alterations on
+        (If alteration) delete all alterations
+        Create and save new alteration! (input affected stat and value)
+        Add alteration (input affected stat and value or Load from save)
+        
+    '''
     
     def manipulate_all_stats(self, peep:BattlePeep):
         while True:
@@ -657,6 +665,15 @@ class StatManipulationSimulator(Simulator):
         print(f"Current alterations for {stat.name}: ")
         
         stat.print_alterations()
+        
+        '''
+            (If alteration) choose alteration to manipulate
+                input new values
+            (If alteration) delete alteration
+            (If alteration) delete all alterations
+            Add an alteration (saved or at run time created from input)
+            Create and save an alteration!
+        '''
         
         pass
     

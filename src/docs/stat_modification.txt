@@ -256,6 +256,9 @@ if there are conditiional effects, what will turn the effect on or off?
 Answer
     An event manager! They can add mult changes from items to a peep when something triggers.
     Then update when another trigger happens. EX: getting in water vs getting out.
+    > An equipment or effect producing object can pass in no stat changes and instead rely 
+        on the event manager to handle effects based on "Observer pattern"
+            https://refactoring.guru/design-patterns/observer/python/example
 
 PEEP MANIPULATOR
 Could work similarly but for more complex peep effects.
