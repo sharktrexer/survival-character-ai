@@ -481,7 +481,7 @@ class StatManipulationSimulator(Simulator):
         self.peep_funcs = [self.manipulate_a_stat, self.manipulate_all_stats, 
                            self.compare_peep,
                            self.manage_every_alteration_on_peep, 
-                           self.get_peep_info,
+                           self.print_peep_info,
                            self.reset_peep_to_default]
         
         self.stat_funcs = [self.show_stat_info, self.grow_or_shrink_stat, 
@@ -498,7 +498,7 @@ class StatManipulationSimulator(Simulator):
     
     def view_stats_of_all_peeps(self):
         for peep in self.peeps:
-            self.get_peep_info(peep)
+            self.print_peep_info(peep)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     
     def play_with_peep_stats(self):
@@ -521,7 +521,7 @@ class StatManipulationSimulator(Simulator):
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PEEP FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''        
-    def get_peep_info(self, peep:BattlePeep):
+    def print_peep_info(self, peep:BattlePeep):
         print(peep.get_info_as_str())
     
     def compare_peep(self, peep:BattlePeep):
@@ -544,10 +544,13 @@ class StatManipulationSimulator(Simulator):
             
     
     def reset_peep_to_default(self, peep:BattlePeep):
+        print("\nPrevious Values: ")
         self.print_peep_info(peep)
         
         PeepManager.reset_peep_to_default(peep)
         
+        print("\n--------------------------------------------------")
+        print("Values after reset: ")
         self.print_peep_info(peep)
         
     
@@ -555,10 +558,9 @@ class StatManipulationSimulator(Simulator):
         pass
     '''
         See all alterations, sorted by stat
-        Choose stat to view alterations on
+        Choose a stat to manipulate alterations on 
         (If alteration) delete all alterations
-        Create and save new alteration! (input affected stat and value)
-        Add alteration (input affected stat and value or Load from save)
+        Add alteration (input affected stat and value or choose from preset list)
         
     '''
     
@@ -591,16 +593,6 @@ class StatManipulationSimulator(Simulator):
             
             prompt = f"What would you like to do with the {stat_name} stat?"
             self.mini_sim(func_list=self.stat_funcs, args=[peep, stat], prompt=prompt)
-            '''
-            while True:
-                # choose different funcs of manipulating the stat
-                prompt = f"What would you like to do with the {stat_name} stat?"
-                chosen_func = self.get_choice_with_exit(self.stat_funcs, prompt=prompt) 
-                
-                if chosen_func is None:
-                    break
-                
-                chosen_func(peep, stat)     '''
     
        
     def set_stat_values_directly(self, peep:BattlePeep, stat:Stat):
@@ -671,8 +663,7 @@ class StatManipulationSimulator(Simulator):
                 input new values
             (If alteration) delete alteration
             (If alteration) delete all alterations
-            Add an alteration (saved or at run time created from input)
-            Create and save an alteration!
+            Add an alteration (preset list or at run time created from input)
         '''
         
         pass

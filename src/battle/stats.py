@@ -312,10 +312,14 @@ def convert_muliplier_to_whole_number(multiplier:float, affected_number:int) -> 
 
 def reduce_decreasing_modifier(apt:int, modifier:float):
     '''
-    When a stat has a decreasing modifier (debuff), it should be reduced based on the increasing
-    aptitude multiplier of the stat.
-    This function calculates the new modifier by multiplying 1 divided by aptitude multiplier with
-    the inverse of the modifier multiplier and then taking one to subtract by the product
+    When a stat has a decreasing modifier (debuff), it should be reduced 
+    based on the increasing aptitude multiplier of the stat.
+    
+    Get inverse of aptitude increasing multiplier
+    Get the difference between 1 and the decreasing modifier
+    Multiply the inverse by the difference 
+    Get the difference of 1 from the product
+    
     
     Example:
         With an aptitude of 4 and a multiplier of 0.9,
@@ -344,8 +348,10 @@ def reduce_increasing_modifier(apt:int, modifier:float):
     '''
     When a stat has an increasing modifier (buff), it should be reduced based on the decreasing 
     aptitude multiplier of the stat.
-    This function calculates the new modifier by multiplying the inverse of the modifier 
-    by the aptitude multiplier and then adding one
+    
+    Get difference of positive modifier from 1
+    Multiply by reducing aptitude multiplier
+    Add 1 to the product
 
     Example:
         With an aptitude of -4 and a multiplier of 1.1,
@@ -366,7 +372,7 @@ def reduce_increasing_modifier(apt:int, modifier:float):
     if modifier < 1:
         raise ValueError("Modifier must be greater than 1, an increasing modifier")
     
-    return 1 + ((1 - modifier) * apt_mult)
+    return ((modifier - 1) * apt_mult) + 1
         
 
 def sn(name):
