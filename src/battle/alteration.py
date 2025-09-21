@@ -1,9 +1,20 @@
+import enum
+from enum import auto
+
 class Alteration:
 
+    class Grade(enum.Enum):
+        LESSER = auto()
+        MINOR = auto()
+        MAJOR = auto()
+        GREAT = auto()
+        ULTIMATE = auto()
+        BEWILDERING = auto()
+    
     def __init__(self, name: str, value: float, duration: int, ef_stat: str):
         
         if value < 0 or value == 1:
-            raise Exception("Alteration value must be greater than r equal to 0 and cannot be 1")
+            raise Exception("Alteration value must be greater than or equal to 0 and cannot be 1")
         
         self.name = name # won't be displayed in game, only used for internal equality checks
         self.value = value
@@ -86,3 +97,40 @@ str_debuff = Alteration("Minor Weakness", 0.8, 5, "feurza")
 str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "s")
 
 ap_buff = Alteration("Intiative Bonus", 1.5, 1, "AP")
+
+def create_alteration(effected_stat_name:str, value:float, duration:int) -> Alteration:
+    return Alteration(value, duration, effected_stat_name)
+
+def get_grade_values(grade:Alteration.Grade, values_out:dict[str,int]):
+    
+    if(grade == Alteration.Grade.LESSER):
+        values_out['mult'] = 1.1
+        values_out['duration'] = 6
+    elif(grade == Alteration.Grade.MINOR):
+        values_out['mult'] = 1.2
+        values_out['duration'] = 5
+    elif(grade == Alteration.Grade.MAJOR):
+        values_out['mult'] = 1.5
+        values_out['duration'] = 3
+    elif(grade == Alteration.Grade.GREAT):
+        values_out['mult'] = 2
+        values_out['duration'] = 2
+    elif(grade == Alteration.Grade.ULTIMATE):
+        values_out['mult'] = 3
+        values_out['duration'] = 1
+    elif(grade == Alteration.Grade.BEWILDERING):
+        values_out['mult'] = 10
+        values_out['duration'] = 1
+
+def create_preset_alt(effected_stat_name:str, is_buff:bool, grade:Alteration.Grade) -> Alteration:
+
+    value = {'mult': 0, 'duration': 0}
+    
+    get_grade_values(grade, value)
+       
+    if not is_buff:
+        value['mult'] = 1/value['mult']
+    
+    return Alteration(f"minor {effected_stat_name}", 
+                      value['mult'], value['duration'], 
+                      effected_stat_name)
