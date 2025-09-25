@@ -557,12 +557,23 @@ class StatManipulationSimulator(Simulator):
     def manage_every_alteration_on_peep(self, peep:BattlePeep):
         pass
     '''
-        See all alterations, sorted by stat
-        Choose a stat to manipulate alterations on 
-        (If alteration) delete all alterations
-        Add alteration (input affected stat and value or choose from preset list)
+        If any alterations:
+        View all sorted by stat :)
+        Choose a stat to modify alterations (call manage_stat_alterations)
+        Delete all alterations on every stat :)
+        
+        Anytime:
+        Create Alteration, but this time input stat to effect
         
     '''
+    
+    def delete_all_peep_alts(self, peep:BattlePeep):
+        peep.stats.remove_all_alterations()
+    
+    def show_all_peep_alts(self, peep:BattlePeep):
+        for stat in peep.stats.cur_stats.values():
+            print(stat.name + ":" + stat.get_alt_info_as_str())
+            print()
     
     def manipulate_all_stats(self, peep:BattlePeep):
         while True:
@@ -656,14 +667,16 @@ class StatManipulationSimulator(Simulator):
     def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
         print(f"Current alterations for {stat.name}: ")
         
-        stat.print_alterations()
+        stat.get_alt_info_as_str()
         
         '''
-            (If alteration) choose alteration to manipulate
-                input new values
-            (If alteration) delete alteration
-            (If alteration) delete all alterations
-            Add an alteration (preset list or at run time created from input)
+            If any alterations:
+            Delete All on stat
+            
+            Anytime:
+            Create Alteration
+                Choose preset
+                Input values
         '''
         
         pass

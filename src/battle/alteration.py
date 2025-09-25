@@ -86,20 +86,13 @@ class Alteration:
             if not self.is_this_more_potent(a) and i == len(alt_list) - 1:
                 alt_list.append(self)
                 return False
-        
-# test alterations, applying to base stat values
-#TODO: make into a test file
-str_buff = Alteration("Minor Strength", 1.2, 5, "Strength")
-str_buff2 = Alteration("Major Strength", 2, 2, "STRENGTH")
-str_buff3 = Alteration("Itty Bitty Strength", 1.1, 10, "str")
 
-str_debuff = Alteration("Minor Weakness", 0.8, 5, "feurza")
-str_debuff2 = Alteration("Itty Bitty Weakness", 0.9, 10, "s")
+AP_BUFF = Alteration("Intiative Bonus", 1.5, 1, "AP")
 
-ap_buff = Alteration("Intiative Bonus", 1.5, 1, "AP")
-
-def create_alteration(effected_stat_name:str, value:float, duration:int) -> Alteration:
-    return Alteration(value, duration, effected_stat_name)
+def create_alteration(effected_stat_name:str, mult:float, duration:int) -> Alteration:
+    
+    return Alteration(name=f"{mult} {effected_stat_name}", value=mult, 
+                      duration=duration, ef_stat=effected_stat_name)
 
 def get_grade_values(grade:Alteration.Grade, values_out:dict[str,int]):
     
@@ -127,10 +120,15 @@ def create_preset_alt(effected_stat_name:str, is_buff:bool, grade:Alteration.Gra
     value = {'mult': 0, 'duration': 0}
     
     get_grade_values(grade, value)
+    
+    suffix = ""
        
     if not is_buff:
         value['mult'] = 1/value['mult']
+        suffix = "debuff"
+    else:
+        suffix = "buff"
     
-    return Alteration(f"minor {effected_stat_name}", 
-                      value['mult'], value['duration'], 
-                      effected_stat_name)
+    return Alteration(name=f"{grade.name} {effected_stat_name} {suffix}", 
+                      value=value['mult'], duration=value['duration'], 
+                      ef_stat=effected_stat_name)

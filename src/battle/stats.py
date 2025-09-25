@@ -1,6 +1,6 @@
 import copy
 
-from battle.alteration import Alteration, ap_buff
+from battle.alteration import Alteration, AP_BUFF
 #from battle.multipliers import MultChange
 
 '''
@@ -129,13 +129,29 @@ class Stat:
         
         return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
     
-    def print_alterations(self):
-        print("\nBuffs:")
+    def get_buff_info_as_str(self):
+        buff_info = "\nBuffs:"
         for buff in self.buffs:
-            print(buff)
-        print("\nDebuffs:")
+            buff_info += buff + "\n"
+        return buff_info
+    
+    def get_debuff_info_as_str(self):
+        debuff_info = "\nDebuffs:"
         for debuff in self.debuffs:
-            print(debuff)
+            debuff_info += debuff + "\n"
+        return debuff_info
+    
+    def get_alt_info_as_str(self):
+        alt_info = self.get_buff_info_as_str()
+            
+        alt_info += self.get_debuff_info_as_str()
+        
+        return alt_info
+    
+    def remove_all_alterations(self):
+        self.buffs = []
+        self.debuffs = []
+        self.calc_active_value()
     
     ''' 
                             ACTIVE VALUE CALCULATION
@@ -530,7 +546,7 @@ class StatBoard:
     '''
     
     def apply_init_ap_bonus(self):
-        self.apply_alteration(ap_buff)
+        self.apply_alteration(AP_BUFF)
 
     def apply_alteration(self, alt: Alteration):
         
@@ -555,6 +571,10 @@ class StatBoard:
                 else:
                     s.debuffs.remove(alteration)
                 break
+            
+    def remove_all_alterations(self):
+        for s in self.cur_stats.values():
+            s.remove_all_alterations()
             
     # TEMPORARY func to tick alterations.
     def tick_alterations(self):
