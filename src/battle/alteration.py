@@ -32,6 +32,9 @@ class Alteration:
     def __str__(self):
         return f"{self.name}: ({self.value}) | {self.duration_left} turns left"
     
+    def get_grades():
+        return [grade for grade in Alteration.Grade]
+    
     def tick(self):
         self.duration_left -= 1
         return self.duration_left <= 0
@@ -114,6 +117,15 @@ def get_grade_values(grade:Alteration.Grade, values_out:dict[str,int]):
     elif(grade == Alteration.Grade.BEWILDERING):
         values_out['mult'] = 10
         values_out['duration'] = 1
+
+def get_grade_info_as_str_lst():
+    lst = []
+    value = {'mult': 0, 'duration': 0}
+    
+    for grade in Alteration.Grade:
+        get_grade_values(grade, value)
+        lst.append((grade.name,"-", "mult val:", value['mult'], "| duration:", value['duration']))
+    return lst
 
 def create_preset_alt(effected_stat_name:str, is_buff:bool, grade:Alteration.Grade) -> Alteration:
 

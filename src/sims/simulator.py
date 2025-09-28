@@ -10,6 +10,7 @@ from peep_data.data_reader import SIMPLE_PEEPS, PEEPS
 from battle.stats import Stat, STAT_TYPES
 from battle.battle_peep import BattlePeep
 from battle.peep_manager import PeepManager
+from battle.alteration import Alteration, get_grade_info_as_str_lst, create_preset_alt
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -604,6 +605,7 @@ class StatManipulationSimulator(Simulator):
             
             prompt = f"What would you like to do with the {stat_name} stat?"
             self.mini_sim(func_list=self.stat_funcs, args=[peep, stat], prompt=prompt)
+            #TODO: print stat info every time a stat altered function is called
     
        
     def set_stat_values_directly(self, peep:BattlePeep, stat:Stat):
@@ -664,23 +666,6 @@ class StatManipulationSimulator(Simulator):
     def manipulate_extra_modifiers(self, peep:BattlePeep, stat:Stat):
         pass
     
-    def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
-        print(f"Current alterations for {stat.name}: ")
-        
-        stat.get_alt_info_as_str()
-        
-        '''
-            If any alterations:
-            Delete All on stat
-            
-            Anytime:
-            Create Alteration
-                Choose preset
-                Input values
-        '''
-        
-        pass
-    
     def reset_stat_to_default(self, peep:BattlePeep, stat:Stat):
         
         print("\nPrevious Values: ")
@@ -692,6 +677,56 @@ class StatManipulationSimulator(Simulator):
         print(stat)
         print()
         
+    def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
+        
+        
+        
+        print(f"Current alterations for {stat.name}: ")
+        
+        print(stat.get_alt_info_as_str())
+        
+        '''
+        self.get_choice_with_exit(self.alt_funcs, prompt=prompt)
+        
+        
+            If any alterations:
+            Delete All on stat
+            
+            Anytime:
+            Create Alteration
+                Choose preset
+                Input values
+        '''
+        print("New alteration info: ")
+        print("Mults: ")
+        print(stat.get_active_alt_info_as_str())
+        print("All alterations: ")
+        print(stat.get_alt_info_as_str())
+        
+        pass
+    
+    def create_preset_stat_alteration(self, peep:BattlePeep, stat:Stat):
+        
+        prompt = f"Choose a preset alteration grade for {stat.name}: "
+        
+        # grade objects with same index as stringified version for better user info
+        # when choosing
+        presets = Alteration.get_grades()
+        alt_info_as_str = get_grade_info_as_str_lst()
+        
+        grade_ind_choice = self.get_choice(alt_info_as_str, get_index=True, prompt=prompt)
+        
+        # get buff or debuff 
+        is_a_buff = -1      
+        while is_a_buff == -1:
+            prompt = "Is this a buff or a debuff?"
+            is_a_buff = self.get_choice(["No", "Yes"], prompt=prompt)  
+         
+        
+        new_alt = create_preset_alt(stat.name, is_buff=is_a_buff, grade=presets[grade_ind_choice])
+        
+        peep.stats.apply_alteration(new_alt)
+    
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EQUATIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -153,6 +153,22 @@ class Stat:
         self.debuffs = []
         self.calc_active_value()
     
+    def get_debuff_mult(self):
+        # Prevent index out of bounds, Get values if they exist
+        return 1 if self.debuffs == [] else self.debuffs[0].value
+    
+    def get_buff_mult(self):
+        # Prevent index out of bounds, Get values if they exist
+        return 1 if self.buffs == [] else self.buffs[0].value
+    
+    #TODO: perhaps all the string funcs can be placed into peep_manager?
+    def get_active_alt_info_as_str(self):
+        buff = self.get_buff_mult()
+        debuff = self.get_debuff_mult()
+        return ("Buff Mult: " + str(self.get_buff_mult()) 
+                + "\nDebuff Mult: " + str(self.get_debuff_mult())
+                + "\nFinal Mult: " + str(buff * debuff))
+    
     ''' 
                             ACTIVE VALUE CALCULATION
     '''
@@ -203,15 +219,12 @@ class Stat:
         
         self.val_active = int(self.value * self.multiplier)
     
-    
     def get_alteration_mult(self):
         '''
         Returns the combined mult of the highest potency buff and debuff
-        '''
-
-        # Prevent index out of bounds, Get values if they exist
-        buff_val = 1 if self.buffs == [] else self.buffs[0].value
-        debuff_val = 1 if self.debuffs == [] else self.debuffs[0].value
+        ''' 
+        buff_val = self.get_buff_mult()
+        debuff_val = self.get_debuff_mult()
         
         # TODO: incorporate Hunger apt mult here
         return buff_val * debuff_val

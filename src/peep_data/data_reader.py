@@ -69,6 +69,7 @@ def read_peep_magic_data():
         # Every row is a char name, primary, secondary, tertiary magic name
         for row in reader:
             # calc stat resistances and add to peeps
+            #TODO: 
             pass
 
 '''
