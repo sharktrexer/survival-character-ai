@@ -124,7 +124,9 @@ def get_grade_info_as_str_lst():
     
     for grade in Alteration.Grade:
         get_grade_values(grade, value)
-        lst.append((grade.name,"-", "mult val:", value['mult'], "| duration:", value['duration']))
+        lst.append((f"{grade.name:<11} -  mult val: {round(value['mult'], 3):<3}" 
+                    + f" | duration: {value['duration']:<3}"
+                    ))
     return lst
 
 def create_preset_alt(effected_stat_name:str, is_buff:bool, grade:Alteration.Grade) -> Alteration:

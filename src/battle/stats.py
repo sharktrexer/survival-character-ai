@@ -118,7 +118,7 @@ class Stat:
     ''' 
                                 HELPER FUNCTIONS
     ''' 
-    def print_simple_str(self):
+    def simple_str(self):
         return f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.val_active:<4}" 
     
     def get_all_names(self):
@@ -129,16 +129,20 @@ class Stat:
         
         return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
     
+    def get_all_alterations(self):
+        ''' returns the list of buffs + debuffs'''
+        return self.buffs + self.debuffs
+    
     def get_buff_info_as_str(self):
-        buff_info = "\nBuffs:"
+        buff_info = "\nBuffs:\n"
         for buff in self.buffs:
-            buff_info += buff + "\n"
+            buff_info += "\t" + str(buff) + "\n"
         return buff_info
     
     def get_debuff_info_as_str(self):
-        debuff_info = "\nDebuffs:"
+        debuff_info = "\nDebuffs:\n"
         for debuff in self.debuffs:
-            debuff_info += debuff + "\n"
+            debuff_info += "\t" + str(debuff) + "\n"
         return debuff_info
     
     def get_alt_info_as_str(self):
@@ -147,11 +151,6 @@ class Stat:
         alt_info += self.get_debuff_info_as_str()
         
         return alt_info
-    
-    def remove_all_alterations(self):
-        self.buffs = []
-        self.debuffs = []
-        self.calc_active_value()
     
     def get_debuff_mult(self):
         # Prevent index out of bounds, Get values if they exist
@@ -165,9 +164,9 @@ class Stat:
     def get_active_alt_info_as_str(self):
         buff = self.get_buff_mult()
         debuff = self.get_debuff_mult()
-        return ("Buff Mult: " + str(self.get_buff_mult()) 
-                + "\nDebuff Mult: " + str(self.get_debuff_mult())
-                + "\nFinal Mult: " + str(buff * debuff))
+        return ("Buff Mult: " + str(round(self.get_buff_mult(), 3)) 
+                + "\nDebuff Mult: " + str(round(self.get_debuff_mult(), 3))
+                + "\nFinal Mult: " + str(round(buff * debuff, 3)))
     
     ''' 
                             ACTIVE VALUE CALCULATION
@@ -217,7 +216,10 @@ class Stat:
         # Alteration multiplier
         self.multiplier *= self.get_alteration_mult()
         
-        self.val_active = int(self.value * self.multiplier)
+        final_val = int(self.value * self.multiplier)
+        
+        # active value can't be less than 1
+        self.val_active = final_val if final_val > 1 else 1
     
     def get_alteration_mult(self):
         '''
@@ -228,6 +230,26 @@ class Stat:
         
         # TODO: incorporate Hunger apt mult here
         return buff_val * debuff_val
+    
+    def remove_all_alterations(self):
+        self.buffs = []
+        self.debuffs = []
+        self.calc_active_value()
+        
+    def remove_alteration(self, alt_ind:int):
+        '''
+        Removes the alteration at the given index from the stat.
+        Index is assumed to be the index of the list "buffs + debuffs"
+        '''
+        if alt_ind < len(self.buffs):
+            self.buffs.pop(alt_ind)
+        else:
+            self.debuffs.pop(alt_ind - len(self.buffs))
+        
+        # recalc active value if the highest priority buff or debuff was removed
+        # (at index 0 of either buffs or debuffs)
+        if alt_ind == 0 or alt_ind == len(self.buffs) :    
+            self.calc_active_value()
     
     ''' 
                             RESOURCE VALUE FUNCS

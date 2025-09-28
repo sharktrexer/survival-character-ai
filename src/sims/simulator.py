@@ -10,7 +10,7 @@ from peep_data.data_reader import SIMPLE_PEEPS, PEEPS
 from battle.stats import Stat, STAT_TYPES
 from battle.battle_peep import BattlePeep
 from battle.peep_manager import PeepManager
-from battle.alteration import Alteration, get_grade_info_as_str_lst, create_preset_alt
+from battle.alteration import Alteration, get_grade_info_as_str_lst, create_preset_alt, create_alteration
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -539,7 +539,7 @@ class StatManipulationSimulator(Simulator):
                 break
             
             for stat_name in STAT_CHOICES:
-                print(f"{peep.name}'s {stat_name}:", peep.get_stat(stat_name).print_simple_str())
+                print(f"{peep.name}'s {stat_name}:", peep.get_stat(stat_name).simple_str())
                 print(f"{comparer.name}'s {stat_name}:", comparer.get_stat(stat_name).print_simple_str())
                 print()
             
@@ -610,7 +610,7 @@ class StatManipulationSimulator(Simulator):
        
     def set_stat_values_directly(self, peep:BattlePeep, stat:Stat):
         print("\nCurrent Values: ")
-        print(stat.print_simple_str())
+        print(stat.simple_str())
         
         print(f"Choose a new number for both the aptitude and the stat value.",
               'The aptitude must be between -4 and 8 (inclusive).')
@@ -624,12 +624,12 @@ class StatManipulationSimulator(Simulator):
         stat.set_new_vals(change_in['value'], change_in['apt'])
         
         print("\nWith Your Set Values: ")
-        print(stat.print_simple_str())
+        print(stat.simple_str())
         
     
     def grow_or_shrink_stat(self, peep:BattlePeep, stat:Stat):
         print("\nCurrent Values: ")
-        print(stat.print_simple_str())
+        print(stat.simple_str())
         
         # input form
         change_in = {"val_change": 0}
@@ -642,7 +642,7 @@ class StatManipulationSimulator(Simulator):
         stat.set_new_vals(new_val, stat.apt)
         
         print("\nWith Your Set Values: ")
-        print(stat.print_simple_str())
+        print(stat.simple_str())
     
     def manipulate_apt_level_by_xp(self, peep:BattlePeep, stat:Stat):
         print("\nCurrent Stat Info: ")
@@ -657,7 +657,7 @@ class StatManipulationSimulator(Simulator):
         stat.change_aptitude_xp(change_in['xp_change'])
         
         print("\nAfter your aptitude xp change: ")
-        print(stat.print_simple_str())
+        print(stat.simple_str())
     
     def show_stat_info(self, peep:BattlePeep, stat:Stat):
         print(stat, "\n")
@@ -679,35 +679,41 @@ class StatManipulationSimulator(Simulator):
         
     def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
         
+        alt_funcs = [self.create_preset_stat_alteration, self.create_custom_stat_alteration]
+        alt_delete_funcs = [self.delete_a_stat_alteration,self.delete_all_stat_alts]
         
-        
-        print(f"Current alterations for {stat.name}: ")
+        print(f"Current alterations for {peep.name}'s {stat.name}: ")
         
         print(stat.get_alt_info_as_str())
         
-        '''
-        self.get_choice_with_exit(self.alt_funcs, prompt=prompt)
+        prompt = f"What would you like to do with {stat.name}'s alterations?"
         
-        
-            If any alterations:
-            Delete All on stat
+        while True:
+            # dont let user delete alterations if there are none
+            applicable_alt_funcs = alt_funcs
             
-            Anytime:
-            Create Alteration
-                Choose preset
-                Input values
-        '''
-        print("New alteration info: ")
-        print("Mults: ")
-        print(stat.get_active_alt_info_as_str())
-        print("All alterations: ")
-        print(stat.get_alt_info_as_str())
+            if stat.get_all_alterations() != []:
+                applicable_alt_funcs = alt_funcs + alt_delete_funcs
+            
+            alt_fn_choice = self.get_choice_with_exit(choices=applicable_alt_funcs, prompt=prompt)
+            
+            if alt_fn_choice is None:
+                return
+            
+            alt_fn_choice(peep, stat)
+            
+            # print new info after any change
+            print("New alteration info: ")
+            print(stat.get_active_alt_info_as_str())
+            print(stat.get_alt_info_as_str())
+            
+            print(f"\nNew {stat.name} info:")
+            print(stat)
         
-        pass
-    
+        
     def create_preset_stat_alteration(self, peep:BattlePeep, stat:Stat):
         
-        prompt = f"Choose a preset alteration grade for {stat.name}: "
+        prompt = f"Choose a preset alteration grade for {peep.name}'s {stat.name} "
         
         # grade objects with same index as stringified version for better user info
         # when choosing
@@ -719,14 +725,37 @@ class StatManipulationSimulator(Simulator):
         # get buff or debuff 
         is_a_buff = -1      
         while is_a_buff == -1:
-            prompt = "Is this a buff or a debuff?"
-            is_a_buff = self.get_choice(["No", "Yes"], prompt=prompt)  
+            prompt = "Is this a buff or a debuff (increasing or decreasing modifier)?"
+            is_a_buff = self.get_choice(["Debuff", "Buff"], prompt=prompt)  
          
         
         new_alt = create_preset_alt(stat.name, is_buff=is_a_buff, grade=presets[grade_ind_choice])
         
         peep.stats.apply_alteration(new_alt)
     
+    def create_custom_stat_alteration(self, peep:BattlePeep, stat:Stat):
+        
+        # input form
+        # TODO: prob can create a class for this
+        value_of = { "mult": 0, "duration": 0}
+        conditions = [lambda x: x > 0 and x <= 250, lambda x: x >= 1]
+        
+        print(f"Choose the multiplier and duration of an alteration to apply to {peep.name}'s {stat.name}: ",
+              'The mult value must be between 0 (exclusive) and 250 (inclusive).')
+        self.obtain_number_inputs(input_form_dict=value_of, conds=conditions)
+        
+        new_alt = create_alteration(stat.name, value_of['mult'], int(value_of['duration']))
+        
+        peep.stats.apply_alteration(new_alt)
+    
+    def delete_a_stat_alteration(self, peep:BattlePeep, stat:Stat):
+        prompt = f"Which alteration of {peep.name}'s {stat.name} would you like to delete?"
+        alt_ind = self.get_choice(stat.get_all_alterations(), prompt=prompt)
+        
+        stat.remove_alteration(alt_ind)
+    
+    def delete_all_stat_alts(self, peep:BattlePeep, stat:Stat):
+        stat.remove_all_alterations()
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EQUATIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
