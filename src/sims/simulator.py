@@ -94,6 +94,9 @@ class Simulator(ABC):
             return choices[choice]
     
     def get_choice_with_exit(self, choices:list, prompt: str = ""):
+        '''
+        calls get_choice but adds an exit option where None can be returned
+        '''
         choices = copy.deepcopy(choices)
         choices.append(self.EXIT_KEY)
         choice = self.get_choice(choices=choices, get_index = False, prompt=prompt)
@@ -553,28 +556,6 @@ class StatManipulationSimulator(Simulator):
         print("\n--------------------------------------------------")
         print("Values after reset: ")
         self.print_peep_info(peep)
-        
-    
-    def manage_every_alteration_on_peep(self, peep:BattlePeep):
-        pass
-    '''
-        If any alterations:
-        View all sorted by stat :)
-        Choose a stat to modify alterations (call manage_stat_alterations)
-        Delete all alterations on every stat :)
-        
-        Anytime:
-        Create Alteration, but this time input stat to effect
-        
-    '''
-    
-    def delete_all_peep_alts(self, peep:BattlePeep):
-        peep.stats.remove_all_alterations()
-    
-    def show_all_peep_alts(self, peep:BattlePeep):
-        for stat in peep.stats.cur_stats.values():
-            print(stat.name + ":" + stat.get_alt_info_as_str())
-            print()
     
     def manipulate_all_stats(self, peep:BattlePeep):
         while True:
@@ -586,7 +567,61 @@ class StatManipulationSimulator(Simulator):
                 break
             
             for stat in peep.stats.cur_stats.values():
-                chosen_func(peep, stat)     
+                chosen_func(peep, stat)    
+                 
+    def manage_every_alteration_on_peep(self, peep:BattlePeep):
+        peep_alt_fn = [self.affect_stat_alterations, self.create_random_alterations_on_peep]
+        if_alt_fns = [self.show_all_peep_alts, self.delete_all_peep_alts]
+        
+        while True:
+            # dont let user delete or print alterations if there are none
+            applicable_alt_funcs = peep_alt_fn
+            
+            if peep.stats.get_all_alterations() != []:
+                applicable_alt_funcs = peep_alt_fn + if_alt_fns
+            
+            prompt = f"What would you like to do with {peep.name}'s alterations?"
+            alt_fn_choice = self.get_choice_with_exit(choices=applicable_alt_funcs, prompt=prompt)
+            
+            if alt_fn_choice is None:
+                return
+            
+            alt_fn_choice(peep)
+    
+    def create_random_alterations_on_peep(self, peep:BattlePeep):
+        '''
+        user inputs how many to make
+        
+        chooses random stats and creates random alterations values or presets
+        
+        the more alterations a stat has, the less likely it will gain another random alteration
+        '''
+        print("\nNot yet implemented")
+        pass
+    
+    def affect_stat_alterations(self, peep:BattlePeep):
+        prompt = f"Which stat of {peep.name} would you like to affect alterations on?"
+        stat_choice = self.get_choice_with_exit(STAT_CHOICES, prompt=prompt)
+        
+        if stat_choice is None:
+            return
+        
+        stat_choice = peep.get_stat(stat_choice)
+        
+        choice = self.get_choice(
+            choices=[self.manage_stat_alterations, self.create_a_stat_alteration], 
+            get_index=False,
+            prompt=f"Do you just want to create an alteration or manage {stat_choice.name}'s alterations?")
+        
+        choice(peep, stat_choice)
+        
+        
+    def delete_all_peep_alts(self, peep:BattlePeep):
+        peep.stats.remove_all_alterations()
+    
+    def show_all_peep_alts(self, peep:BattlePeep):
+        print(f"\nCurrent Alterations on {peep.name}: ")
+        print(peep.stats.get_all_alts_as_str())
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STAT MANIPULATION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -662,8 +697,8 @@ class StatManipulationSimulator(Simulator):
     def show_stat_info(self, peep:BattlePeep, stat:Stat):
         print(stat, "\n")
         
-    
     def manipulate_extra_modifiers(self, peep:BattlePeep, stat:Stat):
+        print("\nNot yet implemented")
         pass
     
     def reset_stat_to_default(self, peep:BattlePeep, stat:Stat):
@@ -710,6 +745,21 @@ class StatManipulationSimulator(Simulator):
             print(f"\nNew {stat.name} info:")
             print(stat)
         
+    def create_a_stat_alteration(self, peep:BattlePeep, stat:Stat):
+        create_fns = [self.create_preset_stat_alteration, 
+                      self.create_custom_stat_alteration,
+                      self.create_random_stat_alteration]
+        
+        prompt = f"How would you like to create an alteration for {peep.name}'s {stat.name}?"
+        
+        while True:
+            choice = self.get_choice_with_exit(create_fns, prompt=prompt)
+            
+            if choice is None:
+                return
+            
+            choice(peep, stat)
+
         
     def create_preset_stat_alteration(self, peep:BattlePeep, stat:Stat):
         
@@ -747,6 +797,17 @@ class StatManipulationSimulator(Simulator):
         new_alt = create_alteration(stat.name, value_of['mult'], int(value_of['duration']))
         
         peep.stats.apply_alteration(new_alt)
+        
+    def create_random_stat_alteration(self, peep:BattlePeep, stat:Stat):
+        '''
+        user provides how many to make
+        
+        creates random custom or preset alterations
+        
+        the more buffs a stat has, the higher chance of creating a buff and vice versa
+        '''
+        print("\nNot yet implemented")
+        pass
     
     def delete_a_stat_alteration(self, peep:BattlePeep, stat:Stat):
         prompt = f"Which alteration of {peep.name}'s {stat.name} would you like to delete?"
@@ -761,6 +822,7 @@ class StatManipulationSimulator(Simulator):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EQUATIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''
     def play_with_equations(self):
+        print("\nNot yet implemented")
         pass
        
     

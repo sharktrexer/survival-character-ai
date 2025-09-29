@@ -21,6 +21,9 @@ class BattlePeep():
         return peep_info
     
     def get_stat(self, name:str) -> Stat:
+        '''
+        given a name, returns the peep's current stat obj
+        '''
         return self.stats.get_stat_cur(name)
     
     def get_stat_apts(self):

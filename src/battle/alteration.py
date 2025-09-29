@@ -30,7 +30,7 @@ class Alteration:
         return NotImplemented
     
     def __str__(self):
-        return f"{self.name}: ({self.value}) | {self.duration_left} turns left"
+        return f"{self.name}: ({round(self.value, 3)}) | {self.duration_left} turns left"
     
     def get_grades():
         return [grade for grade in Alteration.Grade]
@@ -94,7 +94,13 @@ AP_BUFF = Alteration("Intiative Bonus", 1.5, 1, "AP")
 
 def create_alteration(effected_stat_name:str, mult:float, duration:int) -> Alteration:
     
-    return Alteration(name=f"{mult} {effected_stat_name}", value=mult, 
+    name = ''
+    if mult < 1:
+        name = "-" + str((1 - mult) * 100) + "%"
+    else:
+        name = "+" + str((mult-1) * 100) + "%"
+    
+    return Alteration(name=f"{name} {effected_stat_name}", value=mult, 
                       duration=duration, ef_stat=effected_stat_name)
 
 def get_grade_values(grade:Alteration.Grade, values_out:dict[str,int]):

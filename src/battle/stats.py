@@ -112,7 +112,7 @@ class Stat:
         
     def __str__(self):
         return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.val_active:<4}" 
-                + f"\nCurrent Modifier - {self.multiplier:<4}"
+                + f"\nCurrent Modifier - {round(self.multiplier, 3):<4}"
                 + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
     
     ''' 
@@ -129,7 +129,7 @@ class Stat:
         
         return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
     
-    def get_all_alterations(self):
+    def get_all_alterations(self) -> list[Alteration]:
         ''' returns the list of buffs + debuffs'''
         return self.buffs + self.debuffs
     
@@ -574,6 +574,24 @@ class StatBoard:
             stats_2_str += str(stat) + "\n---------------------------\n"
         return stats_2_str
     
+    def get_all_alts_as_str(self):
+        
+        alts_2_str = ""
+        
+        alts = self.get_all_alterations()
+        cur_stat = alts[0].ef_stat
+        
+        for alt in alts:
+            
+            # divider between stat alts
+            if alt.ef_stat != cur_stat:
+                alts_2_str += "----------------------------------------------\n"
+                cur_stat = alt.ef_stat
+                
+            alts_2_str += str(alt) + "\n"
+                
+        return alts_2_str
+    
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ALTERATIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -623,6 +641,12 @@ class StatBoard:
                     print("Removed debuff: " + d.name)
                     s.debuffs.remove(d)
       
+    def get_all_alterations(self) -> list[Alteration]:
+        all_alts = []
+        for s in self.cur_stats.values():
+            for alt in s.get_all_alterations():
+                all_alts.append(alt)
+        return all_alts
                     
     def get_all_buffs(self):
         all_buffs = {}
