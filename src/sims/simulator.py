@@ -568,6 +568,8 @@ class StatManipulationSimulator(Simulator):
     def manipulate_all_stats(self, peep:BattlePeep):
         while True:
             # choose different funcs of manipulating the stat
+            #TODO: most functions require input for each stat instead of applying affect to all stats
+            # should this be the intended behavior?
             prompt = f"What would you like to do with all of {peep.name}'s stat?"
             chosen_func = self.get_choice_with_exit(self.stat_funcs, prompt=prompt) 
             
@@ -699,7 +701,7 @@ class StatManipulationSimulator(Simulator):
         
         self.obtain_number_inputs(input_form_dict=change_in, conds=conditions)
         
-        new_val = self.val + change_in['val_change']
+        new_val = stat.value + change_in['val_change']
         
         stat.set_new_vals(new_val, stat.apt)
         
