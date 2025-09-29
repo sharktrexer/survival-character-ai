@@ -1,5 +1,7 @@
 import enum
+import random
 from enum import auto
+
 
 class Alteration:
 
@@ -92,17 +94,6 @@ class Alteration:
 
 AP_BUFF = Alteration("Intiative Bonus", 1.5, 1, "AP")
 
-def create_alteration(effected_stat_name:str, mult:float, duration:int) -> Alteration:
-    
-    name = ''
-    if mult < 1:
-        name = "-" + str((1 - mult) * 100) + "%"
-    else:
-        name = "+" + str((mult-1) * 100) + "%"
-    
-    return Alteration(name=f"{name} {effected_stat_name}", value=mult, 
-                      duration=duration, ef_stat=effected_stat_name)
-
 def get_grade_values(grade:Alteration.Grade, values_out:dict[str,int]):
     
     if(grade == Alteration.Grade.LESSER):
@@ -135,20 +126,101 @@ def get_grade_info_as_str_lst():
                     ))
     return lst
 
-def create_preset_alt(effected_stat_name:str, is_buff:bool, grade:Alteration.Grade) -> Alteration:
+MAX_MULT = 3
+MIN_MULT = 0.05
+MAX_DURATION = 6  
 
-    value = {'mult': 0, 'duration': 0}
+class AlterationFactory:
     
-    get_grade_values(grade, value)
+    def create_alteration(effected_stat_name:str, mult:float, duration:int) -> Alteration:
     
-    suffix = ""
-       
-    if not is_buff:
-        value['mult'] = 1/value['mult']
-        suffix = "debuff"
-    else:
-        suffix = "buff"
+        # TODO: translating float to percents should be done by a helper class
+        name = ''
+        if mult < 1:
+            name = "-" + str(round((1 - mult) * 100, 3)) + "%"
+        else:
+            name = "+" + str(round((mult-1) * 100, 3)) + "%"
+        
+        return Alteration(name=f"{name} {effected_stat_name}", value=mult, 
+                        duration=duration, ef_stat=effected_stat_name)
     
-    return Alteration(name=f"{grade.name} {effected_stat_name} {suffix}", 
-                      value=value['mult'], duration=value['duration'], 
-                      ef_stat=effected_stat_name)
+    def create_preset_alt(effected_stat_name:str, is_buff:bool, grade:Alteration.Grade) -> Alteration:
+
+        value = {'mult': 0, 'duration': 0}
+        
+        get_grade_values(grade, value)
+        
+        suffix = ""
+        
+        if not is_buff:
+            value['mult'] = 1/value['mult']
+            suffix = "debuff"
+        else:
+            suffix = "buff"
+        
+        return Alteration(name=f"{grade.name} {effected_stat_name} {suffix}", 
+                        value=value['mult'], duration=value['duration'], 
+                        ef_stat=effected_stat_name)
+    
+    def generate_random_preset_alteration(stat_names:list[str]) -> Alteration:
+        '''
+        provided with a list of stat names, returns a completely random preset alteration
+        '''
+        # get rand stat name
+        rand_stat = random.randint(0, len(stat_names) - 1)
+        stat_name = stat_names[rand_stat]
+        
+        # rand grade
+        grades = Alteration.get_grades()
+        rand_grade = random.randint(0, len(grades) - 1)
+        grade = grades[rand_grade]
+        
+        # rand buff or debuff
+        is_buff = random.randint(0, 1)
+        
+        return AlterationFactory.create_preset_alt(effected_stat_name=stat_name, 
+                                                   is_buff=is_buff, 
+                                                   grade=grade)
+    
+    def generate_random_alteration(stat_names:list[str]) -> Alteration:
+        '''
+        provided with a list of stat names, returns a completely random alteration
+        '''
+        
+        # get a mult that is not 1
+        rand_mult = 1
+        while rand_mult == 1:
+            rand_mult = round(random.uniform(MIN_MULT, MAX_MULT), 2)
+            
+        rand_duration = random.randint(1, MAX_DURATION)
+        
+        rand_stat = random.randint(0, len(stat_names) - 1)
+        stat_name = stat_names[rand_stat]
+        
+        return AlterationFactory.create_alteration(stat_name, rand_mult, rand_duration)
+        
+    def generate_random_stat_alteration(stat_name:str) -> Alteration:
+        '''
+        provided with a stat name, creates a random alteration for that stat
+        '''
+        # get a mult that is not 1
+        rand_mult = 1
+        while rand_mult == 1:
+            rand_mult = round(random.uniform(MIN_MULT, MAX_MULT), 2)
+            
+        rand_duration = random.randint(1, MAX_DURATION)
+        
+        return AlterationFactory.create_alteration(stat_name, rand_mult, rand_duration)
+
+    def generate_random_stat_buff_or_debuff(stat_name:str, is_buff:bool) -> Alteration:
+        '''
+        provided with a stat name and bool, generates a buff/debuff with random mult and duration
+        '''
+        # get rand mult based on passed in bool
+        rand_mult = (round(random.uniform(MIN_MULT, 0.95), 2) 
+                    if not is_buff 
+                    else round(random.uniform(1.05, MAX_MULT), 2))
+            
+        rand_duration = random.randint(1, MAX_DURATION)
+        
+        return AlterationFactory.create_alteration(stat_name, rand_mult, rand_duration)

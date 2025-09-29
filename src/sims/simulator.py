@@ -10,7 +10,10 @@ from peep_data.data_reader import SIMPLE_PEEPS, PEEPS
 from battle.stats import Stat, STAT_TYPES
 from battle.battle_peep import BattlePeep
 from battle.peep_manager import PeepManager
-from battle.alteration import Alteration, get_grade_info_as_str_lst, create_preset_alt, create_alteration
+from battle.alteration import (Alteration, 
+                               AlterationFactory,
+                               get_grade_info_as_str_lst, 
+                               )
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -493,6 +496,11 @@ class StatManipulationSimulator(Simulator):
                            self.manipulate_extra_modifiers, self.manage_stat_alterations,
                            self.reset_stat_to_default]
         
+        self.create_alt_funcs = [self.create_preset_stat_alteration, 
+                     self.create_custom_stat_alteration,
+                     self.create_random_stat_alteration,
+                     self.create_an_alteration_population,]
+        
     def welcome(self):
         print(f"Welcome to the {self.name}!\n",
               "Here you can manually change the stats of a character to get a feel for",
@@ -570,7 +578,9 @@ class StatManipulationSimulator(Simulator):
                 chosen_func(peep, stat)    
                  
     def manage_every_alteration_on_peep(self, peep:BattlePeep):
-        peep_alt_fn = [self.affect_stat_alterations, self.create_random_alterations_on_peep]
+        peep_alt_fn = [self.affect_stat_alterations, 
+                       self.create_random_alterations_on_peep, 
+                       self.populate_peep_stats_with_alterations]
         if_alt_fns = [self.show_all_peep_alts, self.delete_all_peep_alts]
         
         while True:
@@ -592,12 +602,29 @@ class StatManipulationSimulator(Simulator):
         '''
         user inputs how many to make
         
-        chooses random stats and creates random alterations values or presets
+        chooses random stats and creates random alterations values
         
-        the more alterations a stat has, the less likely it will gain another random alteration
+        for 4+ creations:
+        guarantees affecting at least 3 different stats, and one buff and debuff on one stat
         '''
         print("\nNot yet implemented")
         pass
+    
+    def populate_peep_stats_with_alterations(self, peep:BattlePeep):
+        '''
+        creates 1 buff and debuff of random values for every stat
+        '''
+        for stat_name in STAT_CHOICES:
+            new_buff = AlterationFactory.generate_random_stat_buff_or_debuff(
+                stat_name=stat_name, is_buff=True)
+            
+            new_debuff = AlterationFactory.generate_random_stat_buff_or_debuff(
+                stat_name=stat_name, is_buff=False)
+            
+            peep.stats.apply_alteration(new_buff)
+            peep.stats.apply_alteration(new_debuff)
+            
+        print("Added a random buff and debuff to every stat!")
     
     def affect_stat_alterations(self, peep:BattlePeep):
         prompt = f"Which stat of {peep.name} would you like to affect alterations on?"
@@ -714,10 +741,12 @@ class StatManipulationSimulator(Simulator):
         
     def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
         
-        alt_funcs = [self.create_preset_stat_alteration, self.create_custom_stat_alteration]
-        alt_delete_funcs = [self.delete_a_stat_alteration,self.delete_all_stat_alts]
+        alt_delete_funcs = [self.delete_a_stat_alteration, self.delete_all_stat_alts]
         
         print(f"Current alterations for {peep.name}'s {stat.name}: ")
+        
+        print("Multiplier info: ")
+        print(stat.get_active_alt_info_as_str())
         
         print(stat.get_alt_info_as_str())
         
@@ -725,10 +754,10 @@ class StatManipulationSimulator(Simulator):
         
         while True:
             # dont let user delete alterations if there are none
-            applicable_alt_funcs = alt_funcs
+            applicable_alt_funcs = self.create_alt_funcs
             
             if stat.get_all_alterations() != []:
-                applicable_alt_funcs = alt_funcs + alt_delete_funcs
+                applicable_alt_funcs = self.create_alt_funcs + alt_delete_funcs
             
             alt_fn_choice = self.get_choice_with_exit(choices=applicable_alt_funcs, prompt=prompt)
             
@@ -746,14 +775,11 @@ class StatManipulationSimulator(Simulator):
             print(stat)
         
     def create_a_stat_alteration(self, peep:BattlePeep, stat:Stat):
-        create_fns = [self.create_preset_stat_alteration, 
-                      self.create_custom_stat_alteration,
-                      self.create_random_stat_alteration]
         
         prompt = f"How would you like to create an alteration for {peep.name}'s {stat.name}?"
         
         while True:
-            choice = self.get_choice_with_exit(create_fns, prompt=prompt)
+            choice = self.get_choice_with_exit(self.create_alt_funcs, prompt=prompt)
             
             if choice is None:
                 return
@@ -766,7 +792,7 @@ class StatManipulationSimulator(Simulator):
         prompt = f"Choose a preset alteration grade for {peep.name}'s {stat.name} "
         
         # grade objects with same index as stringified version for better user info
-        # when choosing
+        # when choosing in terminal
         presets = Alteration.get_grades()
         alt_info_as_str = get_grade_info_as_str_lst()
         
@@ -779,7 +805,11 @@ class StatManipulationSimulator(Simulator):
             is_a_buff = self.get_choice(["Debuff", "Buff"], prompt=prompt)  
          
         
-        new_alt = create_preset_alt(stat.name, is_buff=is_a_buff, grade=presets[grade_ind_choice])
+        new_alt = AlterationFactory.create_preset_alt(
+            stat.name, 
+            is_buff=is_a_buff, 
+            grade=presets[grade_ind_choice]
+            )
         
         peep.stats.apply_alteration(new_alt)
     
@@ -794,7 +824,10 @@ class StatManipulationSimulator(Simulator):
               'The mult value must be between 0 (exclusive) and 250 (inclusive).')
         self.obtain_number_inputs(input_form_dict=value_of, conds=conditions)
         
-        new_alt = create_alteration(stat.name, value_of['mult'], int(value_of['duration']))
+        new_alt = AlterationFactory.create_alteration(
+            stat.name, value_of['mult'], 
+            int(value_of['duration'])
+            )
         
         peep.stats.apply_alteration(new_alt)
         
@@ -804,10 +837,32 @@ class StatManipulationSimulator(Simulator):
         
         creates random custom or preset alterations
         
-        the more buffs a stat has, the higher chance of creating a buff and vice versa
+        for 2+ creations:
+        guarantees at least one buff and debuff
         '''
         print("\nNot yet implemented")
         pass
+    
+    def create_an_alteration_population(self, peep:BattlePeep, stat:Stat):
+        '''
+        adds 3 debuffs and buffs of random values to the stat
+        '''
+        generated_alts = []
+        
+        i = 0
+        while i < 6:
+            is_buff = i <= 2
+            new_alt = AlterationFactory.generate_random_stat_buff_or_debuff(
+                stat_name=stat.name, is_buff=is_buff
+                )
+            generated_alts.append(new_alt)
+            i += 1
+        
+        for alt in generated_alts:
+            peep.stats.apply_alteration(alt)
+            
+        print(f"Added 3 random buffs and debuffs each to {stat.name}!")
+            
     
     def delete_a_stat_alteration(self, peep:BattlePeep, stat:Stat):
         prompt = f"Which alteration of {peep.name}'s {stat.name} would you like to delete?"

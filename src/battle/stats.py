@@ -575,20 +575,22 @@ class StatBoard:
         return stats_2_str
     
     def get_all_alts_as_str(self):
+        '''
+        Returns a formatted string of all alterations on every stat
+        
+        EXAMPLE:
+            stat_name: alteration_mult
+            alt_name: (mult_val) | (duration)
+            etc...
+        '''
         
         alts_2_str = ""
         
-        alts = self.get_all_alterations()
-        cur_stat = alts[0].ef_stat
-        
-        for alt in alts:
-            
-            # divider between stat alts
-            if alt.ef_stat != cur_stat:
-                alts_2_str += "----------------------------------------------\n"
-                cur_stat = alt.ef_stat
-                
-            alts_2_str += str(alt) + "\n"
+        for stat in self.cur_stats.values():
+            alts_2_str += "----------------------------\n" + stat.name.upper() + ": "
+            alts_2_str += str(round(stat.get_alteration_mult(), 2)) + "\n"
+            for alt in stat.get_all_alterations():
+                alts_2_str += str(alt) + "\n"
                 
         return alts_2_str
     
