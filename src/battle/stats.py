@@ -99,8 +99,8 @@ class Stat:
         self.ex_mults = 1.0 
         
         # Alterations 
-        self.buffs = []
-        self.debuffs = []
+        self.buffs: list[Alteration] = []
+        self.debuffs: list[Alteration] = []
         
         
         #TODO: should this class have a way to point to its battlepeep owner?
@@ -255,17 +255,26 @@ class Stat:
                             RESOURCE VALUE FUNCS
     '''
     def resource_restore(self):
-        self.val_resource = self.val_active
+        self.resource_set_to_percent(1.0)
         
-    def resource_change(self, amount:int):
+    def resource_change(self, amount:int) -> bool:
+        '''
+        Returns:
+            if the resource of this stat has been depleted
+        '''
         
         self.val_resource += amount
         
         # cap
         if self.val_resource > self.val_active:
             self.val_resource = self.val_active
-        elif self.val_resource < 0:
+        elif self.val_resource <= 0:
             self.val_resource = 0
+            return True
+        return False
+    
+    def resource_set_to_percent(self, percent:float):
+        self.val_resource = int(self.val_active * percent)
     
     
     ''' 
@@ -526,10 +535,23 @@ class StatBoard:
         Reserved for stats like Hunger, Energy, Health, Stress, & Fear
     '''   
     def resource_change(self, stat_name, amount):
-        self.cur_stats[sn(stat_name)].resource_change(amount)
+        return self.cur_stats[sn(stat_name)].resource_change(amount)
     
     def resource_restore(self, stat_name):
         self.cur_stats[sn(stat_name)].resource_restore()
+        
+    def resource_is_depleted(self, stat_name):
+        return self.cur_stats[sn(stat_name)].val_resource <= 0
+    
+    def resource_set_to_percent(self, stat_name:str, percent:float):
+        
+        # caps
+        if percent < 0:
+            percent = 0   
+        elif percent > 1:
+            percent = 1
+        
+        self.cur_stats[sn(stat_name)].resource_set_to_percent(percent)
  
 #TODO: these should be in a higher level class. Statboard doesn't need to know about sleeping
     def calc_hrs_req_to_sleep(self):
@@ -617,7 +639,8 @@ class StatBoard:
         
         if recalc:
             self.cur_stats[stat_name].calc_active_value()
-        
+     
+    #TODO: needs rewrite?   
     def remove_alteration(self, alteration: Alteration):
         for s in self.cur_stats.values():
             if s.name == sn(alteration.ef_stat):
@@ -631,17 +654,12 @@ class StatBoard:
         for s in self.cur_stats.values():
             s.remove_all_alterations()
             
-    # TEMPORARY func to tick alterations.
+    # func to tick alterations while alterations only rely on turns
     def tick_alterations(self):
         for s in self.cur_stats.values():
-            for b in s.buffs:
-                if b.tick():
-                    print("Removed buff: " + b.name)
-                    s.buffs.remove(b)   
-            for d in s.debuffs:
-                if d.tick():
-                    print("Removed debuff: " + d.name)
-                    s.debuffs.remove(d)
+            for i, alt in enumerate(s.get_all_alterations()):
+                if alt.tick():
+                    s.remove_alteration(i)
       
     def get_all_alterations(self) -> list[Alteration]:
         all_alts = []

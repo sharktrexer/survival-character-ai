@@ -38,6 +38,10 @@ class Alteration:
         return [grade for grade in Alteration.Grade]
     
     def tick(self):
+        '''
+        Returns:
+            bool: if this alteration should be removed
+        '''
         self.duration_left -= 1
         return self.duration_left <= 0
         
