@@ -1,11 +1,12 @@
-'''
-Info stored representing the state of the lodge
-'''
+from activity_mechanics.resources import ResourceManager
 class Lodge:
-    def __init__(self, name, resources):
+    '''
+    Info stored representing the state of the lodge
+    '''
+    def __init__(self, name, resourcer:ResourceManager):
         self.name = name
-        self.resources = resources
-        self.locaions = []
+        self.resourcer = resourcer
+        self.locations = []
         
         
         

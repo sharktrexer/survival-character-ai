@@ -51,27 +51,6 @@ class BattlePeep():
         
         self.stats.resource_restore("ap")
         if self.gained_ap_bonus: self.stats.apply_init_ap_bonus()
-        
-        # temp print to test debuffs and buffs on one stat
-        '''
-        buffs = self.stats.get_all_buffs().values()
-        if buffs:
-            str_buffs = buffs[sn("Strength")]
-            if str_buffs:
-                print("this is my most potent strength buff: ", 
-                    self.stats.str_buffs[0],
-                    "\n",
-                    "Rest: ", *str_buffs)
-        
-        debuffs = self.stats.get_all_debuffs()
-        if debuffs:
-            str_debuffs = debuffs[sn("Strength")]
-            if str_debuffs:
-                print("this is my most potent strength debuff: ", 
-                    self.stats.str_debuffs[0],
-                    "\n",
-                    "Rest: ", *str_debuffs)
-                '''
      
      
     def end_turn(self):
@@ -86,5 +65,4 @@ class BattlePeep():
         #TODO: should battle manager handle this???
         self.init_growth = 0
         self.gained_ap_bonus = True
-        #TODO: Add energy bonus to AP value
         

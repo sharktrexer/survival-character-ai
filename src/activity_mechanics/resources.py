@@ -1,7 +1,7 @@
 from enum import Enum, auto
+from copy import deepcopy
 
-
-class ResourcesTypes(Enum):
+class ResourcesType(Enum):
     SEEDS = auto()
     INGREDIENTS = auto()
     FOOD = auto()
@@ -10,7 +10,7 @@ class ResourcesTypes(Enum):
     DEFENSE = auto()
     
 class Resource():
-    def __init__(self, r_type:ResourcesTypes, amount:int):
+    def __init__(self, r_type:ResourcesType, amount:int):
         self.type = r_type
         self.amount = amount
         
@@ -18,50 +18,43 @@ class Resource():
         return isinstance(other, Resource) and self.type == other.type
  
  
-RESOURCE_LIST = [Resource(r_type, 0) for r_type in ResourcesTypes]
+RESOURCE_LIST = [Resource(r_type, 0) for r_type in ResourcesType]
     
-    
-''' To replace resource exchanger'''
 class ResourceManager:
-    def __init__(self):
-        self.resources = RESOURCE_LIST
+    '''
+    Manages the resources owned by the lodge.
+    '''
+    def __init__(self, resources:list[Resource] = []):
+        if resources != []:
+            self.resources = {r.type: r for r in resources}
+        else:
+            self.resources = {r.type: r for r in RESOURCE_LIST}
         
-    def does_this_cover_cost(self, cost:list[Resource]):
+    def does_this_cover_cost(self, cost:list[Resource]) -> bool:
         
         """
         Determines whether the owned resources are sufficient to cover the costs.
-
-        Parameters:
-            cost (list[Resource]): A list of resources required to be consumed. 
-                Every type of resource is assumed to be represented in this list.
-
-        Returns:
-            bool: if all resources in the cost list are covered by the owned resources
         """
-
-        for i, r_cost in enumerate(cost):
-            if self.resources[i].amount < r_cost.amount:
+        
+        for r in cost:
+            if self.resources[r.type].amount < r.amount:
                 return False
         return True
     
-    def exchange(self, cost:list[Resource]):
+    def exchange(self, cost:list[Resource]) -> bool:
         """
         Exchanges resources according to the inputted cost.
-
-        Parameters:
-            owned_resources (list[Resource]): A list of resources currently owned. 
-                Every type of resource is assumed to be represented in this list.
-
-        Returns:
-            bool: if the exchange is successful.
-        """
-        temp_resources = self.resources[:]
         
-        for i, r_cost in enumerate(cost):
-            if self.resources[i].amount - r_cost.amount < 0:
+        Returns True if the exchange was successful
+        """
+        
+        temp_resources = deepcopy(self.resources)
+        
+        for r in cost:
+            if self.resources[r.type].amount < r.amount:
                 return False
-            temp_resources[i].amount -= r_cost.amount
+            temp_resources[r.type].amount -= r.amount
             
-        self.resources = temp_resources[:]
+        self.resources = deepcopy(temp_resources)
         return True
             
