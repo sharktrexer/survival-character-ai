@@ -47,12 +47,23 @@ class BattlePeep():
         pass 
     
     def turn(self):
+        # are we bleeding out?
         self.battle_handler.handle_bleeding_out()
         
+        # time has passed for alterations
         self.stats.tick_alterations()
+        
+        if self.battle_handler.stance == Peep_State.KNOCKED_OUT:
+            #TODO: extra logic for knocked out peeps
+            # currently will ignore energy bonus 
+            # could ignore getting input from ai or player
+            # perhaps trigger a flag to "help me!" and attract NPCs to help
+            return
         
         # apply energy bonus
         if self.gained_ap_bonus: self.stats.apply_init_ap_bonus()
+        
+        # restore ap value
         self.stats.resource_restore("ap")
      
      
@@ -61,9 +72,11 @@ class BattlePeep():
         self.gained_ap_bonus = False
     
     def end_battle(self):
+        # recover wih 10% health if knocked out at end of battle
         if self.battle_handler.stance == Peep_State.KNOCKED_OUT: 
             self.recover_from_battle_end()
-            
+        
+        # let battle handler know    
         self.battle_handler.end_battle()   
         
     ''' Gained extra energy from initiative calculations. 

@@ -535,6 +535,10 @@ class StatBoard:
         Reserved for stats like Hunger, Energy, Health, Stress, & Fear
     '''   
     def resource_change(self, stat_name, amount):
+        '''
+        Returns:
+            if the resource of the current stat is depleted
+        '''
         return self.cur_stats[sn(stat_name)].resource_change(amount)
     
     def resource_restore(self, stat_name):
