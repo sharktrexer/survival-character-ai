@@ -259,6 +259,10 @@ class Stat:
         
     def resource_change(self, amount:int) -> bool:
         '''
+        Adds the given amount to the resource value of this stat
+        Resource value cannot be depleted to less than 0 
+        or increased beyond the active value
+        
         Returns:
             if the resource of this stat has been depleted
         '''
@@ -545,6 +549,10 @@ class StatBoard:
         self.cur_stats[sn(stat_name)].resource_restore()
         
     def resource_is_depleted(self, stat_name):
+        '''
+        Returns:
+            if the resource of the current stat is depleted (0)
+        '''
         return self.cur_stats[sn(stat_name)].val_resource <= 0
     
     def resource_set_to_percent(self, stat_name:str, percent:float):
