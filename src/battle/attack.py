@@ -1,0 +1,27 @@
+class Attack():
+    '''
+    Given a stat to associate with and a percent of the stat to utilize,
+    a number can be returned to represent how much an attack will deal damage or heal for
+    
+    Can affect multiple targets
+    
+    Can inflict alterations or status effects
+    
+    Example:
+        Attack("Strength", 0.5) would return 50% of the strength stat of the attacker as damage to deal
+    '''
+    def __init__(self, associated_stat_name:str, 
+                 percent_of_stat_2_value:float, 
+                 is_aoe:bool,
+                 inflicting_alterations,
+                 inflicting_status_effects):
+        
+        self.percent = percent_of_stat_2_value
+        self.stat = associated_stat_name
+        self.is_aoe = is_aoe
+        self.alterations = inflicting_alterations
+        self.status_effects = inflicting_status_effects
+        
+    
+    def get_value(self, stat_val):
+        return stat_val * self.percent
