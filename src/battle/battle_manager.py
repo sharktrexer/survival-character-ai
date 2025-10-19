@@ -1,7 +1,7 @@
 from .battle_peep import BattlePeep
 
 class BattleManager():
-    def __init__(self, members:list):
+    def __init__(self, members:list[BattlePeep]):
         self.rounds = 0
         self.members = members
         self.init_anchor = 0
@@ -33,6 +33,7 @@ class BattleManager():
         self.get_anchor_init()
      
     def start_round(self):
+        #TODO: order peeps by initiative
         for peep in self.members:
             peep.start()
         
@@ -79,7 +80,8 @@ class BattleManager():
             # let peep know they have bonus
             if gain_bonus:
                 print(peep.name + " - Gained energy bonus from initiative! Growth reset :O")
-                peep.energy_bonus()
+                peep.init_growth = 0
+                peep.gained_ap_bonus = True
             
             return gain_bonus
     

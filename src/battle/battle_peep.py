@@ -1,16 +1,19 @@
 from .stats import Stat, StatBoard, sn
 from .alteration import Alteration
 from enum import Enum, auto
+from .attack import Attack
 
 ''' A version of character that is battle oriented 
 '''
 class BattlePeep():
-    def __init__(self, name: str,  stats_dict: dict):
+    def __init__(self, name: str, stats_dict: dict, move_set:list[Attack]=[]):
         self.name = name
         self.stats = StatBoard(stats_dict)
         self.battle_handler = BattleHandler()
         self.init_growth = 0
         self.gained_ap_bonus = False
+        self.is_player = False
+        self.move_set = move_set
         
     def __str__(self):
         return self.name
@@ -42,8 +45,16 @@ class BattlePeep():
         self.stats.remove_alteration(alt)
         
     def start(self):
+        '''
+        Lets this peep start their turn
+        '''
         #TODO: Add start logic
         # trigger all on start turn effects
+        if self.is_player:
+            input = 0
+        else:
+            input = 1
+        
         pass 
     
     def turn(self):
@@ -83,13 +94,6 @@ class BattlePeep():
         # let battle handler know    
         self.battle_handler.end_battle()   
         
-    ''' Gained extra energy from initiative calculations. 
-    Reset vars and obtain an energy bonus
-    '''   
-    def energy_bonus(self):
-        #TODO: should battle manager handle this???
-        self.init_growth = 0
-        self.gained_ap_bonus = True
         
     def affect_hp(self, amount:int):
         if self.stats.resource_is_depleted('hp'): 

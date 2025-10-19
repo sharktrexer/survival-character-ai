@@ -1,7 +1,7 @@
 from sims.simulator import Simulator
 
 from battle.battle_manager import BattleManager
-from battle.battle_peep import BattlePeep
+from battle.battle_peep import BattlePeep, Attack
 from battle.stats import Stat, make_stat
 
 from peep_data.data_reader import PEEPS
@@ -61,11 +61,23 @@ TEMP_ENEMIES = [
     
 ]
 
+test_attack = Attack(associated_stat_name="Strength", 
+                     percent_of_stat_2_value=0.5)
+test_heal = Attack(associated_stat_name="Recovery", 
+                     percent_of_stat_2_value=0.3)
+
 PLAYGROUND = PEEPS + TEMP_ENEMIES
 
 VALID_NAMES = [p.name for p in PLAYGROUND]
 
 peep_test_group = PEEPS[0:3]
+
+def give_battle_peeps_moves():
+    for peep in PLAYGROUND:
+        peep.move_set.append(test_attack)
+        peep.move_set.append(test_heal)
+        
+give_battle_peeps_moves()
 
 class BattleSimulator(Simulator):
     def __init__(self):
@@ -94,6 +106,7 @@ class BattleSimulator(Simulator):
               "Here you can simulate a battle between characters.",
               "There are many different things to do so have fun!")
         t.sleep(0.2)
+        #TODO: get input of who the player wants to be
         
     def toggle_init_debug(self):
         self.show_init_debug = not self.show_init_debug
@@ -189,6 +202,9 @@ class BattleSimulator(Simulator):
             print("\nThere is no one here so nothing happened...",
                   "You should add some peeps using the modify battle option.")
         return no_peeps
+    
+    def choose_player(self):
+        pass
         
 
 '''

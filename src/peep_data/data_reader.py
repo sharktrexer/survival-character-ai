@@ -12,10 +12,10 @@ MAGIC_PATH = os.getcwd() + "\\src\\peep_data\\char_magic.csv"
 MAX_STAT_VAL = 18
 
 # holds the default stats of the OG characters
-PEEPS = []
+PEEPS: list[BattlePeep] = []
 TITLES = []
 DESCS = []
-SIMPLE_PEEPS = []
+SIMPLE_PEEPS: list[Character] = []
 
 '''
 --------------------------------------------- CSV READS ---------------------------------------------

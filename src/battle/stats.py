@@ -460,20 +460,22 @@ def sn(name):
             
             
 def make_stat(name, val, apt):
-        name = sn(name).lower()
-        stat = copy.deepcopy(STAT_TYPES[name])
-        stat.apt = apt
-        stat.value = val
-        stat.apt_exp = XP_REQURED_PER_APT[stat.apt]
-        stat.calc_active_value()
-        stat.val_resource = stat.val_active
-        return stat
+    '''
+    Creates a stat object from a name, value, and aptitude
+    '''
+    name = sn(name).lower()
+    stat = copy.deepcopy(STAT_TYPES[name])
+    stat.apt = apt
+    stat.value = val
+    stat.apt_exp = XP_REQURED_PER_APT[stat.apt]
+    stat.calc_active_value()
+    stat.val_resource = stat.val_active
+    return stat
 
-def divide_resource_max_by(self, stat:Stat, divisor:int):
-        if divisor < 1:
-            return 0
-        #TODO: cast into float with 2 decimal places
-        return stat.val_active / divisor
+def divide_resource_max_by(stat:Stat, divisor:int):
+    if divisor < 1:
+        return 0
+    return round(stat.val_active / divisor, 2)
 
 ''' 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

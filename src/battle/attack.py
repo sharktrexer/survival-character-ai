@@ -12,9 +12,9 @@ class Attack():
     '''
     def __init__(self, associated_stat_name:str, 
                  percent_of_stat_2_value:float, 
-                 is_aoe:bool,
-                 inflicting_alterations,
-                 inflicting_status_effects):
+                 is_aoe:bool = False,
+                 inflicting_alterations:list=[],
+                 inflicting_status_effects:list=[]):
         
         self.percent = percent_of_stat_2_value
         self.stat = associated_stat_name
