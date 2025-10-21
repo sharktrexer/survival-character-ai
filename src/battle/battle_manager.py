@@ -47,7 +47,11 @@ class BattleManager():
         
         for peep in self.members:
             self.do_gain_bonus_AP_from_init(peep)
-            peep.turn()
+            cur_move = peep.turn()
+            value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
+            print(f'{peep.name} used {cur_move.percent} of {cur_move.stat} which is a value of {value}')
+            peep.end_turn()
+            
             
     def do_gain_bonus_AP_from_init(self, peep: BattlePeep):
         
@@ -72,18 +76,18 @@ class BattleManager():
             return False
 #~~~~~~~~ Growth Calculation      
         else:         
-            gain_bonus =  peep.init_growth >= 2 * self.init_anchor
+            do_gain_bonus =  peep.init_growth >= 2 * self.init_anchor
             
             # print init growth
             print(peep.name + " - Growth: " + str(past_growth) + " -> " + str(peep.init_growth))
             
             # let peep know they have bonus
-            if gain_bonus:
+            if do_gain_bonus:
                 print(peep.name + " - Gained energy bonus from initiative! Growth reset :O")
                 peep.init_growth = 0
                 peep.gained_ap_bonus = True
             
-            return gain_bonus
+            return do_gain_bonus
     
 
    

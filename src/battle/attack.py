@@ -22,6 +22,9 @@ class Attack():
         self.alterations = inflicting_alterations
         self.status_effects = inflicting_status_effects
         
+    def __str__(self):
+        return f"{self.percent} of {self.stat}"
+        
     
     def get_value(self, stat_val):
         return stat_val * self.percent

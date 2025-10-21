@@ -61,10 +61,18 @@ TEMP_ENEMIES = [
     
 ]
 
+def set_teams():
+    for peep in PEEPS:
+        peep.team = "peep"
+    for peep in TEMP_ENEMIES:
+        peep.team = "enemy"
+        
+set_teams()
+
 test_attack = Attack(associated_stat_name="Strength", 
-                     percent_of_stat_2_value=0.5)
+                     percent_of_stat_2_value=0.8)
 test_heal = Attack(associated_stat_name="Recovery", 
-                     percent_of_stat_2_value=0.3)
+                     percent_of_stat_2_value=0.5)
 
 PLAYGROUND = PEEPS + TEMP_ENEMIES
 

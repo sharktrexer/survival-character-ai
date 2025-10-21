@@ -1,3 +1,4 @@
+import random
 from .stats import Stat, StatBoard, sn
 from .alteration import Alteration
 from enum import Enum, auto
@@ -14,6 +15,7 @@ class BattlePeep():
         self.gained_ap_bonus = False
         self.is_player = False
         self.move_set = move_set
+        self.team = None
         
     def __str__(self):
         return self.name
@@ -50,14 +52,12 @@ class BattlePeep():
         '''
         #TODO: Add start logic
         # trigger all on start turn effects
-        if self.is_player:
-            input = 0
-        else:
-            input = 1
+
+            
         
         pass 
     
-    def turn(self):
+    def turn(self) -> Attack:
         # are we bleeding out?
         if self.battle_handler.handle_bleeding_out():
             #TODO: what happens when we dead for reals?
@@ -80,6 +80,13 @@ class BattlePeep():
         
         # restore ap value
         self.stats.resource_restore("ap")
+        
+        # get move to do
+        if self.is_player:
+            input = 0
+        else:
+            choice = random.randint(0, 1)
+            return self.move_set[choice]
      
      
     def end_turn(self):
