@@ -1,4 +1,4 @@
-from .battle_peep import BattlePeep
+from .battle_peep import BattlePeep, Attack
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
@@ -33,7 +33,7 @@ class BattleManager():
         self.get_anchor_init()
      
     def start_round(self):
-        #TODO: order peeps by initiative
+        # Does this need to be in order of initiative?
         for peep in self.members:
             peep.start()
         
@@ -45,11 +45,31 @@ class BattleManager():
         print("\nCurrent Anchor Value: |" + str(self.init_anchor) + "|")
         print("Target: |" + str(self.init_anchor*2) + "|")
         
-        for peep in self.members:
-            self.do_gain_bonus_AP_from_init(peep)
-            cur_move = peep.turn()
+        # order peep turns by initiative
+        for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
+            
+            if not peep.stats.resource_is_depleted('hp'): 
+                self.do_gain_bonus_AP_from_init(peep)
+            
+            cur_move:Attack = peep.turn(self.members)
+            # skip turn of no move
+            if cur_move is None:
+                continue
+            
             value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
-            print(f'{peep.name} used {cur_move.percent} of {cur_move.stat} which is a value of {value}')
+            print(f'{peep.name} used {cur_move.percent} of {cur_move.stat} which is a value of {value}' 
+                  + f' on {cur_move.target_names[0]}')
+            
+            # get target
+            target:BattlePeep = None
+            for member in self.members:
+                if member.name == cur_move.target_names[0]:
+                    target = member
+                    break
+            value = value if cur_move.is_heal else -value
+            target.affect_hp(value)
+            print(f'{target.name} has {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP')
+            
             peep.end_turn()
             
             

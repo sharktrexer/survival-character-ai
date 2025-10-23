@@ -58,6 +58,22 @@ TEMP_ENEMIES = [
         "hunger": make_stat("hun", 20, 0),
         "energy": make_stat("ap", 10, 0),
     }),
+    BattlePeep("Ent", {
+        "strength": make_stat("str", 10, 2),
+        "defense": make_stat("def", 20, 4),
+        "evasion": make_stat("eva", 10, 0),
+        "dexterity": make_stat("dex", 15, 1),
+        "recovery": make_stat("rec", 20, 4),
+        "intelligence": make_stat("int", 15, 3),
+        "creativity": make_stat("cre", 10, 2,),
+        "fear": make_stat("fear", 15, 2),
+        "intimidation": make_stat("itmd", 10, -1),
+        "charisma": make_stat("cha", 10, 0,),
+        "stress": make_stat("tres", 20, 4),
+        "health": make_stat("hp", 133, 3),
+        "hunger": make_stat("hun", 20, 4),
+        "energy": make_stat("ap", 8, 2),
+    }),
     
 ]
 
@@ -71,8 +87,10 @@ set_teams()
 
 test_attack = Attack(associated_stat_name="Strength", 
                      percent_of_stat_2_value=0.8)
-test_heal = Attack(associated_stat_name="Recovery", 
-                     percent_of_stat_2_value=0.5)
+test_heal = Attack(associated_stat_name="Recovery",
+                   is_for_team=True, 
+                   is_heal=True,
+                   percent_of_stat_2_value=0.5)
 
 PLAYGROUND = PEEPS + TEMP_ENEMIES
 
@@ -132,9 +150,13 @@ class BattleSimulator(Simulator):
         
     def modify_battle(self):
         
-        print("Add or remove something?")
-        do_add = bool(self.get_choice(["Remove", "Add"]))
-        verb_str = "Add" if do_add else "Remove"
+        if self.battler.members != []:
+            print("Add or remove something?")
+            do_add = bool(self.get_choice(["Remove", "Add"]))
+            verb_str = "Add" if do_add else "Remove"
+        else:
+            do_add = True
+            verb_str = "Add"
         
         #TODO: choices should have more info on char, like init, etc
         choices = VALID_NAMES if do_add else self.battler.get_member_names()

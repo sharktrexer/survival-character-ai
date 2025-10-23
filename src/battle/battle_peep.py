@@ -57,7 +57,7 @@ class BattlePeep():
         
         pass 
     
-    def turn(self) -> Attack:
+    def turn(self, battlers:list[BattlePeep]) -> Attack:
         # are we bleeding out?
         if self.battle_handler.handle_bleeding_out():
             #TODO: what happens when we dead for reals?
@@ -81,12 +81,34 @@ class BattlePeep():
         # restore ap value
         self.stats.resource_restore("ap")
         
-        # get move to do
-        if self.is_player:
-            input = 0
+        '''~~~~~~~~~~~~~~~~~~~~~~~~MOVES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+        
+        allies = [battler for battler in battlers if battler.team == self.team]
+        enemies = [battler for battler in battlers if battler.team != self.team]
+        
+        allies_max_hp = sum([ally.stats.get_stat_cur("hp").val_active for ally in allies])
+        allies_cur_hp = sum([ally.stats.get_stat_cur("hp").val_resource for ally in allies])
+        allies_hp_ratio = allies_cur_hp / allies_max_hp
+        
+        move_choice = 0
+        
+        if allies_hp_ratio > 0.5:
+            move_choice = 0
         else:
-            choice = random.randint(0, 1)
-            return self.move_set[choice]
+            move_choice = 1
+            
+        
+        move = self.move_set[move_choice]
+        targets:list[BattlePeep] = []
+        # get target
+        if move.is_for_team:
+            targets = allies
+        else:
+            targets = enemies
+            
+        the_target = targets[random.randint(0, len(targets) - 1)]
+        move.target_names = [the_target.name]
+        return move
      
      
     def end_turn(self):
@@ -124,6 +146,7 @@ class BattlePeep():
         # knock out
         if depleted:
             self.battle_handler.knock_out(self.stats.get_stat_cur('hp').val_active)
+            print(f"{self.name} has been knocked out!")
             # TODO: affect fear and/or stress. maybe hunger too?
             
     def recover_from_battle_end(self):
@@ -148,6 +171,7 @@ class BattleHandler():
         self.evasion_health = 0
         self.bleed_out = 0
         self.bleed_out_max = 0
+        self.times_knocked_down = 0
         self.status_effects = []
         self.stance = Peep_State.STANDARD
         
@@ -161,6 +185,11 @@ class BattleHandler():
         self.stance = Peep_State.KNOCKED_OUT
         self.bleed_out = max_hp
         self.bleed_out_max = max_hp
+        self.times_knocked_down += 1
+        
+        # if knocked down too many times, die lol
+        if self.times_knocked_down > 3:
+            self.die()
         
     def handle_bleeding_out(self):
         '''
@@ -175,11 +204,11 @@ class BattleHandler():
         
         # TODO: count down bleed out based on HP Apt
         # 5 rounds for Apt 0, 15 at Apt 8, 3 for Apt -4
-        
+        temp = self.bleed_out
         self.bleed_out -= self.bleed_out_max  * 0.1
-        
+        print(f"bleed out: {temp} -> {self.bleed_out}")
         if self.bleed_out <= 0:
-            self.stance = Peep_State.DEAD
+            self.die()
             
             return True
         
@@ -188,8 +217,13 @@ class BattleHandler():
     def affect_bleed_out(self, amount:int):
         '''
         Affect bleed out health by amount
+        Amount if 80% less effective if it speeds up the bleed out process
         '''
+        amount = amount if amount > 0 else amount * 0.8
+        
+        temp = self.bleed_out
         self.bleed_out += amount
+        print(f"recived dmg while bleeding: {temp} -> {self.bleed_out}")
         if self.bleed_out > self.bleed_out_max:
             self.bleed_out = self.bleed_out_max
         elif self.bleed_out <= 0:
@@ -197,7 +231,8 @@ class BattleHandler():
             
     def die(self):
         self.stance = Peep_State.DEAD
-        print(f"{self.peep.name} has died!")
+        self.times_knocked_down = 0
+        print(f"died!")
         
     def end_battle(self):
         # perhaps stance could be different if char is always flying
@@ -205,6 +240,7 @@ class BattleHandler():
         self.bleed_out = 0
         self.bleed_out_max = 0
         self.evasion_health = 0
+        self.times_knocked_down = 0
         # temp hp can potentially carry over out of battle
         
 class Inventory():
