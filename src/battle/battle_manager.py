@@ -48,6 +48,9 @@ class BattleManager():
         # order peep turns by initiative
         for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
             
+            print()
+            print(peep.get_label_as_str())
+            
             if not peep.stats.resource_is_depleted('hp'): 
                 self.do_gain_bonus_AP_from_init(peep)
             
@@ -58,7 +61,7 @@ class BattleManager():
             
             value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
             print(f'{peep.name} used {cur_move.percent} of {cur_move.stat} which is a value of {value}' 
-                  + f' on {cur_move.target_names[0]}')
+                  + f' on {cur_move.target_names[0]}', end=" ")
             
             # get target
             target:BattlePeep = None
@@ -68,7 +71,8 @@ class BattleManager():
                     break
             value = value if cur_move.is_heal else -value
             target.affect_hp(value)
-            print(f'{target.name} has {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP')
+            if not target.stats.resource_is_depleted('hp'):
+                print(f'({target.name} = {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP)')
             
             peep.end_turn()
             
@@ -92,18 +96,18 @@ class BattleManager():
             
 #~~~~~~~~ Dont show growth if there is none
         if peep.initiative() == self.init_anchor:
-            print(peep.name + " did not have growth as they are the anchor! :(")
+            #print(peep.name + " did not have growth as they are the anchor! :(")
             return False
 #~~~~~~~~ Growth Calculation      
         else:         
             do_gain_bonus =  peep.init_growth >= 2 * self.init_anchor
             
             # print init growth
-            print(peep.name + " - Growth: " + str(past_growth) + " -> " + str(peep.init_growth))
+            #print(peep.name + " - Growth: " + str(past_growth) + " -> " + str(peep.init_growth))
             
             # let peep know they have bonus
             if do_gain_bonus:
-                print(peep.name + " - Gained energy bonus from initiative! Growth reset :O")
+                #print(peep.name + " - Gained energy bonus from initiative! Growth reset :O")
                 peep.init_growth = 0
                 peep.gained_ap_bonus = True
             

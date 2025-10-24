@@ -78,7 +78,7 @@ def read_peep_magic_data():
 
 def check_peep(peep: Character):
     '''Verifies characters have the right amount of stat distribution'''
-    val_total = sum(peep.get_stat_apts().values())
+    val_total = sum(peep.get_all_stat_apts().values())
     
     # Rebecca has a special case
     val_total = MAX_STAT_VAL if peep.name == "Rebecca" and val_total == 0 else val_total
@@ -93,7 +93,7 @@ def create_simple_peeps():
     for i, bp in enumerate(PEEPS):
         check_peep(bp)
         SIMPLE_PEEPS.append(Character(bp.name, TITLES[i], DESCS[i], 
-                                bp.get_stat_apts()))
+                                bp.get_all_stat_apts()))
             
 read_peep_stat_data()
 read_peep_desc_data()

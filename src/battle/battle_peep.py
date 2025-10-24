@@ -22,8 +22,25 @@ class BattlePeep():
     
     def get_info_as_str(self):
         peep_info = self.name + ":\n"
-        peep_info += self.stats.get_stats_as_str()
+        peep_info += self.stats.get_all_stats_as_str()
         return peep_info
+    
+    def get_label_as_str(self):
+        standard_label = (f"{self.name}: "
+                + f"{self.stats.get_stat_resource('hp')}/{self.stats.get_stat_active('hp')} HP"
+                + f" {self.stats.get_stat_resource('ap')}/{self.stats.get_stat_active('ap')} AP")
+        
+        bleeding_label = (f"{self.name}: "
+                + f"{self.battle_handler.bleed_out}/{self.battle_handler.bleed_out_max} Blood")
+        
+        dead_label = f"{self.name}:DEAD"
+        
+        if self.battle_handler.stance == Peep_State.KNOCKED_OUT:
+            return bleeding_label
+        elif self.battle_handler.stance == Peep_State.DEAD:
+            return dead_label
+        else:
+            return standard_label
     
     def get_stat(self, name:str) -> Stat:
         '''
@@ -31,11 +48,11 @@ class BattlePeep():
         '''
         return self.stats.get_stat_cur(name)
     
-    def get_stat_apts(self):
-        return self.stats.get_stat_apts()
+    def get_all_stat_apts(self):
+        return self.stats.get_all_stat_apts()
     
-    def get_stat_avs(self):
-        return self.stats.get_stat_active_value
+    def get_all_stat_avs(self):
+        return self.stats.get_all_stat_active_value
      
     def initiative(self):
         return self.stats.initiative()
@@ -58,6 +75,9 @@ class BattlePeep():
         pass 
     
     def turn(self, battlers:list[BattlePeep]) -> Attack:
+        if self.battle_handler.stance == Peep_State.DEAD:
+            return
+        
         # are we bleeding out?
         if self.battle_handler.handle_bleeding_out():
             #TODO: what happens when we dead for reals?
@@ -72,7 +92,7 @@ class BattlePeep():
             # currently will ignore energy bonus 
             # could ignore getting input from ai or player
             # perhaps trigger a flag to "help me!" and attract NPCs to help
-            print(f"{self.name} was knocked out!")
+            
             return
         
         # apply energy bonus
@@ -86,16 +106,27 @@ class BattlePeep():
         allies = [battler for battler in battlers if battler.team == self.team]
         enemies = [battler for battler in battlers if battler.team != self.team]
         
-        allies_max_hp = sum([ally.stats.get_stat_cur("hp").val_active for ally in allies])
-        allies_cur_hp = sum([ally.stats.get_stat_cur("hp").val_resource for ally in allies])
-        allies_hp_ratio = allies_cur_hp / allies_max_hp
+        allies_max_hp = sum([ally.stats.get_stat_active("hp") for ally in allies])
+        allies_cur_hp = sum([ally.stats.get_stat_resource("hp") for ally in allies])
+        dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.1 for ally in allies])
+        
+        allies_hp_ratio = (allies_cur_hp / allies_max_hp) - dead_affect
         
         move_choice = 0
         
+        # more chance to heal when teammates are hurtin
         if allies_hp_ratio > 0.5:
-            move_choice = 0
+            rand = random.randint(0, 100)
+            if rand > 10:
+                move_choice = 0
+            else:
+                move_choice = 1
         else:
-            move_choice = 1
+            rand = random.randint(0, 100)
+            if rand > 30:
+                move_choice = 1
+            else:
+                move_choice = 0
             
         
         move = self.move_set[move_choice]
@@ -125,17 +156,22 @@ class BattlePeep():
         
         
     def affect_hp(self, amount:int):
+        
+        if self.battle_handler.stance == Peep_State.DEAD:
+            return
+        
+        # when bleeding out
         if self.stats.resource_is_depleted('hp'): 
-            #TODO: logic for affecting bleed out health when taking dmg
             
-            # affect bleed out
-            '''
-            when healed: increase bleed out. If bleed out hp >= max hp then set current hp equal to 
-            overflow from max_hp (minimum 1)
+            past_bleed_out = self.battle_handler.bleed_out
             
-            when recieving damage: reduce by 80%. If bleed out hp <= 0 then die
-            '''
             self.battle_handler.affect_bleed_out(amount)
+            '''
+            If bleed out hp >= max hp then set current hp equal to overflow from max_hp (minimum 1)
+            '''
+            if amount > 0 and self.battle_handler.bleed_out >= self.battle_handler.bleed_out_max:
+                restored_hp = self.battle_handler.bleed_out_max - past_bleed_out + 1
+                self.stats.resource_change('hp', restored_hp)
             
             return
         
@@ -146,7 +182,7 @@ class BattlePeep():
         # knock out
         if depleted:
             self.battle_handler.knock_out(self.stats.get_stat_cur('hp').val_active)
-            print(f"{self.name} has been knocked out!")
+            print(f"\n{self.name} has been knocked out!")
             # TODO: affect fear and/or stress. maybe hunger too?
             
     def recover_from_battle_end(self):
@@ -167,11 +203,11 @@ class Peep_State(Enum):
 ''' 
 class BattleHandler():
     def __init__(self):
-        self.temp_health = 0
-        self.evasion_health = 0
-        self.bleed_out = 0
-        self.bleed_out_max = 0
-        self.times_knocked_down = 0
+        self.temp_health:int = 0
+        self.evasion_health:int = 0
+        self.bleed_out:int = 0
+        self.bleed_out_max:int = 0
+        self.times_knocked_down:int = 0
         self.status_effects = []
         self.stance = Peep_State.STANDARD
         
@@ -180,14 +216,14 @@ class BattleHandler():
         Let BattleHandler know that peep is knocked out
         
         Args:
-            max_hp (int): max hp of peep to double to represent bleed out health
+            max_hp (int): max hp of peep to represent bleed out health
         '''
         self.stance = Peep_State.KNOCKED_OUT
         self.bleed_out = max_hp
-        self.bleed_out_max = max_hp
+        self.bleed_out_max = max_hp 
         self.times_knocked_down += 1
         
-        # if knocked down too many times, die lol
+        # if knocked down too many times, die lol!
         if self.times_knocked_down > 3:
             self.die()
         
@@ -200,13 +236,14 @@ class BattleHandler():
             bool: if peep is dead from bleeding out
         '''
         if self.stance != Peep_State.KNOCKED_OUT:
-            return
+            return False
         
         # TODO: count down bleed out based on HP Apt
         # 5 rounds for Apt 0, 15 at Apt 8, 3 for Apt -4
         temp = self.bleed_out
-        self.bleed_out -= self.bleed_out_max  * 0.1
+        self.bleed_out = int(self.bleed_out - self.bleed_out_max  * 0.1)
         print(f"bleed out: {temp} -> {self.bleed_out}")
+        
         if self.bleed_out <= 0:
             self.die()
             
@@ -215,15 +252,16 @@ class BattleHandler():
         return False
     
     def affect_bleed_out(self, amount:int):
+        '''        
+        when recieving damage: reduce by 80%. 
+        If bleed out hp <= 0 then die
         '''
-        Affect bleed out health by amount
-        Amount if 80% less effective if it speeds up the bleed out process
-        '''
-        amount = amount if amount > 0 else amount * 0.8
+        amount = amount if amount > 0 else int(amount * 0.8)
         
         temp = self.bleed_out
         self.bleed_out += amount
-        print(f"recived dmg while bleeding: {temp} -> {self.bleed_out}")
+        print(f"\nrecieved dmg while bleeding: {temp} -> {self.bleed_out}")
+        
         if self.bleed_out > self.bleed_out_max:
             self.bleed_out = self.bleed_out_max
         elif self.bleed_out <= 0:

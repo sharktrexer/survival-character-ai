@@ -1,4 +1,6 @@
+import copy
 from sims.simulator import Simulator
+from collections import defaultdict
 
 from battle.battle_manager import BattleManager
 from battle.battle_peep import BattlePeep, Attack
@@ -105,6 +107,8 @@ def give_battle_peeps_moves():
         
 give_battle_peeps_moves()
 
+peep_copy_tracker = defaultdict(int)
+
 class BattleSimulator(Simulator):
     def __init__(self):
         self.name = "Battle Simulator"
@@ -184,7 +188,17 @@ class BattleSimulator(Simulator):
             
             # get peep by name
             peep = [p for p in PLAYGROUND if p.name == peep_name][0]
+            
+            # give peep new name to differentiate it between copies
+            if do_add:
+                peep = copy.deepcopy(peep)
+                suffix = "" if peep_copy_tracker[peep.name] == 0 else f" {peep_copy_tracker[peep.name]}"
+                peep_copy_tracker[peep.name] += 1
+                peep.name = f"{peep.name}{suffix}"
+                
+                
             self.battler.change_member_list(peep, do_add)
+            
             
             # ensure updated list when removing
             if not do_add:

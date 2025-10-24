@@ -505,6 +505,12 @@ class StatBoard:
     def get_stat_mem(self, name):
         return self.mem_stats[sn(name)]
     
+    def get_stat_active(self, name):
+        return self.cur_stats[sn(name)].val_active
+    
+    def get_stat_resource(self, name):
+        return self.cur_stats[sn(name)].val_resource
+    
 
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -530,24 +536,32 @@ class StatBoard:
         '''
         Call to apply all multiplier changes to stats
         '''
+        total_mult = 1
         for change in self.mult_changes:
-            self.get_stat_cur(change.stat_name).set_extra_mult(change.mult)
+            total_mult *= change.mult
             
+        self.get_stat_cur(change.stat_name).set_extra_mult(total_mult)    
     def mults_reset(self):
         for change in self.mult_changes:
             change.mult = 1
+        self.mults_apply()
     
     '''
         Reserved for stats like Hunger, Energy, Health, Stress, & Fear
     '''   
     def resource_change(self, stat_name, amount):
         '''
+        Adds the passed in amount to the passed in stat's resource value
+        
         Returns:
             if the resource of the current stat is depleted
         '''
         return self.cur_stats[sn(stat_name)].resource_change(amount)
     
     def resource_restore(self, stat_name):
+        '''
+        Restores the passed in stat's resource value to its max value (active value)
+        '''
         self.cur_stats[sn(stat_name)].resource_restore()
         
     def resource_is_depleted(self, stat_name):
@@ -595,16 +609,16 @@ class StatBoard:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     '''
             
-    def get_stat_apts(self):
+    def get_all_stat_apts(self):
         return {stat.name: stat.apt for stat in self.cur_stats.values()}
     
-    def get_stat_active_value(self):
+    def get_all_stat_active_value(self):
         return {stat.name: stat.val_active for stat in self.cur_stats.values()}
      
     def initiative(self):
         return self.cur_stats["dexterity"].val_active + self.cur_stats["evasion"].val_active
     
-    def get_stats_as_str(self):
+    def get_all_stats_as_str(self):
         stats_2_str = ""
         for stat in self.cur_stats.values():
             stats_2_str += str(stat) + "\n---------------------------\n"
