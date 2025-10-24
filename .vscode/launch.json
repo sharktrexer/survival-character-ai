@@ -6,7 +6,7 @@
     "configurations": [
         
         {
-            "name": "Python Debugger: Main",
+            "name": "Launch Survival Game",
             "type": "debugpy",
             "request": "launch",
             "program": "src\\main.py",
