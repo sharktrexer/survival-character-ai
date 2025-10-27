@@ -7,6 +7,7 @@ class BattleManager():
         self.init_anchor = 0
         
     def get_anchor_init(self):
+        # TODO: perhaps only call this when a change is calculated 
         """ 
         Sets the anchor initiative value to the lowest initiative value among the 
         peeps. The anchor value is used to determine when a peep gains 

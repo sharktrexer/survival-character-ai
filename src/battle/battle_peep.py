@@ -112,7 +112,7 @@ class BattlePeep():
         
         allies_max_hp = sum([ally.stats.get_stat_active("hp") for ally in allies])
         allies_cur_hp = sum([ally.stats.get_stat_resource("hp") for ally in allies])
-        dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.15 for ally in allies])
+        dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.2 for ally in allies])
         
         allies_hp_ratio = (allies_cur_hp / allies_max_hp) - dead_affect
         
@@ -127,7 +127,7 @@ class BattlePeep():
                 move_choice = 1
         else:
             rand = random.randint(0, 100)
-            if rand > 50:
+            if rand > 10:
                 move_choice = 1
             else:
                 move_choice = 0
@@ -174,7 +174,7 @@ class BattlePeep():
             If bleed out hp >= max hp then set current hp equal to overflow from max_hp (minimum 1)
             '''
             if amount > 0 and self.battle_handler.bleed_out >= self.battle_handler.bleed_out_max:
-                restored_hp = self.battle_handler.bleed_out_max - past_bleed_out + 1
+                restored_hp = past_bleed_out + amount - self.battle_handler.bleed_out_max + 1
                 self.stats.resource_change('hp', restored_hp)
                 self.battle_handler.stance = Peep_State.STANDARD
             
@@ -225,13 +225,13 @@ class BattleHandler():
             max_hp (int): max hp of peep to represent bleed out health
         '''
         self.stance = Peep_State.KNOCKED_OUT
-        self.bleed_out = max_hp
         self.bleed_out_max = max_hp 
-        self.times_knocked_down += 1
         
-        # if knocked down too many times, die lol!
-        if self.times_knocked_down > 3:
-            self.die()
+        # calculate bleed out trauma
+        # reduces by 25% for each knock out, minimum 1
+        self.bleed_out = max(1, int(max_hp * (1 - 0.25 * self.times_knocked_down)))
+        
+        self.times_knocked_down += 1
         
     def handle_bleeding_out(self):
         '''
