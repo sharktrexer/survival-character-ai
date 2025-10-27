@@ -55,6 +55,10 @@ class BattlePeep():
         return self.stats.get_all_stat_active_value
      
     def initiative(self):
+        '''
+        Returns:
+            Combined active values of Dexterity and Evasion
+        '''
         return self.stats.initiative()
     
     def recieve_alt(self, alt: Alteration):
@@ -108,7 +112,7 @@ class BattlePeep():
         
         allies_max_hp = sum([ally.stats.get_stat_active("hp") for ally in allies])
         allies_cur_hp = sum([ally.stats.get_stat_resource("hp") for ally in allies])
-        dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.1 for ally in allies])
+        dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.15 for ally in allies])
         
         allies_hp_ratio = (allies_cur_hp / allies_max_hp) - dead_affect
         
@@ -123,7 +127,7 @@ class BattlePeep():
                 move_choice = 1
         else:
             rand = random.randint(0, 100)
-            if rand > 30:
+            if rand > 50:
                 move_choice = 1
             else:
                 move_choice = 0
@@ -172,6 +176,7 @@ class BattlePeep():
             if amount > 0 and self.battle_handler.bleed_out >= self.battle_handler.bleed_out_max:
                 restored_hp = self.battle_handler.bleed_out_max - past_bleed_out + 1
                 self.stats.resource_change('hp', restored_hp)
+                self.battle_handler.stance = Peep_State.STANDARD
             
             return
         
@@ -183,6 +188,7 @@ class BattlePeep():
         if depleted:
             self.battle_handler.knock_out(self.stats.get_stat_cur('hp').val_active)
             print(f"\n{self.name} has been knocked out!")
+            self.init_growth = 0
             # TODO: affect fear and/or stress. maybe hunger too?
             
     def recover_from_battle_end(self):
@@ -241,7 +247,7 @@ class BattleHandler():
         # TODO: count down bleed out based on HP Apt
         # 5 rounds for Apt 0, 15 at Apt 8, 3 for Apt -4
         temp = self.bleed_out
-        self.bleed_out = int(self.bleed_out - self.bleed_out_max  * 0.1)
+        self.bleed_out = int(self.bleed_out - self.bleed_out_max * 0.1)
         print(f"bleed out: {temp} -> {self.bleed_out}")
         
         if self.bleed_out <= 0:
@@ -256,15 +262,16 @@ class BattleHandler():
         when recieving damage: reduce by 80%. 
         If bleed out hp <= 0 then die
         '''
-        amount = amount if amount > 0 else int(amount * 0.8)
+        amount = amount if amount > 0 else int(amount * 0.2)
         
         temp = self.bleed_out
         self.bleed_out += amount
-        print(f"\nrecieved dmg while bleeding: {temp} -> {self.bleed_out}")
+        #print(f"\nrecieved dmg while bleeding: {temp} -> {self.bleed_out}")
         
         if self.bleed_out > self.bleed_out_max:
             self.bleed_out = self.bleed_out_max
         elif self.bleed_out <= 0:
+            self.bleed_out = 0
             self.die()
             
     def die(self):

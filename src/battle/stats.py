@@ -616,6 +616,9 @@ class StatBoard:
         return {stat.name: stat.val_active for stat in self.cur_stats.values()}
      
     def initiative(self):
+        '''
+        Combined active values of Dexterity and Evasion
+        '''
         return self.cur_stats["dexterity"].val_active + self.cur_stats["evasion"].val_active
     
     def get_all_stats_as_str(self):

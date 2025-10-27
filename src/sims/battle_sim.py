@@ -87,9 +87,9 @@ def set_teams():
         
 set_teams()
 
-test_attack = Attack(associated_stat_name="Strength", 
+test_attack = Attack(name="Attack", associated_stat_name="Strength", 
                      percent_of_stat_2_value=0.8)
-test_heal = Attack(associated_stat_name="Recovery",
+test_heal = Attack(name="Heal", associated_stat_name="Recovery",
                    is_for_team=True, 
                    is_heal=True,
                    percent_of_stat_2_value=0.5)
@@ -127,9 +127,7 @@ class BattleSimulator(Simulator):
         self.show_init_debug = False
         self.show_alt_debug = False
         self.debug_mode = False
-        
-    def start_round(self):
-        self.battler.start_round()
+
         
     def welcome(self):
         print(f"Welcome to the {self.name}!\n", 
@@ -159,6 +157,7 @@ class BattleSimulator(Simulator):
             do_add = bool(self.get_choice(["Remove", "Add"]))
             verb_str = "Add" if do_add else "Remove"
         else:
+            # no need to ask to remove if there are no peeps
             do_add = True
             verb_str = "Add"
         
@@ -222,8 +221,13 @@ class BattleSimulator(Simulator):
             print("[",p.name, "] with init: ", str(p.initiative()))
             
     def next_round(self):
+        
         if self.check_if_no_peeps():
             return
+        
+        if self.battler.rounds == 0:
+            self.battler.start_round()
+        
         self.battler.next_round()
         
     def reset_battle(self):

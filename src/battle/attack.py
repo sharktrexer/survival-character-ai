@@ -10,7 +10,8 @@ class Attack():
     Example:
         Attack("Strength", 0.5) would return 50% of the strength stat of the attacker as damage to deal
     '''
-    def __init__(self, associated_stat_name:str, 
+    def __init__(self, name:str,
+                 associated_stat_name:str, 
                  percent_of_stat_2_value:float, 
                  is_aoe:bool = False,
                  is_for_team:bool = False,
@@ -18,6 +19,7 @@ class Attack():
                  inflicting_alterations:list=[],
                  inflicting_status_effects:list=[]):
         
+        self.name = name
         self.percent = percent_of_stat_2_value
         self.stat = associated_stat_name
         self.is_aoe = is_aoe

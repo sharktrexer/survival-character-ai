@@ -5,18 +5,24 @@ class BattleManager():
         self.rounds = 0
         self.members = members
         self.init_anchor = 0
-        self.get_anchor_init()
         
     def get_anchor_init(self):
         """ 
         Sets the anchor initiative value to the lowest initiative value among the 
         peeps. The anchor value is used to determine when a peep gains 
         bonus AP. 
+        
+        The anchor should update when:
+        1. The fight begins
+        2. The end of a round (takes into account those who left, joined, knocked out)
         """
         if self.members == []: return 0
         
-        anchor = min(self.members, key = lambda peep: peep.initiative())
-        print("Anchor: " + anchor.name, " with init: " + str(anchor.initiative()))
+        valid_members = [peep for peep in self.members if not peep.stats.resource_is_depleted('hp')]
+        if valid_members == []: return 0
+        
+        anchor = min(valid_members, key = lambda peep: peep.initiative())
+        print("Anchor: " + anchor.name + " with init: " + str(anchor.initiative()))
         self.init_anchor = anchor.initiative()
     
     def get_member_names(self):
@@ -30,10 +36,12 @@ class BattleManager():
             print("Removed " + peep.name)
             self.members.remove(peep)
         
-        self.get_anchor_init()
+        #self.get_anchor_init()
      
     def start_round(self):
-        # Does this need to be in order of initiative?
+        self.get_anchor_init()
+        
+        #TODO: Does this need to be in order of initiative?
         for peep in self.members:
             peep.start()
         
@@ -42,8 +50,10 @@ class BattleManager():
         
         print("\n~Round " + str(self.rounds) + "~")
         
-        print("\nCurrent Anchor Value: |" + str(self.init_anchor) + "|")
-        print("Target: |" + str(self.init_anchor*2) + "|")
+        #print("\nCurrent Anchor Value: |" + str(self.init_anchor) + "|")
+        #print("Target: |" + str(self.init_anchor*2) + "|")
+        
+        
         
         # order peep turns by initiative
         for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
@@ -51,6 +61,7 @@ class BattleManager():
             print()
             print(peep.get_label_as_str())
             
+            # calc growth if unit is alive
             if not peep.stats.resource_is_depleted('hp'): 
                 self.do_gain_bonus_AP_from_init(peep)
             
@@ -60,10 +71,10 @@ class BattleManager():
                 continue
             
             value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
-            print(f'{peep.name} used {cur_move.percent} of {cur_move.stat} which is a value of {value}' 
+            print(f'{peep.name} used {cur_move.name} for {value}' 
                   + f' on {cur_move.target_names[0]}', end=" ")
             
-            # get target
+            # get target by provided name
             target:BattlePeep = None
             for member in self.members:
                 if member.name == cur_move.target_names[0]:
@@ -71,10 +82,17 @@ class BattleManager():
                     break
             value = value if cur_move.is_heal else -value
             target.affect_hp(value)
+            
+            # printing move effect
             if not target.stats.resource_is_depleted('hp'):
                 print(f'({target.name} = {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP)')
+            else:
+                print(f'({target.name} = {target.battle_handler.bleed_out}/{target.battle_handler.bleed_out_max} Bleed)')
             
             peep.end_turn()
+            
+        # update anchor after round
+        self.get_anchor_init()
             
             
     def do_gain_bonus_AP_from_init(self, peep: BattlePeep):
