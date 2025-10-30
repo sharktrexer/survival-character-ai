@@ -3,6 +3,7 @@ from .stats import Stat, StatBoard, sn
 from .alteration import Alteration
 from enum import Enum, auto
 from .attack import Attack
+from .damage import Damage
 
 ''' A version of character that is battle oriented 
 '''
@@ -110,6 +111,9 @@ class BattlePeep():
         allies = [battler for battler in battlers if battler.team == self.team]
         enemies = [battler for battler in battlers if battler.team != self.team]
         
+        allies_v = [ally for ally in allies if ally.battle_handler.stance != Peep_State.KNOCKED_OUT]
+        enemies_v = [enemy for enemy in enemies if enemy.battle_handler.stance != Peep_State.KNOCKED_OUT]
+        
         allies_max_hp = sum([ally.stats.get_stat_active("hp") for ally in allies])
         allies_cur_hp = sum([ally.stats.get_stat_resource("hp") for ally in allies])
         dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.2 for ally in allies])
@@ -137,9 +141,9 @@ class BattlePeep():
         targets:list[BattlePeep] = []
         # get target
         if move.is_for_team:
-            targets = allies
+            targets = allies_v
         else:
-            targets = enemies
+            targets = enemies_v
             
         the_target = targets[random.randint(0, len(targets) - 1)]
         move.target_names = [the_target.name]
@@ -159,7 +163,8 @@ class BattlePeep():
         self.battle_handler.end_battle()   
         
         
-    def affect_hp(self, amount:int):
+    def affect_hp(self, affect:Damage):
+        amount = affect.amount
         
         if self.battle_handler.stance == Peep_State.DEAD:
             return
@@ -182,6 +187,7 @@ class BattlePeep():
         
         # TODO: get the type of damage (using STR, DEX, etc.) and use the opposing
         # stat to resist it
+           
         depleted = self.stats.resource_change('hp', amount)
         
         # knock out
@@ -262,6 +268,7 @@ class BattleHandler():
         when recieving damage: reduce by 80%. 
         If bleed out hp <= 0 then die
         '''
+        # Should peep's stats or magic resist matter?
         amount = amount if amount > 0 else int(amount * 0.2)
         
         temp = self.bleed_out
