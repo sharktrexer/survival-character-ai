@@ -2,13 +2,12 @@ import random
 from .stats import Stat, StatBoard, sn
 from .alteration import Alteration
 from enum import Enum, auto
-from .attack import Attack
 from .damage import Damage
 
 ''' A version of character that is battle oriented 
 '''
 class BattlePeep():
-    def __init__(self, name: str, stats_dict: dict, move_set:list[Attack]=[]):
+    def __init__(self, name: str, stats_dict: dict, move_set:list[int]=[0,1]):
         self.name = name
         self.stats = StatBoard(stats_dict)
         self.battle_handler = BattleHandler()
@@ -79,7 +78,7 @@ class BattlePeep():
         
         pass 
     
-    def turn(self, battlers:list[BattlePeep]) -> Attack:
+    def turn(self, battlers:list[BattlePeep]) -> int:
         if self.battle_handler.stance == Peep_State.DEAD:
             return
         
@@ -111,9 +110,6 @@ class BattlePeep():
         allies = [battler for battler in battlers if battler.team == self.team]
         enemies = [battler for battler in battlers if battler.team != self.team]
         
-        allies_v = [ally for ally in allies if ally.battle_handler.stance != Peep_State.KNOCKED_OUT]
-        enemies_v = [enemy for enemy in enemies if enemy.battle_handler.stance != Peep_State.KNOCKED_OUT]
-        
         allies_max_hp = sum([ally.stats.get_stat_active("hp") for ally in allies])
         allies_cur_hp = sum([ally.stats.get_stat_resource("hp") for ally in allies])
         dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.2 for ally in allies])
@@ -123,6 +119,7 @@ class BattlePeep():
         move_choice = 0
         
         # more chance to heal when teammates are hurtin
+        # currently index 0 is attack and index 1 is heal
         if allies_hp_ratio > 0.5:
             rand = random.randint(0, 100)
             if rand > 10:
@@ -136,18 +133,9 @@ class BattlePeep():
             else:
                 move_choice = 0
             
+        return move_choice
+
         
-        move = self.move_set[move_choice]
-        targets:list[BattlePeep] = []
-        # get target
-        if move.is_for_team:
-            targets = allies_v
-        else:
-            targets = enemies_v
-            
-        the_target = targets[random.randint(0, len(targets) - 1)]
-        move.target_names = [the_target.name]
-        return move
      
      
     def end_turn(self):
@@ -185,8 +173,16 @@ class BattlePeep():
             
             return
         
-        # TODO: get the type of damage (using STR, DEX, etc.) and use the opposing
-        # stat to resist it
+        resisting_stat_amnt = 0
+        # get stat to resist against damage
+        if not affect.is_heal:
+            amnt_before = amount
+            resisting_stat_amnt = self.stats.get_stat_active(affect.resisting_stat)
+            resisting_stat_amnt /= 4
+            amount += resisting_stat_amnt
+            print(f"| Resisted! {amnt_before} -> {amount}", end="")
+        
+        
            
         depleted = self.stats.resource_change('hp', amount)
         

@@ -3,7 +3,7 @@ from sims.simulator import Simulator
 from collections import defaultdict
 
 from battle.battle_manager import BattleManager
-from battle.battle_peep import BattlePeep, Attack
+from battle.battle_peep import BattlePeep
 from battle.stats import Stat, make_stat
 
 from peep_data.data_reader import PEEPS
@@ -87,25 +87,11 @@ def set_teams():
         
 set_teams()
 
-test_attack = Attack(name="Attack", associated_stat_name="Strength", 
-                     percent_of_stat_2_value=0.8)
-test_heal = Attack(name="Heal", associated_stat_name="Recovery",
-                   is_for_team=True, 
-                   is_heal=True,
-                   percent_of_stat_2_value=0.5)
-
 PLAYGROUND = PEEPS + TEMP_ENEMIES
 
 VALID_NAMES = [p.name for p in PLAYGROUND]
 
 peep_test_group = PEEPS[0:3]
-
-def give_battle_peeps_moves():
-    for peep in PLAYGROUND:
-        peep.move_set.append(test_attack)
-        peep.move_set.append(test_heal)
-        
-give_battle_peeps_moves()
 
 peep_copy_tracker = defaultdict(int)
 

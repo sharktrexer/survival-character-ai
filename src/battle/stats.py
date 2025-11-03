@@ -1,6 +1,6 @@
 import copy
 
-from battle.alteration import Alteration, AP_BUFF
+from .alteration import Alteration, AP_BUFF
 #from battle.multipliers import MultChange
 
 '''
