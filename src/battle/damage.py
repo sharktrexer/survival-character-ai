@@ -1,7 +1,7 @@
 '''
 Types of damage dealt by status effects, and actions:
 
-    Physical damage: attacks with Str + other stats depending on situation, DEF resists
+    Physical damage: attacks with stat dependant on weapon type, DEF resists
     Healing: heals with Rec, HP improves
     Magical damage: attacks with Int, REC resists
     
@@ -20,9 +20,11 @@ Gear or special moves can add other stat values to any damage
 from enum import Enum, auto
 
 
-def create_dmg(ratio:int, type:Damage.DamageType):
+def create_dmg_preset(ratio:int, type:Damage.DamageType):
     '''
     Creates a specific damage object given the type
+    
+    EXCLUDES PHYSICAL
     '''
     match type:
         case Damage.DamageType.Physical:
@@ -37,6 +39,9 @@ def create_dmg(ratio:int, type:Damage.DamageType):
             return Damage(ratio, 'itmd', 'fear')
         case Damage.DamageType.Stress:
             return Damage(ratio, 'cha', 'tres')
+        
+def create_specific_phys_dmg(ratio:int, stat:str):
+    return Damage(ratio, stat, 'def')
         
 
 class Damage:
@@ -74,7 +79,10 @@ class Damage:
     def give_value(self, empowering_stat_av:int):
         '''
         Pass in empowering stat active value to store the damage amount
+        
+        Allows for an amount to have been previously set to add onto
         '''
-        self.amount = int(self.ratio * empowering_stat_av)
+        value = int(round(self.ratio * empowering_stat_av))
         if not self.is_heal:
-            self.amount *= -1 
+            value *= -1 
+        self.amount += value

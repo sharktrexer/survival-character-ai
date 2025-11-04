@@ -1,8 +1,8 @@
 import random
 from .battle_peep import BattlePeep, Peep_State
-from .battle_action import BattleAction, basic_dmg, basic_heal
+from .battle_action import BattleAction, basic_dmg, basic_heal, knife_stab
 
-temp_actions = [basic_dmg, basic_heal]
+temp_actions = [knife_stab, basic_heal]
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
