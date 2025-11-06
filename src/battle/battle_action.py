@@ -95,6 +95,24 @@ class BattleAction():
                 auged_dmg = 0
                 
             behavior.execute(user, target)
+            
+    def get_damage_per_stat(self):
+        
+        stat_2_dmg_dict = {}
+        
+        # get ratios of stats used for damage
+        # TODO: handle decreases in healing (thru dmg augs) and decreases in damage (heal augs)
+        for behavior in self.behaviors:
+            
+            if isinstance(behavior, AugmentDamage) or isinstance(behavior, DealDamage):
+                
+                if behavior.damage.empowering_stat not in stat_2_dmg_dict:
+                    stat_2_dmg_dict[behavior.damage.empowering_stat] = 0 # initialize key
+                    
+                stat_2_dmg_dict[behavior.damage.empowering_stat] += behavior.damage.ratio
+                
+        return stat_2_dmg_dict
+        
 
 basic_heal = BattleAction("Heal",[
     DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
