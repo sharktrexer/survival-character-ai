@@ -97,9 +97,19 @@ class BattleAction():
         # temporary modification of an action's behavior
         # Example: an electric glove may add a 0.1 of int DealDamage behavior to an action    
         self.behaviors_modified = copy.deepcopy(self.behaviors)
+        
+        self.action_type = self.get_action_type()
                 
     def reset_behaviors(self):
             self.behaviors_modified = copy.deepcopy(self.behaviors)
+    
+    # TODO: account for non damage dealing behaviors
+    def get_action_type(self):
+        for behavior in self.behaviors_modified:
+            if isinstance(behavior, DealDamage):
+                if behavior.damage.is_heal:
+                    return "heal"
+                return "dmg"
         
     def cast(self, user:BattlePeep, target:BattlePeep):
         
@@ -193,13 +203,5 @@ knife_stab = BattleAction("Knife Stab",[
     DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical)),
 ])
 
-negative = BattleAction("Knife Stab",[
-    AugmentDamage(create_specific_phys_dmg(0.8, 'dex')),
-    AugmentDamage(Damage(0.1, 'dex', 'def', is_heal=True)),
-    DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical)),
-])
 
-blah = negative.get_damage_per_stat()
 
-for stat in blah:
-    print(f"{stat}: {blah[stat]}")

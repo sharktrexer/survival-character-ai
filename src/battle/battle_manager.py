@@ -1,8 +1,9 @@
 import random
 from .battle_peep import BattlePeep, Peep_State
-from .battle_action import BattleAction, basic_dmg, basic_heal, knife_stab
+from .battle_action import BattleAction, basic_dmg, basic_heal, knife_stab, rat_chz
+from .battle_ai import what_do
 
-temp_actions = [knife_stab, basic_heal]
+temp_actions = [knife_stab, basic_heal, basic_dmg, rat_chz]
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
@@ -70,28 +71,14 @@ class BattleManager():
             if not peep.stats.resource_is_depleted('hp'): 
                 self.do_gain_bonus_AP_from_init(peep)
             
-            allies = [battler for battler in self.members if battler.team == peep.team]
-            enemies = [battler for battler in self.members if battler.team != peep.team]
-            
-            move_ind = peep.turn(self.members)
-            cur_move:BattleAction = temp_actions[move_ind]
-            # skip turn of no move
-            if cur_move is None:
+            peep.turn()
+           
+            if peep.stats.resource_is_depleted('hp'): 
                 continue
             
-            # only get alive peeps
-            allies_v = [ally for ally in allies if ally.battle_handler.stance != Peep_State.DEAD]
-            enemies_v = [enemy for enemy in enemies if enemy.battle_handler.stance != Peep_State.DEAD]
+            cur_move, chosen_targ = what_do(peep, self.members, temp_actions)
             
-            targets:list[BattlePeep] = []
-            # get target
-            if move_ind == 1:
-                targets = allies_v
-            else:
-                targets = enemies_v
-                
-            the_target = targets[random.randint(0, len(targets) - 1)]
-            target_name = the_target.name
+            target_name = chosen_targ.name
             
             #value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
             print(f'{peep.name} used {cur_move.name}' 

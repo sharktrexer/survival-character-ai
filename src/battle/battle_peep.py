@@ -78,7 +78,7 @@ class BattlePeep():
         
         pass 
     
-    def turn(self, battlers:list[BattlePeep]) -> int:
+    def turn(self):
         if self.battle_handler.stance == Peep_State.DEAD:
             return
         
@@ -104,40 +104,8 @@ class BattlePeep():
         
         # restore ap value
         self.stats.resource_restore("ap")
-        
-        '''~~~~~~~~~~~~~~~~~~~~~~~~MOVES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
-        
-        allies = [battler for battler in battlers if battler.team == self.team]
-        enemies = [battler for battler in battlers if battler.team != self.team]
-        
-        allies_max_hp = sum([ally.stats.get_stat_active("hp") for ally in allies])
-        allies_cur_hp = sum([ally.stats.get_stat_resource("hp") for ally in allies])
-        dead_affect = sum([int(ally.battle_handler.stance == Peep_State.KNOCKED_OUT) * 0.2 for ally in allies])
-        
-        allies_hp_ratio = (allies_cur_hp / allies_max_hp) - dead_affect
-        
-        move_choice = 0
-        
-        # more chance to heal when teammates are hurtin
-        # currently index 0 is attack and index 1 is heal
-        if allies_hp_ratio > 0.5:
-            rand = random.randint(0, 100)
-            if rand > 10:
-                move_choice = 0
-            else:
-                move_choice = 1
-        else:
-            rand = random.randint(0, 100)
-            if rand > 10:
-                move_choice = 1
-            else:
-                move_choice = 0
-            
-        return move_choice
 
-        
-     
-     
+
     def end_turn(self):
         # revert energy bonus
         self.gained_ap_bonus = False
@@ -180,10 +148,12 @@ class BattlePeep():
             resisting_stat_amnt = self.stats.get_stat_active(affect.resisting_stat)
             resisting_stat_amnt /= 4
             amount += resisting_stat_amnt
+            # don't let resisting damage heal!
+            if amount > 0:
+                amount = -1
             print(f"| Resisted! {amnt_before} -> {amount}", end="")
         
-        
-           
+        # apply damage   
         depleted = self.stats.resource_change('hp', amount)
         
         # knock out
