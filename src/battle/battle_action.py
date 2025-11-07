@@ -1,3 +1,4 @@
+import copy
 from .battle_peep import BattlePeep, Damage
 from .damage import create_dmg_preset, create_specific_phys_dmg
 from .status_effects import StatusEffect
@@ -77,11 +78,34 @@ class BattleAction():
         self.name = name
         self.behaviors = behaviors
         
+        # check that AugmentDamage(s) come before DealDamage        
+        auging = False
+        for behavior in self.behaviors:
+            if isinstance(behavior, AugmentDamage):
+                auging = True
+            elif isinstance(behavior, DealDamage):
+                auging = False
+            elif auging:
+                break
+            
+        if auging:
+            raise Exception(
+                ("AugmentDamage(s) must come before DealDamage and"
+                + " there must be a DealDamage after AugmentDamage(s)")
+                )
+        
+        # temporary modification of an action's behavior
+        # Example: an electric glove may add a 0.1 of int DealDamage behavior to an action    
+        self.behaviors_modified = copy.deepcopy(self.behaviors)
+                
+    def reset_behaviors(self):
+            self.behaviors_modified = copy.deepcopy(self.behaviors)
+        
     def cast(self, user:BattlePeep, target:BattlePeep):
         
         auged_dmg = 0
         
-        for behavior in self.behaviors:
+        for behavior in self.behaviors_modified:
             
             # grab extra damage to add to final attack
             if isinstance(behavior, AugmentDamage):
@@ -96,20 +120,56 @@ class BattleAction():
                 
             behavior.execute(user, target)
             
-    def get_damage_per_stat(self):
+    def get_damage_per_stat(self) -> dict[str, float]:
+        '''
+        Returns a dictionary of stat name to damage ratio
+        based on the damage behaviors
+        
+        Assumes that the functionalaity of AugmentDamage's {is_heal} variable opposing the 
+        DealDamage's {is_heal} variable means the Augment decreases the damage instead of increasing
+        
+        Utlized by the in game AI to make the best move decision when taking in account
+        their BattlePeep obj stats
+        
+        EXAMPLE:
+            An enemy with high Strength and Dexterity may usually choose
+            between 2 different actions that deal 0.8x of either stat.
+            
+            If they recieve a negative Strength augment of 0.1, then the Dexterity
+            action will have a higher likelyhood of being chosen
+        
+        '''
         
         stat_2_dmg_dict = {}
+        is_heal = False
         
-        # get ratios of stats used for damage
-        # TODO: handle decreases in healing (thru dmg augs) and decreases in damage (heal augs)
-        for behavior in self.behaviors:
+        for behavior in reversed(self.behaviors_modified):
             
-            if isinstance(behavior, AugmentDamage) or isinstance(behavior, DealDamage):
+            # grab the action's main damage source
+            if isinstance(behavior, DealDamage):
+                
+                # check if healing. Any augments that are opposing this value
+                # count as decreasing the damage ratio
+                is_heal = behavior.damage.is_heal
                 
                 if behavior.damage.empowering_stat not in stat_2_dmg_dict:
                     stat_2_dmg_dict[behavior.damage.empowering_stat] = 0 # initialize key
                     
                 stat_2_dmg_dict[behavior.damage.empowering_stat] += behavior.damage.ratio
+            
+            # check the augments    
+            elif isinstance(behavior, AugmentDamage):
+                
+                if behavior.damage.empowering_stat not in stat_2_dmg_dict:
+                    stat_2_dmg_dict[behavior.damage.empowering_stat] = 0 # initialize key
+                
+                # if opposing the DealDamage's goal, reduce the ratio
+                if is_heal != behavior.damage.is_heal:
+                    stat_2_dmg_dict[behavior.damage.empowering_stat] -= behavior.damage.ratio
+                else:
+                    stat_2_dmg_dict[behavior.damage.empowering_stat] += behavior.damage.ratio
+            else:
+                continue
                 
         return stat_2_dmg_dict
         
@@ -132,3 +192,14 @@ knife_stab = BattleAction("Knife Stab",[
     AugmentDamage(create_specific_phys_dmg(0.1, 'int')),
     DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical)),
 ])
+
+negative = BattleAction("Knife Stab",[
+    AugmentDamage(create_specific_phys_dmg(0.8, 'dex')),
+    AugmentDamage(Damage(0.1, 'dex', 'def', is_heal=True)),
+    DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical)),
+])
+
+blah = negative.get_damage_per_stat()
+
+for stat in blah:
+    print(f"{stat}: {blah[stat]}")
