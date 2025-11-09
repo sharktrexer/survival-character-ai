@@ -2,7 +2,7 @@
 Here will contain all move sets for all peeps
 '''
 from battle.battle_action import (BattleAction, Damage, create_dmg_preset, create_specific_phys_dmg, 
-                                  DealDamage, AugmentDamage)
+                                  DealDamage, AugmentDamage, GainEvasion)
 
 UNIVERSAL_MOVES = [
 
@@ -12,6 +12,7 @@ UNIVERSAL_MOVES = [
 
     BattleAction("Evade", -1, [
         # give evasion health
+            GainEvasion(0.3, for_self=True),
         ]),
     BattleAction("Shove", 5, [
         # set target to knocked down if conditions are met

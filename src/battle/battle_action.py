@@ -112,7 +112,39 @@ class KnockDown(Behavior):
         
         dex_success = dex > targ_eva + targ_eva_hp
         str_success = strength > targ_cur_hp + targ_def
+
+class CheckEvade(Behavior):
+    '''
+    Used to check if the target would evade whatever has this behavior
+    Automatically applied to the start of the behaviors list of an action that uses DealDamage
+    '''
+    def __init__(self):
+        self.for_self = False
         
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        '''
+        Returns if target used evasion health to evade attack
+        '''
+        super().execute(user, target)
+        
+        return target.try_to_evade(user)
+        
+class GainEvasion(Behavior):
+    '''
+    Target gains evasion health based on their EVA x passed in multiplier 
+    '''
+    def __init__(self, eva_mult, for_self:bool = False):
+        super().__init__(for_self)    
+        self.eva_mult = eva_mult
+        
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        super().execute(user, target)
+        
+        amount = target.stats.get_stat_active("eva") * self.eva_mult
+        
+        target.change_evasion_health(amount)
+        
+     
 class ApplyStatusEfct(Behavior):
     def __init__(self, stat_effect:StatusEffect, for_self:bool = False):
         super().__init__(for_self)
@@ -139,14 +171,18 @@ class BattleAction():
         self.ap = ap_cost
         self.flexible = self.get_ap_flexibility()
         self.behaviors = behaviors
+        self.evadable = False
         
-        # check that AugmentDamage(s) come before DealDamage        
+        # check that AugmentDamage(s) come before DealDamage  
+        # also while we're checking, if there is a DealDamage then this action is evadable      
         auging = False
         for behavior in self.behaviors:
             if isinstance(behavior, AugmentDamage):
                 auging = True
             elif isinstance(behavior, DealDamage):
                 auging = False
+                self.evadable = True
+                self.behaviors.insert(0, CheckEvade())
             elif auging:
                 break
             
@@ -182,7 +218,14 @@ class BattleAction():
         
         auged_dmg = 0
         
+        # TODO: if ap flexible, cast for as many times as Ap used
         for behavior in self.behaviors_modified:
+            
+            # check if the target would evade this attack
+            if isinstance(behavior, CheckEvade):
+                # stop cast if evaded
+                if behavior.execute(user, target):
+                    return
             
             # grab extra damage to add to final attack
             if isinstance(behavior, AugmentDamage):
@@ -196,6 +239,12 @@ class BattleAction():
                 auged_dmg = 0
                 
             behavior.execute(user, target)
+            
+    def cast_aoe(self, user:BattlePeep, targets:list[BattlePeep]):
+        # TODO: raise error if this is not an aoe move
+        # TODO: check for self_only behaviors and only apply them once instead of for every target
+        for target in targets:
+            self.cast(user, target)
             
     def get_damage_per_stat(self) -> dict[str, float]:
         '''

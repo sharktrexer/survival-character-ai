@@ -125,6 +125,27 @@ class BattlePeep():
         # let battle handler know    
         self.battle_handler.end_battle()   
         
+    def try_to_evade(self, attacker:BattlePeep):
+        '''
+        Returns:
+            If attack is dodged
+        '''
+        if self.battle_handler.evasion_health <= 0:
+            return False
+        
+        # deal with evasion health
+        # decide if this peep wants to evade
+        evade_hp_dmg = attacker.stats.get_stat_active('dex') * -1
+        past_evade_hp = self.battle_handler.evasion_health
+        
+        self.change_evasion_health(evade_hp_dmg)
+        
+        if past_evade_hp - evade_hp_dmg >= 0:
+            # ignore attack if evasion health fully absorbed attack
+            return True
+        
+        return False
+        
         
     def affect_hp(self, affect:Damage):
         amount = affect.amount
@@ -173,6 +194,13 @@ class BattlePeep():
     def recover_from_battle_end(self):
         self.stats.resource_set_to_percent('hp', 0.1)
         #TODO: is anything else needed?
+        
+    def change_evasion_health(self, amount:int):
+        self.battle_handler.evasion_health += amount
+        
+        # cap
+        if self.battle_handler.evasion_health < 0:
+            self.battle_handler.evasion_health = 0
  
  
 class Peep_State(Enum):
