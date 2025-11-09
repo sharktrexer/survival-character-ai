@@ -181,8 +181,10 @@ class BattleAction():
                 auging = True
             elif isinstance(behavior, DealDamage):
                 auging = False
+                # only insert CheckEvade once
+                if not self.evadable:
+                    self.behaviors.insert(0, CheckEvade())
                 self.evadable = True
-                self.behaviors.insert(0, CheckEvade())
             elif auging:
                 break
             
