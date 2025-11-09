@@ -1,0 +1,85 @@
+SCENARIOS
+
+    is_dancing (continue to dance or do something else)
+    is_grappling (continue punching, protect against evade, or finish)
+    is_blocking (use it for incoming attack or not)
+    is_evading (use it for incoming attack or not)
+    
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LEGEND
+
+    <^> = Added move types in hard mode
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TEMPLATE
+    !!!!!!!!!!  !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    No Different Personality
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Desperate
+    !!!!!!!!!! - HUN !!!!!!!!!!
+    > Scrappy and good at raids. 
+    / Prioritize High HP/HUN enemies | Other Desperate allies
+    Regular
+        [Offensive, Status Effect, Gauge Effect] <^> [Alert, Alterations]
+    Team Failing
+        [Offensive] <^> [Alert]
+    Team Suceeding
+        [Offensive, Gauge Effect] <^> [Alterations]
+    No Different Personality
+        [Status Effect, Offensive] <^> [Alert]
+    Critical Health
+        [Gauge Effect] <^> [Alterations]
+    Prioritized Target Found (target with 3x more HP than self)
+        [Status Effect, Gauge Effect] <^> [Alterations]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Privileged
+    !!!!!!!!!! + HUN !!!!!!!!!!
+    > Enjoy indirect combat, letting others do the work. Selfish. 
+    / Prioritize High REC/STR enemies | high creativity allies
+    Regular
+        [Heal, Alert, Command] <^> [Defensive, Offensive]
+    Team Failing
+        [Heal] <^> [Defensive]
+    Team Suceeding
+        [Command] <^> [Offensive]
+    No Different Personality
+        [Alert] <^> [Defensive, Offensive]
+    Critical Health
+        [Heal, Command] <^> [Defensive]
+    If alongside Desperate
+        [Command] <^> [Defensive]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Go Getter
+    !!!!!!!!!! + AP !!!!!!!!!!
+    > Great Team Player. 
+    / Prioritizes low AP enemies | positive stat personality allies
+    Regular
+        [Offensive, Defensive, Heal] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    No Different Personality
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []

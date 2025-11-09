@@ -50,8 +50,68 @@ class AugmentDamage(Behavior):
         
         print(f"Augment: {self.damage.amount} ({self.damage.ratio}/{self.damage.empowering_stat})",
               end=' ')
+
+class ChangeState(Behavior):
+    def __init__(self, state, for_self:bool = False):
+        super().__init__(for_self)
         
+        self.state = state
         
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        super().execute(user, target)
+        
+        target.change_state(self.state)
+ 
+class Condition(Behavior):
+    def __init__(self, is_and:bool = False, for_self:bool = False):
+        super().__init__(for_self)
+        
+        self.AND = is_and # this condition and the previous conditions must be met
+        self.met = False
+        
+        '''
+        Accept special language for conditions
+        
+        Knockdown example:
+            condition = user str * 1.5 > (targ current HP / 2) + targ current health ratio * targ Def
+                = u.str * 1.5 > t.cur_hp / 2 + t.hp_ratio * t.def
+            condition = user dex > targ current health ratio * targ Eva + (targ evade health / 4)
+                = u.dex > t.hp_ratio * t.eva + (t.eva_hp / 4)
+        '''
+        
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        super().execute(user, target)
+        
+class KnockDown(Behavior):
+    '''
+    Break down into
+    Condition
+    Effect
+    Condition
+    Effect
+    '''
+    def __init__(self, for_self:bool = False):
+        super().__init__(for_self)
+        
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        '''
+        Knocks down target if:
+        1.5x STR to be more than target's (current HP / 2) + current health ratio * Def
+        Dex to be greater than target's current health ratio * EVA + (Evade Health / 4)
+        '''
+        super().execute(user, target)        
+        
+        strength = user.stats.get_stat_active("str") * 1.5
+        dex = user.stats.get_stat_active("dex")
+        
+        targ_cur_hp = target.stats.get_stat_resource("hp") // 2
+        targ_hp_ratio = target.stats.get_stat_resource("hp") // target.stats.get_stat_active("hp")
+        targ_def = target.stats.get_stat_active("def") * targ_hp_ratio
+        targ_eva = target.stats.get_stat_active("eva") * targ_hp_ratio
+        targ_eva_hp = target.battle_handler.evasion_health // 4
+        
+        dex_success = dex > targ_eva + targ_eva_hp
+        str_success = strength > targ_cur_hp + targ_def
         
 class ApplyStatusEfct(Behavior):
     def __init__(self, stat_effect:StatusEffect, for_self:bool = False):
@@ -74,8 +134,10 @@ class ApplyAlteration(Behavior):
         target.recieve_alt(self.alteration)
         
 class BattleAction():
-    def __init__(self, name:str, behaviors:list[Behavior]):
+    def __init__(self, name:str, ap_cost:int, behaviors:list[Behavior]):
         self.name = name
+        self.ap = ap_cost
+        self.flexible = self.get_ap_flexibility()
         self.behaviors = behaviors
         
         # check that AugmentDamage(s) come before DealDamage        
@@ -99,6 +161,11 @@ class BattleAction():
         self.behaviors_modified = copy.deepcopy(self.behaviors)
         
         self.action_type = self.get_action_type()
+    
+    def get_ap_flexibility(self):
+        if self.ap_cost < 0:
+            return True
+        return False
                 
     def reset_behaviors(self):
             self.behaviors_modified = copy.deepcopy(self.behaviors)

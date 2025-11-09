@@ -277,6 +277,19 @@ class Stat:
             return True
         return False
     
+    def resource_change_unlimited(self, amount:int):
+        '''
+        Adds the given amount to the resource value of this stat
+        Resource value can be increased beyond the active value
+        
+        Error:
+            if amount is less than 0, negative resource is not allowed!
+        '''
+        if amount < 0:
+            raise ValueError("Amount must be greater than 0 if using unlimited resource change")
+        
+        self.val_resource += amount
+    
     def resource_set_to_percent(self, percent:float):
         self.val_resource = int(self.val_active * percent)
     
@@ -558,6 +571,14 @@ class StatBoard:
         '''
         return self.cur_stats[sn(stat_name)].resource_change(amount)
     
+    def resource_change_uncapped(self, stat_name, amount):
+        '''
+        Adds the passed in amount to the passed in stat's resource value
+        
+        Can break the resource cap set by the active value
+        '''
+        self.cur_stats[sn(stat_name)].resource_change_unlimited(amount)    
+
     def resource_restore(self, stat_name):
         '''
         Restores the passed in stat's resource value to its max value (active value)

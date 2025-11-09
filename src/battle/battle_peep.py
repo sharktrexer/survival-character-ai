@@ -35,7 +35,7 @@ class BattlePeep():
         
         dead_label = f"{self.name}:DEAD"
         
-        if self.battle_handler.stance == Peep_State.KNOCKED_OUT:
+        if self.battle_handler.stance == Peep_State.BLEEDING_OUT:
             return bleeding_label
         elif self.battle_handler.stance == Peep_State.DEAD:
             return dead_label
@@ -91,7 +91,7 @@ class BattlePeep():
         # time has passed for alterations
         self.stats.tick_alterations()
         
-        if self.battle_handler.stance == Peep_State.KNOCKED_OUT:
+        if self.battle_handler.stance == Peep_State.BLEEDING_OUT:
             #TODO: extra logic for knocked out peeps
             # currently will ignore energy bonus 
             # could ignore getting input from ai or player
@@ -99,11 +99,18 @@ class BattlePeep():
             
             return
         
+        # ap roll over, leftover ap below or equal to 50% of max ap is rolled over
+        rollover = min(self.stats.get_stat_active("ap") // 2, 
+                      self.stats.get_stat_resource("ap"))
+        
         # apply energy bonus
         if self.gained_ap_bonus: self.stats.apply_init_ap_bonus()
         
         # restore ap value
         self.stats.resource_restore("ap")
+        
+        # apply rollover
+        self.stats.resource_change_uncapped("ap", rollover)
 
 
     def end_turn(self):
@@ -112,7 +119,7 @@ class BattlePeep():
     
     def end_battle(self):
         # recover wih 10% health if knocked out at end of battle
-        if self.battle_handler.stance == Peep_State.KNOCKED_OUT: 
+        if self.battle_handler.stance == Peep_State.BLEEDING_OUT: 
             self.recover_from_battle_end()
         
         # let battle handler know    
@@ -158,7 +165,7 @@ class BattlePeep():
         
         # knock out
         if depleted:
-            self.battle_handler.knock_out(self.stats.get_stat_cur('hp').val_active)
+            self.battle_handler.start_bleeding_out(self.stats.get_stat_cur('hp').val_active)
             print(f"\n{self.name} has been knocked out!")
             self.init_growth = 0
             # TODO: affect fear and/or stress. maybe hunger too?
@@ -173,7 +180,8 @@ class Peep_State(Enum):
     FLYING = auto()
     PRONE = auto()
     HANGING = auto()
-    KNOCKED_OUT = auto()
+    BLEEDING_OUT = auto()
+    KNOCKED_DOWN = auto()
     DEAD = auto()
         
 '''
@@ -182,6 +190,7 @@ class Peep_State(Enum):
 class BattleHandler():
     def __init__(self):
         self.temp_health:int = 0
+        self.defense_health:int = 0
         self.evasion_health:int = 0
         self.bleed_out:int = 0
         self.bleed_out_max:int = 0
@@ -189,14 +198,16 @@ class BattleHandler():
         self.status_effects = []
         self.stance = Peep_State.STANDARD
         
-    def knock_out(self, max_hp:int):
+    def start_bleeding_out(self, max_hp:int):
         '''
         Let BattleHandler know that peep is knocked out
         
         Args:
             max_hp (int): max hp of peep to represent bleed out health
         '''
-        self.stance = Peep_State.KNOCKED_OUT
+        self.defense_health = 0
+        
+        self.stance = Peep_State.BLEEDING_OUT
         self.bleed_out_max = max_hp 
         
         # calculate bleed out trauma
@@ -213,11 +224,9 @@ class BattleHandler():
         Returns:
             bool: if peep is dead from bleeding out
         '''
-        if self.stance != Peep_State.KNOCKED_OUT:
+        if self.stance != Peep_State.BLEEDING_OUT:
             return False
         
-        # TODO: count down bleed out based on HP Apt
-        # 5 rounds for Apt 0, 15 at Apt 8, 3 for Apt -4
         temp = self.bleed_out
         self.bleed_out = int(self.bleed_out - self.bleed_out_max * 0.1)
         print(f"bleed out: {temp} -> {self.bleed_out}")
@@ -258,6 +267,7 @@ class BattleHandler():
         self.bleed_out = 0
         self.bleed_out_max = 0
         self.evasion_health = 0
+        self.defense_health = 0
         self.times_knocked_down = 0
         # temp hp can potentially carry over out of battle
         
