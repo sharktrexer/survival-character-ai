@@ -1,4 +1,5 @@
 import copy
+from typing import Callable
 from .battle_peep import BattlePeep, Damage
 from .damage import create_dmg_preset, create_specific_phys_dmg
 from .status_effects import StatusEffect
@@ -19,7 +20,6 @@ class Behavior:
         '''
         if self.for_self:
             target = user
-    
     
 class DealDamage(Behavior):
     def __init__(self, damage:Damage, for_self:bool = False):
@@ -63,55 +63,33 @@ class ChangeState(Behavior):
         target.change_state(self.state)
  
 class Condition(Behavior):
-    def __init__(self, is_and:bool = False, for_self:bool = False):
-        super().__init__(for_self)
+    '''
+    Stores a function that uses self and target to provide condition logic
+    If true is returned, the next none-condition behavior is executed
+    Otherwise, move on to next next none-condition behavior
+    
+    Multiple Conditions can be built upon one another to create a more complex one
+        Start list with a Condition with AND = False, then the rest of the conditions
+        with AND = True if you want stacking conditions, or AND = False if you want any
+        one of the conditions to be met
         
-        self.AND = is_and # this condition and the previous conditions must be met
+    To fail action, set ABORT = True and not meeting this condition will cause cast to do nothing
+        WARNING: take into account that any behaviors listed before this will still be executed
+    '''
+    def __init__(self, cond_func:Callable[[BattlePeep, BattlePeep],bool], AND:bool = False,
+                 ABORT:bool = False, ):
+        self.cond_func = cond_func  
+        
         self.met = False
         
-        '''
-        Accept special language for conditions
+        self.AND = AND # if true, previous conditions must also be met
         
-        Knockdown example:
-            condition = user str * 1.5 > (targ current HP / 2) + targ current health ratio * targ Def
-                = u.str * 1.5 > t.cur_hp / 2 + t.hp_ratio * t.def
-            condition = user dex > targ current health ratio * targ Eva + (targ evade health / 4)
-                = u.dex > t.hp_ratio * t.eva + (t.eva_hp / 4)
-        '''
+        self.ABORT = ABORT # if condition isnt met, cast fails
+        
         
     def execute(self, user:BattlePeep, target:BattlePeep):
-        super().execute(user, target)
-        
-class KnockDown(Behavior):
-    '''
-    Break down into
-    Condition
-    Effect
-    Condition
-    Effect
-    '''
-    def __init__(self, for_self:bool = False):
-        super().__init__(for_self)
-        
-    def execute(self, user:BattlePeep, target:BattlePeep):
-        '''
-        Knocks down target if:
-        1.5x STR to be more than target's (current HP / 2) + current health ratio * Def
-        Dex to be greater than target's current health ratio * EVA + (Evade Health / 4)
-        '''
-        super().execute(user, target)        
-        
-        strength = user.stats.get_stat_active("str") * 1.5
-        dex = user.stats.get_stat_active("dex")
-        
-        targ_cur_hp = target.stats.get_stat_resource("hp") // 2
-        targ_hp_ratio = target.stats.get_stat_resource("hp") // target.stats.get_stat_active("hp")
-        targ_def = target.stats.get_stat_active("def") * targ_hp_ratio
-        targ_eva = target.stats.get_stat_active("eva") * targ_hp_ratio
-        targ_eva_hp = target.battle_handler.evasion_health // 4
-        
-        dex_success = dex > targ_eva + targ_eva_hp
-        str_success = strength > targ_cur_hp + targ_def
+        return self.cond_func(user, target)
+    
 
 class CheckEvade(Behavior):
     '''
@@ -219,6 +197,7 @@ class BattleAction():
     def cast(self, user:BattlePeep, target:BattlePeep):
         
         auged_dmg = 0
+        cur_cond = False
         
         # TODO: if ap flexible, cast for as many times as Ap used
         for behavior in self.behaviors_modified:
@@ -228,6 +207,21 @@ class BattleAction():
                 # stop cast if evaded
                 if behavior.execute(user, target):
                     return
+            
+            # check if conditions are met    
+            if isinstance(behavior, Condition):
+                cur_cond = (cur_cond and behavior.execute(user, target) 
+                if behavior.AND 
+                else cur_cond or behavior.execute(user, target)
+                )
+                
+                # stop cast if abort condition fails
+                if not cur_cond and behavior.ABORT:
+                    return
+                
+                continue
+            elif not cur_cond:
+                continue
             
             # grab extra damage to add to final attack
             if isinstance(behavior, AugmentDamage):
