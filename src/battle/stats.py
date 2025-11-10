@@ -216,7 +216,7 @@ class Stat:
         # Alteration multiplier
         self.multiplier *= self.get_alteration_mult()
         
-        final_val = int(self.value * self.multiplier)
+        final_val = int(round(self.value * self.multiplier))
         
         # active value can't be less than 1
         self.val_active = final_val if final_val > 1 else 1
@@ -629,6 +629,10 @@ class StatBoard:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     '''
+    
+    def get_resource_ratio(self, stat_name:str) -> float:
+        stat = self.cur_stats[sn(stat_name)]
+        return stat.val_resource / stat.val_active
             
     def get_all_stat_apts(self):
         return {stat.name: stat.apt for stat in self.cur_stats.values()}

@@ -1,6 +1,6 @@
 import copy
 from typing import Callable
-from .battle_peep import BattlePeep, Damage
+from .battle_peep import BattlePeep, Damage, Peep_State
 from .damage import create_dmg_preset, create_specific_phys_dmg
 from .status_effects import StatusEffect
 from .alteration import Alteration
@@ -14,12 +14,13 @@ class Behavior:
     
     def execute(self, user:BattlePeep, target:BattlePeep):
         '''
-        Sets target to user if this behavior is for self
+        Returns target to user if this behavior is for self
         
         Doesn't do anything else
         '''
         if self.for_self:
-            target = user
+            return user
+        return target
     
 class DealDamage(Behavior):
     def __init__(self, damage:Damage, for_self:bool = False):
@@ -27,15 +28,25 @@ class DealDamage(Behavior):
         self.damage = damage
         
     def execute(self, user:BattlePeep, target:BattlePeep):
-        super().execute(user, target)
+        target = super().execute(user, target)
         
         self.damage.give_value(user.stats.get_stat_active(self.damage.empowering_stat))
+        
+        print(f"HIT: {self.damage.amount} (+{self.damage.ratio}/{self.damage.empowering_stat})",
+              end=' ')
         
         target.affect_hp(self.damage)
         
         self.damage.amount = 0
         
 class AugmentDamage(Behavior):
+    '''
+    Comes before a DealDamage to augment the damage value
+    
+    Used to apply extra damage to an attack through addition than a separate damage attempt
+    
+    Inserting into lists will be done before the first DealDamage
+    '''
     def __init__(self, damage:Damage, for_self:bool = False):
         super().__init__(for_self)
         self.damage = damage
@@ -44,7 +55,7 @@ class AugmentDamage(Behavior):
         # reset previous give value
         self.damage.amount = 0
         
-        super().execute(user, target)
+        target = super().execute(user, target)
         
         self.damage.give_value(user.stats.get_stat_active(self.damage.empowering_stat))
         
@@ -52,44 +63,15 @@ class AugmentDamage(Behavior):
               end=' ')
 
 class ChangeState(Behavior):
-    def __init__(self, state, for_self:bool = False):
+    def __init__(self, state:Peep_State, for_self:bool = False):
         super().__init__(for_self)
         
         self.state = state
         
     def execute(self, user:BattlePeep, target:BattlePeep):
-        super().execute(user, target)
+        target = super().execute(user, target)
         
         target.change_state(self.state)
- 
-class Condition(Behavior):
-    '''
-    Stores a function that uses self and target to provide condition logic
-    If true is returned, the next none-condition behavior is executed
-    Otherwise, move on to next next none-condition behavior
-    
-    Multiple Conditions can be built upon one another to create a more complex one
-        Start list with a Condition with AND = False, then the rest of the conditions
-        with AND = True if you want stacking conditions, or AND = False if you want any
-        one of the conditions to be met
-        
-    To fail action, set ABORT = True and not meeting this condition will cause cast to do nothing
-        WARNING: take into account that any behaviors listed before this will still be executed
-    '''
-    def __init__(self, cond_func:Callable[[BattlePeep, BattlePeep],bool], AND:bool = False,
-                 ABORT:bool = False, ):
-        self.cond_func = cond_func  
-        
-        self.met = False
-        
-        self.AND = AND # if true, previous conditions must also be met
-        
-        self.ABORT = ABORT # if condition isnt met, cast fails
-        
-        
-    def execute(self, user:BattlePeep, target:BattlePeep):
-        return self.cond_func(user, target)
-    
 
 class CheckEvade(Behavior):
     '''
@@ -103,7 +85,6 @@ class CheckEvade(Behavior):
         '''
         Returns if target used evasion health to evade attack
         '''
-        super().execute(user, target)
         
         return target.try_to_evade(user)
         
@@ -116,12 +97,24 @@ class GainEvasion(Behavior):
         self.eva_mult = eva_mult
         
     def execute(self, user:BattlePeep, target:BattlePeep):
-        super().execute(user, target)
+        target = super().execute(user, target)
         
-        amount = target.stats.get_stat_active("eva") * self.eva_mult
+        amount = int(round(target.stats.get_stat_active("eva") * self.eva_mult))
         
         target.change_evasion_health(amount)
         
+
+class ReduceEvasionHealth(Behavior):
+    def __init__(self, percent:float, for_self:bool = False):
+        super().__init__(for_self)
+        self.percent = percent
+        
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        target = super().execute(user, target)
+        
+        eva_hp = target.battle_handler.evasion_health
+        
+        target.change_evasion_health(-int(eva_hp * self.percent))
      
 class ApplyStatusEfct(Behavior):
     def __init__(self, stat_effect:StatusEffect, for_self:bool = False):
@@ -129,7 +122,7 @@ class ApplyStatusEfct(Behavior):
         self.stat_effect = stat_effect
         
     def execute(self, user:BattlePeep, target:BattlePeep):
-        super().execute(user, target)
+        target = super().execute(user, target)
         
         target.status_effects.append(self.stat_effect)
         
@@ -140,9 +133,115 @@ class ApplyAlteration(Behavior):
         self.alteration = alteration        
         
     def execute(self, user:BattlePeep, target:BattlePeep):
-        super().execute(user, target)
+        target = super().execute(user, target)
         target.recieve_alt(self.alteration)
+
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Conditions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~''' 
+ 
+class Condition(Behavior):
+    '''
+    Stores a function that uses self and target to provide condition logic
+    If true is returned, the next behaviors are executed until another condition changes boolean
+    Otherwise, ignore all non-condition behaviors until next condition behavior
+    
+    Multiple Conditions can be built upon one another to create a more complex one
+        AND = True if you want stacking conditions, or AND = False if you want any
+        one of the conditions to be met. Mix and match as desired
         
+        
+        Remember: more conditions doesn't equal more fun
+    '''
+    def __init__(self, cond_func:Callable[[BattlePeep, BattlePeep],bool], AND:bool = False):
+        self.cond_func = cond_func  
+        
+        self.met = False
+        
+        self.AND = AND # if true, previous condition must also be met
+        
+        self.cur_cond = True 
+        # what the current state of the condition is on action
+        # set when batle action finds this in list
+        
+        
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        return self.cond_func(user, target)
+    
+class ReverseCondition(Condition):
+    '''
+    Assumes self.cur_cond is already set
+    
+    Will return the opposite of cur_cond
+    '''
+    def __init__(self):
+        self.cond_func = None
+        
+    def execute(self, user, target):
+        return not self.cur_cond
+
+class YesCondition(Condition):
+    '''
+    Always returns True
+    
+    Useful for adding behaviors to the end of the action without 
+    worrying about previous conditions
+    '''
+    def __init__(self):
+        self.cond_func = None
+        self.AND = False
+        
+    def execute(self, user, target):
+        return True
+
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Flags ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~''' 
+
+class Flag(Behavior):
+    '''
+    Used to flag hard coded decisions a battle action may make
+    
+    No functionality otherwise
+    
+    Helpful for working with Conditions
+    '''
+    def __init__(self):
+        self.flag = True
+        
+    def execute(self, user, target):
+        return
+    
+class ABORT(Flag):
+    '''
+    Used to cancel an action.
+    All conditions before it will be executed
+    All conditions after will not
+    '''
+    def __init__(self):
+        super().__init__()
+        
+class UNEVADABLE(Flag):
+    '''
+    Marks an action as unevadable, even if it has a DealDamage behavior
+    
+    Useful if the action wants to decide when to CheckEvade 
+    '''
+    def __init__(self):
+        super().__init__()
+        
+class AUGMENT_HERE(Flag):
+    '''
+    Mark where specifically an action can have augments added on the behavior list
+    
+    See AugmentDamage for default insertion logic
+    '''
+    def __init__(self):
+        super().__init__()
+
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Battle Action ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~''' 
 class BattleAction():
     def __init__(self, name:str, ap_cost:int, behaviors:list[Behavior]):
         self.name = name
@@ -150,21 +249,25 @@ class BattleAction():
         self.flexible = self.get_ap_flexibility()
         self.behaviors = behaviors
         self.evadable = False
+        self.unevadable = False
         
         # check that AugmentDamage(s) come before DealDamage  
-        # also while we're checking, if there is a DealDamage then this action is evadable      
+        # also while we're checking, if there is a DealDamage then this action is evadable
+        # unless it is unevadable through behavior flag      
         auging = False
         for behavior in self.behaviors:
             if isinstance(behavior, AugmentDamage):
                 auging = True
+            elif isinstance(behavior, UNEVADABLE):
+                self.unevadable = True
             elif isinstance(behavior, DealDamage):
                 auging = False
-                # only insert CheckEvade once
-                if not self.evadable:
-                    self.behaviors.insert(0, CheckEvade())
-                self.evadable = True
+                self.evadable = not self.unevadable
             elif auging:
                 break
+            
+        if self.evadable:
+            self.behaviors.insert(0, CheckEvade())
             
         if auging:
             raise Exception(
@@ -179,7 +282,7 @@ class BattleAction():
         self.action_type = self.get_action_type()
     
     def get_ap_flexibility(self):
-        if self.ap_cost < 0:
+        if self.ap < 0:
             return True
         return False
                 
@@ -193,11 +296,14 @@ class BattleAction():
                 if behavior.damage.is_heal:
                     return "heal"
                 return "dmg"
+            
+        return "dmg"
         
     def cast(self, user:BattlePeep, target:BattlePeep):
         
         auged_dmg = 0
-        cur_cond = False
+        cur_cond = True # if conditions are met
+        sorting_out_condition = False # if last behavior analyzed was a condition
         
         # TODO: if ap flexible, cast for as many times as Ap used
         for behavior in self.behaviors_modified:
@@ -207,21 +313,35 @@ class BattleAction():
                 # stop cast if evaded
                 if behavior.execute(user, target):
                     return
+                else:
+                    continue
             
             # check if conditions are met    
             if isinstance(behavior, Condition):
-                cur_cond = (cur_cond and behavior.execute(user, target) 
-                if behavior.AND 
-                else cur_cond or behavior.execute(user, target)
+                behavior.cur_cond = cur_cond
+                if sorting_out_condition:
+                    # if last behavior analyzed was a condition
+                    # use AND or OR logic
+                    cur_cond = (cur_cond and behavior.execute(user, target) 
+                    if behavior.AND 
+                    else cur_cond or behavior.execute(user, target)
                 )
-                
-                # stop cast if abort condition fails
-                if not cur_cond and behavior.ABORT:
-                    return
-                
+                else:
+                    cur_cond = behavior.execute(user, target) 
+                    sorting_out_condition = True
                 continue
-            elif not cur_cond:
+            
+            elif not cur_cond: 
+                sorting_out_condition = False
                 continue
+            # Everything below is executed ONLY if conditions are met
+            
+            # not looking at a condition
+            sorting_out_condition = False
+            
+            # Deal with Abort Behavior  
+            if isinstance(behavior, ABORT):
+                return
             
             # grab extra damage to add to final attack
             if isinstance(behavior, AugmentDamage):
@@ -295,7 +415,7 @@ class BattleAction():
                 
         return stat_2_dmg_dict
         
-
+'''
 basic_heal = BattleAction("Heal",[
     DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
 ])
@@ -316,4 +436,4 @@ knife_stab = BattleAction("Knife Stab",[
 ])
 
 
-
+'''

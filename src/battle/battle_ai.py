@@ -1,7 +1,7 @@
 from random import randint
 from battle.battle_peep import Peep_State
 from .battle_action import BattleAction, BattlePeep
-
+from peep_data.move_data import MOVE_SETS
 
 def what_do(myself:BattlePeep, battlers:list[BattlePeep], moves:list[BattleAction]):
     '''
@@ -16,6 +16,9 @@ def what_do(myself:BattlePeep, battlers:list[BattlePeep], moves:list[BattleActio
     if enemies are looking low, try to finish them off
     
     '''
+    
+    #TODO: fix if name as added number in it
+    moves = MOVE_SETS[myself.name]
     
     allies = [battler for battler in battlers if battler.team == myself.team]
     enemies = [battler for battler in battlers if battler.team != myself.team]

@@ -30,6 +30,10 @@ class BattlePeep():
                 + f"{self.stats.get_stat_resource('hp')}/{self.stats.get_stat_active('hp')} HP"
                 + f" {self.stats.get_stat_resource('ap')}/{self.stats.get_stat_active('ap')} AP")
         
+        # addon evasion points
+        if self.battle_handler.evasion_health > 0:
+            standard_label += f" {self.battle_handler.evasion_health} EvaP"
+        
         bleeding_label = (f"{self.name}: "
                 + f"{self.battle_handler.bleed_out}/{self.battle_handler.bleed_out_max} Blood")
         
@@ -140,12 +144,14 @@ class BattlePeep():
         
         self.change_evasion_health(evade_hp_dmg)
         
-        if past_evade_hp - evade_hp_dmg >= 0:
+        if past_evade_hp + evade_hp_dmg >= 0:
             # ignore attack if evasion health fully absorbed attack
             return True
         
         return False
         
+    def change_state(self, state:Peep_State):
+        self.battle_handler.stance = state 
         
     def affect_hp(self, affect:Damage):
         amount = affect.amount

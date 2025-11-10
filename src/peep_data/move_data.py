@@ -1,46 +1,78 @@
 '''
 Here will contain all move sets for all peeps
 '''
-from battle.battle_action import (BattleAction, Damage, create_dmg_preset, create_specific_phys_dmg, 
-                                  DealDamage, AugmentDamage, GainEvasion, Condition, ChangeState)
+from battle.battle_action import (BattleAction, Damage, Peep_State,
+                                  create_dmg_preset, create_specific_phys_dmg, 
+                                  DealDamage, AugmentDamage, GainEvasion, Condition, ChangeState,
+                                  ReduceEvasionHealth,
+                                  ReverseCondition, ABORT, CheckEvade, UNEVADABLE)
 
 UNIVERSAL_MOVES = [
 
-    BattleAction("Block", -1, [
-        # Give defense health
-        ]),
+    # BattleAction("Block", -1, [
+    #     # Give defense health
+    #     ]),
 
+    BattleAction("Attack", 6, [
+        DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
+        ]),
+    
+    BattleAction("Heal", 8, [
+        DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
+        ]),
+    
     BattleAction("Evade", -1, [
         # give evasion health
             GainEvasion(0.3, for_self=True),
         ]),
+    
     BattleAction("Shove", 5, [
-        # set target to knocked down if conditions are met
+        UNEVADABLE(),
         Condition((lambda me, tar: (
             me.stats.get_stat_active("dex") > 
             tar.stats.get_stat_active("eva") * tar.stats.get_resource_ratio("hp") +
             tar.battle_handler.evasion_health // 4
             )), 
-            ABORT=True,
         ),
-        ChangeState("Knocked Down"),
+        ReduceEvasionHealth(0.25),
+        ReverseCondition(),
+        CheckEvade(),
+        ABORT(),
         Condition((lambda me, tar: (
-            me.str * 1.5 > 
+            me.stats.get_stat_active("str") * 1.5 > 
             (tar.stats.get_stat_resource("hp") // 2) +
             tar.stats.get_stat_active("def") * tar.stats.get_resource_ratio("hp")
             )), 
         ),
+        ChangeState(Peep_State.KNOCKED_DOWN),
         DealDamage(create_dmg_preset(0.25, Damage.DamageType.Physical)),
         ]),
 ]
 
 HUMAN_MOVES = [
-    BattleAction("Punch", 3, [
+    BattleAction("Punch", 2, [
                     AugmentDamage(create_specific_phys_dmg(0.1, 'dex')),
                     DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical))
                     ]),
-    BattleAction("Kick", 5, [
+    BattleAction("Kick", 3, [
                     AugmentDamage(create_specific_phys_dmg(0.15, 'eva')),
                     DealDamage(create_dmg_preset(0.3, Damage.DamageType.Physical))
                     ]),
 ]
+
+
+MOVE_SETS = {
+    'Adan': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Chris': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Cindy': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Ray': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Jimmy': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Neo': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Lito': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Jayce': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Rebecca': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Sean': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Rat': UNIVERSAL_MOVES,
+    'Heavy Slime': UNIVERSAL_MOVES,
+    'Ent': UNIVERSAL_MOVES
+}

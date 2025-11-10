@@ -1,9 +1,9 @@
 import random
 from .battle_peep import BattlePeep, Peep_State
-from .battle_action import BattleAction, basic_dmg, basic_heal, knife_stab, rat_chz
+from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, rat_chz
 from .battle_ai import what_do
 
-temp_actions = [knife_stab, basic_heal, basic_dmg, rat_chz]
+#temp_actions = [knife_stab, basic_heal, basic_dmg, rat_chz]
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
@@ -76,7 +76,7 @@ class BattleManager():
             if peep.stats.resource_is_depleted('hp'): 
                 continue
             
-            cur_move, chosen_targ = what_do(peep, self.members, temp_actions)
+            cur_move, chosen_targ = what_do(peep, self.members, None)
             
             target_name = chosen_targ.name
             
