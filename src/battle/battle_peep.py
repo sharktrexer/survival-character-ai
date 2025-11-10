@@ -16,6 +16,7 @@ class BattlePeep():
         self.is_player = False
         self.move_set = move_set
         self.team = None
+        self.turns_passed = 0
         
     def __str__(self):
         return self.name
@@ -32,7 +33,11 @@ class BattlePeep():
         
         # addon evasion points
         if self.battle_handler.evasion_health > 0:
-            standard_label += f" {self.battle_handler.evasion_health} EvaP"
+            standard_label += f"! {self.battle_handler.evasion_health} EvaP"
+            
+        # addon defense points
+        if self.battle_handler.defense_health > 0:
+            standard_label += f"! {self.battle_handler.defense_health} DefP"
         
         bleeding_label = (f"{self.name}: "
                 + f"{self.battle_handler.bleed_out}/{self.battle_handler.bleed_out_max} Blood")
@@ -73,14 +78,18 @@ class BattlePeep():
         
     def start(self):
         '''
-        Lets this peep start their turn
+        Lets the peep know combat has starte
         '''
         #TODO: Add start logic
         # trigger all on start turn effects
 
-            
+        # Start with evasion health with high eva apt
+        #TODO: should be a choice to use AP to get the evaP
+        evasion = self.stats.get_stat_cur("eva")
+        if evasion.apt >= 4:
+            self.change_evasion_health(evasion.val_active // 3)    
         
-        pass 
+         
     
     def turn(self):
         if self.battle_handler.stance == Peep_State.DEAD:
@@ -104,8 +113,10 @@ class BattlePeep():
             return
         
         # ap roll over, leftover ap below or equal to 50% of max ap is rolled over
-        rollover = min(self.stats.get_stat_active("ap") // 2, 
-                      self.stats.get_stat_resource("ap"))
+        rollover = 0
+        if self.turns_passed > 0:
+            rollover = min(self.stats.get_stat_active("ap") // 2, 
+                        self.stats.get_stat_resource("ap"))
         
         # apply energy bonus
         if self.gained_ap_bonus: self.stats.apply_init_ap_bonus()
@@ -146,6 +157,7 @@ class BattlePeep():
         
         if past_evade_hp + evade_hp_dmg >= 0:
             # ignore attack if evasion health fully absorbed attack
+            print(f"EVADED!")
             return True
         
         return False
@@ -180,12 +192,21 @@ class BattlePeep():
         if not affect.is_heal:
             amnt_before = amount
             resisting_stat_amnt = self.stats.get_stat_active(affect.resisting_stat)
-            resisting_stat_amnt /= 4
+            
+            #check for defense health effect
+            if self.battle_handler.defense_health > 0 and sn(affect.resisting_stat) == sn('def'):
+                resisting_stat_amnt = resisting_stat_amnt
+            else:
+                resisting_stat_amnt /= 4
+                
             amount += resisting_stat_amnt
+            amount = int(round(amount))
             # don't let resisting damage heal!
-            if amount > 0:
+            if amount >= 0:
                 amount = -1
-            print(f"| Resisted! {amnt_before} -> {amount}", end="")
+                
+            self.change_defense_health( amount )
+            print(f"| Resisted by {affect.resisting_stat}: {resisting_stat_amnt}! {amnt_before} -> {amount}", end="")
         
         # apply damage   
         depleted = self.stats.resource_change('hp', amount)
@@ -202,11 +223,18 @@ class BattlePeep():
         #TODO: is anything else needed?
         
     def change_evasion_health(self, amount:int):
-        self.battle_handler.evasion_health += amount
+        self.battle_handler.evasion_health += int(round(amount))
         
         # cap
         if self.battle_handler.evasion_health < 0:
             self.battle_handler.evasion_health = 0
+            
+    def change_defense_health(self, amount:int):
+        self.battle_handler.defense_health += int(round(amount))
+        
+        # cap
+        if self.battle_handler.defense_health < 0:
+            self.battle_handler.defense_health = 0
  
  
 class Peep_State(Enum):

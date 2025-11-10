@@ -683,6 +683,8 @@ class StatBoard:
 
     def apply_alteration(self, alt: Alteration):
         
+        alt = copy.deepcopy(alt)
+        
         # obtain correct list to apply alteration
         stat_name = sn(alt.ef_stat)
         alt_list = (self.cur_stats[stat_name].buffs 

@@ -3,27 +3,33 @@ Here will contain all move sets for all peeps
 '''
 from battle.battle_action import (BattleAction, Damage, Peep_State,
                                   create_dmg_preset, create_specific_phys_dmg, 
-                                  DealDamage, AugmentDamage, GainEvasion, Condition, ChangeState,
-                                  ReduceEvasionHealth,
+                                  DealDamage, AugmentDamage, GainEvasionHealth, Condition, ChangeState,
+                                  ReduceEvasionHealth, GainDefenseHealth,
                                   ReverseCondition, ABORT, CheckEvade, UNEVADABLE)
 
 UNIVERSAL_MOVES = [
 
-    # BattleAction("Block", -1, [
-    #     # Give defense health
-    #     ]),
+    BattleAction("Block", 1, [
+        # Give defense health
+        GainDefenseHealth(0.3, for_self=True),
+        ]),
 
     BattleAction("Attack", 6, [
         DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
         ]),
     
+    BattleAction("Magic", 6, [
+        DealDamage(create_dmg_preset(0.6, Damage.DamageType.Magical))
+        ]),
+    
     BattleAction("Heal", 8, [
+        UNEVADABLE(),
         DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
         ]),
     
-    BattleAction("Evade", -1, [
+    BattleAction("Evade", 1, [
         # give evasion health
-            GainEvasion(0.3, for_self=True),
+        GainEvasionHealth(0.3, for_self=True),
         ]),
     
     BattleAction("Shove", 5, [

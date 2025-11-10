@@ -22,8 +22,9 @@ Generic (most units will have this)
         Resistant to ranged moves). 
 
         Requires: 
-        1.5x STR to be more than target's (current HP / 2) + current health ratio * Def
         Dex to be greater than target's current health ratio * EVA + (Evade Health / 4)
+        1.5x STR to be more than target's (current HP / 2) + current health ratio * Def
+
     )
     
     These are reserved for when game is ported to an engine

@@ -64,6 +64,10 @@ class BattleManager():
         # order peep turns by initiative
         for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
             
+            peep.turn()
+            
+            peep.turns_passed += 1
+            
             print()
             print(peep.get_label_as_str())
             
@@ -71,33 +75,35 @@ class BattleManager():
             if not peep.stats.resource_is_depleted('hp'): 
                 self.do_gain_bonus_AP_from_init(peep)
             
-            peep.turn()
-           
             if peep.stats.resource_is_depleted('hp'): 
                 continue
             
-            cur_move, chosen_targ = what_do(peep, self.members, None)
+            chosen_moves = what_do(peep, self.members, None)
             
-            target_name = chosen_targ.name
-            
-            #value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
-            print(f'{peep.name} used {cur_move.name}' 
-                  + f' on {target_name}', end=" ")
-            
-            # get target by provided name
-            target:BattlePeep = None
-            for member in self.members:
-                if member.name == target_name:
-                    target = member
-                    break
-            
-            cur_move.cast(peep, target)
-            
-            # printing action effect
-            if not target.stats.resource_is_depleted('hp'):
-                print(f'({target.name} = {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP)')
-            else:
-                print(f'({target.name} = {target.battle_handler.bleed_out}/{target.battle_handler.bleed_out_max} Bleed)')
+            for c in chosen_moves:
+                
+                cur_move, chosen_targ = c[0], c[1]
+                
+                target_name = chosen_targ.name
+                
+                #value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
+                print(f'{peep.name} used {cur_move.name}' 
+                    + f' on {target_name}', end=" ")
+                
+                # get target by provided name
+                target:BattlePeep = None
+                for member in self.members:
+                    if member.name == target_name:
+                        target = member
+                        break
+                
+                cur_move.cast(peep, target)
+                
+                # printing action effect
+                if not target.stats.resource_is_depleted('hp'):
+                    print(f'({target.name} = {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP)')
+                else:
+                    print(f'({target.name} = {target.battle_handler.bleed_out}/{target.battle_handler.bleed_out_max} Bleed)')
             
             peep.end_turn()
             

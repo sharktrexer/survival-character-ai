@@ -88,7 +88,7 @@ class CheckEvade(Behavior):
         
         return target.try_to_evade(user)
         
-class GainEvasion(Behavior):
+class GainEvasionHealth(Behavior):
     '''
     Target gains evasion health based on their EVA x passed in multiplier 
     '''
@@ -101,8 +101,26 @@ class GainEvasion(Behavior):
         
         amount = int(round(target.stats.get_stat_active("eva") * self.eva_mult))
         
+        print(f"EVA Health: +{amount}")
+        
         target.change_evasion_health(amount)
         
+class GainDefenseHealth(Behavior):
+    '''
+    Target gains evasion health based on their EVA x passed in multiplier 
+    '''
+    def __init__(self, def_mult, for_self:bool = False):
+        super().__init__(for_self)    
+        self.def_mult = def_mult
+        
+    def execute(self, user:BattlePeep, target:BattlePeep):
+        target = super().execute(user, target)
+        
+        amount = int(round(target.stats.get_stat_active("def") * self.def_mult))
+        
+        print(f"DEF Health: +{amount}")
+        
+        target.change_defense_health(amount)
 
 class ReduceEvasionHealth(Behavior):
     def __init__(self, percent:float, for_self:bool = False):
@@ -250,12 +268,18 @@ class BattleAction():
         self.behaviors = behaviors
         self.evadable = False
         self.unevadable = False
+        self.for_self = False
         
         # check that AugmentDamage(s) come before DealDamage  
         # also while we're checking, if there is a DealDamage then this action is evadable
         # unless it is unevadable through behavior flag      
         auging = False
         for behavior in self.behaviors:
+            # check that non Flag, Condition behaviors are setting this action for self
+            if not isinstance(behavior, Flag) and not isinstance(behavior, Condition):
+                if behavior.for_self:
+                    self.for_self = True
+            
             if isinstance(behavior, AugmentDamage):
                 auging = True
             elif isinstance(behavior, UNEVADABLE):
@@ -296,8 +320,9 @@ class BattleAction():
                 if behavior.damage.is_heal:
                     return "heal"
                 return "dmg"
-            
-        return "dmg"
+        
+        #TODO: what is default    
+        #return "dmg"
         
     def cast(self, user:BattlePeep, target:BattlePeep):
         
@@ -307,15 +332,7 @@ class BattleAction():
         
         # TODO: if ap flexible, cast for as many times as Ap used
         for behavior in self.behaviors_modified:
-            
-            # check if the target would evade this attack
-            if isinstance(behavior, CheckEvade):
-                # stop cast if evaded
-                if behavior.execute(user, target):
-                    return
-                else:
-                    continue
-            
+ 
             # check if conditions are met    
             if isinstance(behavior, Condition):
                 behavior.cur_cond = cur_cond
@@ -335,6 +352,14 @@ class BattleAction():
                 sorting_out_condition = False
                 continue
             # Everything below is executed ONLY if conditions are met
+            
+            # check if the target would evade this attack
+            if isinstance(behavior, CheckEvade):
+                # stop cast if evaded
+                if behavior.execute(user, target):
+                    return
+                else:
+                    continue
             
             # not looking at a condition
             sorting_out_condition = False
