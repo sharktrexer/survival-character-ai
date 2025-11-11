@@ -38,6 +38,7 @@ class DealDamage(Behavior):
         target.affect_hp(self.damage)
         
         self.damage.amount = 0
+        self.damage.mult = 1.0
         
 class AugmentDamage(Behavior):
     '''
@@ -61,6 +62,8 @@ class AugmentDamage(Behavior):
         
         print(f"Augment: {self.damage.amount} ({self.damage.ratio}/{self.damage.empowering_stat})",
               end=' ')
+        
+        self.damage.mult = 1.0
 
 class ChangeState(Behavior):
     def __init__(self, state:Peep_State, for_self:bool = False):
@@ -257,6 +260,21 @@ class AUGMENT_HERE(Flag):
     def __init__(self):
         super().__init__()
 
+        
+class DMG_MULT(Flag):
+    '''
+    Mark to let the Action know to apply this damage multiplier 
+    to all the subsequent AugmentDamage and DealDamage behaviors
+    
+    Can stack with other DMG_MULTs
+    '''
+    def __init__(self, mult:float):
+        super().__init__()
+        self.mult = mult
+        
+        
+
+
 ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Battle Action ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~''' 
@@ -270,7 +288,7 @@ class BattleAction():
         self.unevadable = False
         self.for_self = False
         
-        # check that AugmentDamage(s) come before DealDamage  
+        # check that AugmentDamage(s) come before DealDamage (excluding Flags & Conditions) 
         # also while we're checking, if there is a DealDamage then this action is evadable
         # unless it is unevadable through behavior flag      
         auging = False
@@ -287,7 +305,8 @@ class BattleAction():
             elif isinstance(behavior, DealDamage):
                 auging = False
                 self.evadable = not self.unevadable
-            elif auging:
+            # can hold onto augs when going thru flags and conditions?
+            elif auging and not (isinstance(behavior, Condition) or isinstance(behavior, Flag)):
                 break
             
         if self.evadable:
@@ -327,6 +346,7 @@ class BattleAction():
     def cast(self, user:BattlePeep, target:BattlePeep):
         
         auged_dmg = 0
+        dmg_mult = 1
         cur_cond = True # if conditions are met
         sorting_out_condition = False # if last behavior analyzed was a condition
         
@@ -368,14 +388,19 @@ class BattleAction():
             if isinstance(behavior, ABORT):
                 return
             
+            if isinstance(behavior, DMG_MULT):
+                dmg_mult *= behavior.mult
+            
             # grab extra damage to add to final attack
             if isinstance(behavior, AugmentDamage):
+                behavior.damage.mult = dmg_mult
                 behavior.execute(user, target)
                 auged_dmg += behavior.damage.amount
                 continue
             
             # add aug dmg to DealDamage behavior   
             if auged_dmg != 0 and isinstance(behavior, DealDamage):
+                behavior.damage.mult = dmg_mult
                 behavior.damage.amount = auged_dmg
                 auged_dmg = 0
                 

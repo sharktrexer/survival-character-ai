@@ -99,6 +99,9 @@ class Simulator(ABC):
     def get_choice_with_exit(self, choices:list, prompt: str = ""):
         '''
         calls get_choice but adds an exit option where None can be returned
+        
+        Returns:
+            copy of object chosen
         '''
         choices = copy.deepcopy(choices)
         choices.append(self.EXIT_KEY)

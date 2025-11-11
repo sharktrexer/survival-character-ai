@@ -76,13 +76,15 @@ class Damage:
         self.is_heal = is_heal
         self.amount = 0
         
+        self.mult = 1.0 #added through exterior classes | applies to amount value
+        
     def give_value(self, empowering_stat_av:int):
         '''
         Pass in empowering stat active value to store the damage amount
         
         Allows for an amount to have been previously set to add onto
         '''
-        value = int(round(self.ratio * empowering_stat_av))
+        value = int(round(self.ratio * empowering_stat_av * self.mult))
         if not self.is_heal:
             value *= -1 
         self.amount += value

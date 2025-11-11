@@ -106,8 +106,12 @@ def what_do(myself:BattlePeep, battlers:list[BattlePeep], moves:list[BattleActio
         dmg_moves = [move for move in moves if move.action_type == 'dmg']
         
         if do_heal:
+            if heal_moves == []:
+                break
             random_move = heal_moves[randint(0, len(heal_moves)-1)]
         else:
+            if dmg_moves == []:
+                break
             random_move = dmg_moves[randint(0, len(dmg_moves)-1)]
             
         choices.append((random_move, random_target))

@@ -214,7 +214,7 @@ class BattlePeep():
         # knock out
         if depleted:
             self.battle_handler.start_bleeding_out(self.stats.get_stat_cur('hp').val_active)
-            print(f"\n{self.name} has been knocked out!")
+            print(f"\n{self.name} is bleeding out!")
             self.init_growth = 0
             # TODO: affect fear and/or stress. maybe hunger too?
             
@@ -256,7 +256,7 @@ class BattleHandler():
         self.evasion_health:int = 0
         self.bleed_out:int = 0
         self.bleed_out_max:int = 0
-        self.times_knocked_down:int = 0
+        self.times_made_bleed:int = 0
         self.status_effects = []
         self.stance = Peep_State.STANDARD
         
@@ -274,9 +274,9 @@ class BattleHandler():
         
         # calculate bleed out trauma
         # reduces by 25% for each knock out, minimum 1
-        self.bleed_out = max(1, int(max_hp * (1 - 0.25 * self.times_knocked_down)))
+        self.bleed_out = max(1, int(max_hp * (1 - 0.25 * self.times_made_bleed)))
         
-        self.times_knocked_down += 1
+        self.times_made_bleed += 1
         
     def handle_bleeding_out(self):
         '''
@@ -320,7 +320,7 @@ class BattleHandler():
             
     def die(self):
         self.stance = Peep_State.DEAD
-        self.times_knocked_down = 0
+        self.times_made_bleed = 0
         print(f"died!")
         
     def end_battle(self):
@@ -330,7 +330,7 @@ class BattleHandler():
         self.bleed_out_max = 0
         self.evasion_health = 0
         self.defense_health = 0
-        self.times_knocked_down = 0
+        self.times_made_bleed = 0
         # temp hp can potentially carry over out of battle
         
 class Inventory():

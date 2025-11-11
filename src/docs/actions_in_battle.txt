@@ -132,10 +132,6 @@ Peep Specific
     Sean
         Snipe, Attack with Dex + Str
         - Deals +50% damage once Self has been in the Bleed Out State before in this battle
-            - CheckBattleEvent behavior
-                pass in an event the behavior will subscribe to
-                when event triggered, set bool 'triggered' to True
-            - Event Manager will let subscribed behavior know when event is triggered
             
     Chris
         Sentinel, Heals team by 10% of max hp + 50% CRE and gives +20% Def Buff for 2 trns

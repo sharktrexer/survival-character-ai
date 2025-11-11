@@ -5,6 +5,7 @@ from collections import defaultdict
 from battle.battle_manager import BattleManager
 from battle.battle_peep import BattlePeep
 from battle.stats import Stat, make_stat
+from battle.peep_manager import PeepManager
 
 from peep_data.data_reader import PEEPS
 
@@ -56,7 +57,7 @@ TEMP_ENEMIES = [
         "intimidation": make_stat("itmd", 10, 0),
         "charisma": make_stat("cha", 5, -4,),
         "stress": make_stat("tres", 50, 8),
-        "health": make_stat("hp", 100, 4),
+        "health": make_stat("hp", 40, 0),
         "hunger": make_stat("hun", 20, 0),
         "energy": make_stat("ap", 10, 0),
     }),
@@ -100,10 +101,11 @@ class BattleSimulator(Simulator):
         self.name = "Battle Simulator"
         self.funcs = [self.next_round,
                       self.modify_battle,
+                      self.simulate_multiple_rounds,
                       self.print_current_peeps, 
                       self.print_spawn_options, 
                       self.reset_battle,
-                      self.manage_debug_info,
+                      self.bleed_out_peep
                       ]
                       
         self.battler = BattleManager([])
@@ -215,6 +217,32 @@ class BattleSimulator(Simulator):
             self.battler.start_round()
         
         self.battler.next_round()
+        
+    def simulate_multiple_rounds(self):
+        
+        number_of = {"rounds": 0}
+        conditions = [lambda x: x >= 2]
+        
+        self.obtain_number_inputs(input_form_dict=number_of, conds=conditions)
+        
+        number_of['rounds'] = int(number_of['rounds'])
+        
+        for i in range(number_of['rounds']):
+            self.next_round()
+            input("Enter to continue...")
+        
+    def bleed_out_peep(self):
+        choice = self.get_choice_with_exit(self.battler.members)
+        
+        if choice is None:
+            return
+        
+        for m in self.battler.members:
+            if m.name == choice.name:
+                choice = m
+        
+        PeepManager.kill_peep(choice)    
+        
         
     def reset_battle(self):
         if self.check_if_no_peeps():

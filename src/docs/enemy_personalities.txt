@@ -34,24 +34,25 @@ TEMPLATE
 Desperate
     !!!!!!!!!! - HUN !!!!!!!!!!
     > Scrappy and good at raids. 
+        Likes disgusting enemies.
     / Prioritize High HP/HUN enemies | Other Desperate allies
     Regular
-        [Offensive, Status Effect, Gauge Effect] <^> [Alert, Alterations]
+        [Offensive, Status Effect, Gauge Effect] <^> [Alert, Debuff]
     Team Failing
         [Offensive] <^> [Alert]
     Team Suceeding
-        [Offensive, Gauge Effect] <^> [Alterations]
-    No Different Personality
-        [Status Effect, Offensive] <^> [Alert]
+        [Offensive, Gauge Effect] <^> [Debuff]
     Critical Health
-        [Gauge Effect] <^> [Alterations]
+        [Gauge Effect] <^> [Debuff]
     Prioritized Target Found (target with 3x more HP than self)
-        [Status Effect, Gauge Effect] <^> [Alterations]
+        [Status Effect, Gauge Effect] <^> [Debuff]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Privileged
     !!!!!!!!!! + HUN !!!!!!!!!!
     > Enjoy indirect combat, letting others do the work. Selfish. 
+        Bargains currency/items for actions
+        Easily disgusted
     / Prioritize High REC/STR enemies | high creativity allies
     Regular
         [Heal, Alert, Command] <^> [Defensive, Offensive]
@@ -59,10 +60,10 @@ Privileged
         [Heal] <^> [Defensive]
     Team Suceeding
         [Command] <^> [Offensive]
-    No Different Personality
-        [Alert] <^> [Defensive, Offensive]
     Critical Health
         [Heal, Command] <^> [Defensive]
+    No Different Personality
+        [Alert] <^> [Defensive, Offensive]
     If alongside Desperate
         [Command] <^> [Defensive]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,14 +73,466 @@ Go Getter
     > Great Team Player. 
     / Prioritizes low AP enemies | positive stat personality allies
     Regular
-        [Offensive, Defensive, Heal] <^> []
+        [Offensive, Defensive, Heal] <^> [Buff, Gauge Heal]
+    Team Failing
+        [Heal, Defensive] <^> [Gauge Heal]
+    Team Suceeding
+        [Offensive, Heal] <^> [Buff, Gauge Heal]
+    Critical Health
+        [Heal, Defensive] <^> [Buff]
+    Special
+        [] <^> []
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Lazy
+    !!!!!!!!!! - AP !!!!!!!!!!
+    > Mostly keeps up with self and ignores allies
+    / Prioritizes Low TRES/EVA/DEF & High AP enemies | Prioritizes Self Only
+    Regular
+        [Debuff, Status Effect, Gauge Damage] <^> [Offensive, Defensive]
+    Team Failing
+        [Status Effect] <^> [Defensive]
+    Team Suceeding
+        [Gauge Damage, Debuff] <^> [Offensive]
+    Critical Health
+        [Status Effect] <^> [Defensive]
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sumo
+    !!!!!!!!!! + HP !!!!!!!!!!
+    > Enjoys being targeted. Defensive at their core
+    / Prioritizes low HP/ITMD + High CHA/ITMD enemies | High HP/CHA/REC & low HP allies
+    Regular
+        [Offensive, Defensive, Buff] <^> [Heal, Gauge Damage]
+    Team Failing
+        [Defensive, Buff] <^> [Heal]
+    Team Suceeding
+        [Offensive, Buff] <^> [Gauge Damage]
+    Critical Health
+        [Defensive] <^> [Heal]
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Slender
+    !!!!!!!!!! - HP !!!!!!!!!!
+    > Small and fiesty, like a chihuahua 
+    / Prioritize high REC & low FEAR enemies | High DEF/HP allies
+    Regular
+        [Heal, Offensive, Defensive] <^> [Gauge Heal, Status Effect]
+    Team Failing
+        [Heal, Defensive] <^> [Gauge Heal]
+    Team Suceeding
+        [Offensive, Heal] <^> [Status Effect]
+    Critical Health
+        [Heal, Defensive] <^> [Status Effect]
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Seductive
+    !!!!!!!!!! + CHA !!!!!!!!!!
+    > Center stage and a bit unpredictable.
+        Vampirism possibly included
+        Bargains Stress and Fear relief for items or actions
+    / Prioritizes High CHA + low CHA/TRES enemies | low CHA allies
+    Regular
+        [Command, Heal, Buff] <^> [Offensive, Gauge Heal]
+    Team Failing
+        [Command, Heal] <^> [Gauge Heal]
+    Team Suceeding
+        [Command, Buff] <^> [Offensive]
+    Critical Health
+        [Heal, Command] <^> [Gauge Heal]
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Insecure
+    !!!!!!!!!! - CHA !!!!!!!!!!
+    > Easily manipulated and often forgotten. Most of their moves debuff themselves lol
+    / low CHA/DEX/STR enemies | high CHA/ITMD/FEAR allies
+    Regular
+        [Offensive, Gauge Damage, Alert] <^> [Status Effect, Debuff]
+    Team Failing
+        [Gauge Damage, Offensive] <^> [Debuff]
+    Team Suceeding
+        [Offensive] <^> [Status Effect]
+    Critical Health
+        [Alert] <^> [Debuff]
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Carefree
+    !!!!!!!!!! + TRES !!!!!!!!!!
+    > Can be reasoned with and enjoy conversation. Start as neutral to player. 
+        Even when an enemy, can calm you down.
+    / low TRES/FEAR/DEF enemies | high TRES/CRE allies
+    Regular
+        [Gauge Heal, Heal, Defensive] <^> [Offensive, Buff]
+    Team Failing
+        [Heal, Gauge Heal, Defensive] <^> [Buff]
+    Team Suceeding
+        [Defensive, Gauge Heal] <^> [Offensive]
+    Critical Health
+        [Heal, Defensive] <^> [Buff]
+    Special
+        [] <^> []
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Vindictive
+    !!!!!!!!!! - TRES !!!!!!!!!!
+    > Brings everyone else down to their level :( Passively stresses the player out
+        Heals by stressing out enemies and allies
+    / high TRES/HUN & low ITMD enemies | low TRES & high ITMD allies
+    Regular
+        [Gauge Damage, Offensive, Status Effect] <^> [Command, Debuff]
+    Team Failing
+        [Gauge Damage, Status Effect] <^> [Command, Debuff]
+    Team Suceeding
+        [Gauge Damage, Offensive] <^> [Command]
+    Critical Health
+        [Gauge Damage, Offensive] <^> [Debuff]
+    Special
+        [] <^> []
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bully
+    !!!!!!!!!! + ITMD !!!!!!!!!!
+    > Focuses on dominating. Likes to tunnel vision their prioritized targets
+        Heals by intimidating
+    / low ITMD/FEAR/DEF/EVA enemies | high ITMD/FEAR and low CRE allies
+    Regular
+        [Offensive, Gauge Damage, Debuff] <^> [Command, Defensive]
+    Team Failing
+        [Offensive, Gauge Damage] <^> [Command]
+    Team Suceeding
+        [Offensive, Debuff, Gauge Damage] <^> [Command]
+    Critical Health
+        [Gauge Damage, Offensive] <^> [Defensive]
+    Special
+        [] <^> []       
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Nerd
+    !!!!!!!!!! - ITMD !!!!!!!!!!
+    > Easy to command and very cowardly. 
+        Will always do what they are commanded, from allies and enemies alike.
+        Gauge heals have charitable soul
+    / low ITMD/FEAR/CHA enemies | high ITMD/FEAR/CHA/INT allies
+    Regular
+        [Defensive, Heal, Alert] <^> [Offensive, Gauge Heal]
+    Team Failing
+        [Heal, Defensive] <^> [Gauge Heal]
+    Team Suceeding
+        [Defensive] <^> [Offensive]
+    Critical Health
+        [Defensive, Heal, Alert] <^> [Gauge Heal]
+    Special
+        [] <^> []
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KILLER
+    !!!!!!!!!! + FEAR !!!!!!!!!!
+    > Strong and unafraid
+        Gain stats of actions used to knock down enemies
+        Deal bonus damage against bleeding out enemies
+    / low FEAR/ITMD/EVA enemies | high FEAR/ITMD/STR allies
+    Regular
+        [Offensive, Gauge Damage, Debilitating Status Effect] <^> [Command, Buff]
+    Team Failing
+        [Offensive] <^> [Buff]
+    Team Suceeding
+        [Status Effect, Offensive, Gauge Damage] <^> [Command, Buff]
+    Critical Health
+        [Offensive, Gauge Damage] <^> [Command]
+    Special
+        [] <^> []
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Victim
+    !!!!!!!!!! - FEAR !!!!!!!!!!
+    > Weakness makes it focus on survival and traps.
+        Prefers dealing damage through indirect ways like status effects
+        When everything looks bad, become Final Girl as last resort
+        (immune to fear for day, traps are more effective)
+    / low FEAR & high FEAR/ITMD enemies | low FEAR/ITMD/HP, high ITMD allies
+    Regular
+        [Trapping Status Effect, Defensive, Heal] <^> [Alert, Gauge Heal]
+    Team Failing
+        [Defensive, Trapping, Heal] <^> [Gauge Heal]
+    Team Suceeding
+        [Trapping] <^> [Gauge Heal]
+    Critical Health
+        [Heal, Defensive] <^> [Alert]
+    Final Girl
+        [Offensive, Trapping] <^> [Alert]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Artisan
+    !!!!!!!!!! + CRE !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
     Team Failing
         [] <^> []
     Team Suceeding
-        [] <^> []
-    No Different Personality
         [] <^> []
     Critical Health
         [] <^> []
     Special
         [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Spammers
+    !!!!!!!!!! - CRE !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Scientist
+    !!!!!!!!!! + Int !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Neanderthal
+    !!!!!!!!!! - INT !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Medic
+    !!!!!!!!!! + REC !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Patient
+    !!!!!!!!!! - REC !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sharpshooter
+    !!!!!!!!!! + DEX !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Clumsy
+    !!!!!!!!!! - DEX !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ninja
+    !!!!!!!!!! + EVA !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Slowpoke
+    !!!!!!!!!! - EVA !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sentinel
+    !!!!!!!!!! + DEF !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Fragile
+    !!!!!!!!!! - DEF !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Buff
+    !!!!!!!!!! + STR !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Wimpy
+    !!!!!!!!!! - STR !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bland
+    > No particular focus. Jack of all trades
+        Stats are balanced out
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+TEMPLATE
+    !!!!!!!!!!  !!!!!!!!!!
+    > 
+    / 
+    Regular
+        [] <^> []
+    Team Failing
+        [] <^> []
+    Team Suceeding
+        [] <^> []
+    Critical Health
+        [] <^> []
+    Special
+        [] <^> []
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
