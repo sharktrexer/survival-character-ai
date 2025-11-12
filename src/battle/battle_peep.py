@@ -7,19 +7,21 @@ from .damage import Damage
 ''' A version of character that is battle oriented 
 '''
 class BattlePeep():
-    def __init__(self, name: str, stats_dict: dict, move_set:list[int]=[0,1]):
+    def __init__(self, name: str, stats_dict: dict):
         self.name = name
         self.stats = StatBoard(stats_dict)
         self.battle_handler = BattleHandler()
         self.init_growth = 0
         self.gained_ap_bonus = False
         self.is_player = False
-        self.move_set = move_set
         self.team = None
         self.turns_passed = 0
         
     def __str__(self):
         return self.name
+    
+    def __repr__(self):
+        return f"BattlePeep(name={self.name}, stats_dict={self.stats.__dict__}, team={self.team})"
     
     def get_info_as_str(self):
         peep_info = self.name + ":\n"

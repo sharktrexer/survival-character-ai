@@ -115,6 +115,9 @@ class Stat:
                 + f"\nCurrent Modifier - {round(self.multiplier, 3):<4}"
                 + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
     
+    def __repr__(self):
+        return f"Stat(name={self.name!r}, val={self.value!r}, apt={self.apt!r})"
+    
     ''' 
                                 HELPER FUNCTIONS
     ''' 

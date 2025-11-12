@@ -47,8 +47,7 @@ class BattleManager():
     def start_round(self):
         self.get_anchor_init()
         
-        #TODO: Does this need to be in order of initiative?
-        for peep in self.members:
+        for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
             peep.start()
         
     def next_round(self):
@@ -74,8 +73,7 @@ class BattleManager():
             # calc growth if unit is alive
             if not peep.stats.resource_is_depleted('hp'): 
                 self.do_gain_bonus_AP_from_init(peep)
-            
-            if peep.stats.resource_is_depleted('hp'): 
+            else:
                 continue
             
             chosen_moves = what_do(peep, self.members, None)
@@ -96,8 +94,13 @@ class BattleManager():
                     if member.name == target_name:
                         target = member
                         break
-                
-                cur_move.cast(peep, target)
+                    
+                # cast moves multiple times if ap flexible
+                if len(c) == 3:
+                    for i in range(c[2]):
+                        cur_move.cast(peep, target)
+                else:
+                    cur_move.cast(peep, target)
                 
                 # printing action effect
                 if not target.stats.resource_is_depleted('hp'):

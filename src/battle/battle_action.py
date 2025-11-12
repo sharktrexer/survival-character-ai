@@ -22,6 +22,9 @@ class Behavior:
             return user
         return target
     
+    def __repr__(self):
+        return f"{self.__class__.__name__}"
+    
 class DealDamage(Behavior):
     def __init__(self, damage:Damage, for_self:bool = False):
         super().__init__(for_self)
@@ -39,6 +42,7 @@ class DealDamage(Behavior):
         
         self.damage.amount = 0
         self.damage.mult = 1.0
+        
         
 class AugmentDamage(Behavior):
     '''
@@ -323,6 +327,9 @@ class BattleAction():
         self.behaviors_modified = copy.deepcopy(self.behaviors)
         
         self.action_type = self.get_action_type()
+    
+    def __repr__(self):
+        return f"BattleAction(name={self.name}, ap_cost={self.ap}, behaviors={self.behaviors})"
     
     def get_ap_flexibility(self):
         if self.ap < 0:

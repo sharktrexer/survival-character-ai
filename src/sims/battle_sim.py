@@ -220,16 +220,24 @@ class BattleSimulator(Simulator):
         
     def simulate_multiple_rounds(self):
         
+        prpmt = "Would you like to simulate rounds fast?"
+        bool_fast = self.get_choice(["No", "Yes"], prompt=prpmt)
+        
         number_of = {"rounds": 0}
         conditions = [lambda x: x >= 2]
         
+        print("How many rounds would you like to simulate?")
         self.obtain_number_inputs(input_form_dict=number_of, conds=conditions)
         
         number_of['rounds'] = int(number_of['rounds'])
         
         for i in range(number_of['rounds']):
             self.next_round()
-            input("Enter to continue...")
+            if bool_fast:
+                t.sleep(0.1)
+            else:
+                input("Enter to continue...")
+            
         
     def bleed_out_peep(self):
         choice = self.get_choice_with_exit(self.battler.members)

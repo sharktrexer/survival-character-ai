@@ -17,14 +17,14 @@ def what_do(myself:BattlePeep, battlers:list[BattlePeep], moves:list[BattleActio
     
     '''
     
-    #TODO: fix if name having added number in it
-    avail_moves = MOVE_SETS[myself.name]
+    cleaned_name = myself.name.split()[0]
+    avail_moves = MOVE_SETS[cleaned_name]
     
     moves = [m for m in avail_moves if myself.stats.get_stat_resource('ap') >= m.ap]
     
     choices = []
     
-    while len(moves) != 0:
+    while myself.stats.get_stat_resource('ap') > 0:
         
         # coin flip to save 50% ish of ap for next round
         save_ap = 0
@@ -47,8 +47,15 @@ def what_do(myself:BattlePeep, battlers:list[BattlePeep], moves:list[BattleActio
         if do_self_move:
             self_moves = [move for move in moves if move.for_self]
             random_move = self_moves[randint(0, len(self_moves)-1)]
-            choices.append((random_move, myself))
-            myself.stats.resource_change('ap', -random_move.ap)
+            
+            if random_move.flexible:
+                amount_to_spend = randint(1, myself.stats.get_stat_resource('ap'))
+                choices.append((random_move, myself, amount_to_spend))
+                myself.stats.resource_change('ap', amount_to_spend)
+            else:
+                choices.append((random_move, myself))
+                myself.stats.resource_change('ap', -random_move.ap)
+            
             moves = [m for m in avail_moves if myself.stats.get_stat_resource('ap') >= m.ap]
             continue
             
