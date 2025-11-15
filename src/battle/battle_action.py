@@ -362,7 +362,7 @@ class BattleAction():
     def cast(self, user:BattlePeep, target:BattlePeep, ap_spent:int=0):
         
         if self.flexible and ap_spent % self.ap != 0:
-            raise Exception("AP spent must be a multiple of the action's AP cost when marked as flexible")
+            raise Exception("This action's cost must be a factor of ap_spent")
         
         auged_dmg = 0
         dmg_mult = 1

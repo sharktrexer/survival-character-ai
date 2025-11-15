@@ -15,12 +15,12 @@ import time as t
 TEMP_ENEMIES = [
     BattlePeep("Rat", {
         "strength": make_stat("str", 10, -2),
-        "defense": make_stat("def", 10, 0),
+        "defense": make_stat("def", 5, 0),
         "evasion": make_stat("eva", 20, 4),
         "dexterity": make_stat("dex", 15, 2),
         "recovery": make_stat("rec", 10, 0),
-        "intelligence": make_stat("int", 10, -1),
-        "creativity": make_stat("cre", 8, -4,),
+        "intelligence": make_stat("int", 10, 2),
+        "creativity": make_stat("cre", 8, -2,),
         "fear": make_stat("fear", 10, 0),
         "intimidation": make_stat("itmd", 10, -1),
         "charisma": make_stat("cha", 8, -2,),
