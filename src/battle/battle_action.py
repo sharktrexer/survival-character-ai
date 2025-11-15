@@ -24,6 +24,16 @@ class Behavior:
     
     def __repr__(self):
         return f"{self.__class__.__name__}"
+
+class FlexibleAPBehavior(Behavior):
+    '''
+    Inherit from this class to behave differently given ap value
+    '''
+    def __init__(self,for_self:bool = False):
+        super().__init__(for_self)
+        
+    def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
+        return super().execute(user, target)
     
 class DealDamage(Behavior):
     def __init__(self, damage:Damage, for_self:bool = False):
@@ -35,8 +45,8 @@ class DealDamage(Behavior):
         
         self.damage.give_value(user.stats.get_stat_active(self.damage.empowering_stat))
         
-        print(f"HIT: {self.damage.amount} (+{self.damage.ratio}/{self.damage.empowering_stat})",
-              end=' ')
+        # print(f"HIT: {self.damage.amount} (+{self.damage.ratio}/{self.damage.empowering_stat})",
+        #       end=' ')
         
         target.affect_hp(self.damage)
         
@@ -64,8 +74,8 @@ class AugmentDamage(Behavior):
         
         self.damage.give_value(user.stats.get_stat_active(self.damage.empowering_stat))
         
-        print(f"Augment: {self.damage.amount} ({self.damage.ratio}/{self.damage.empowering_stat})",
-              end=' ')
+        # print(f"Augment: {self.damage.amount} ({self.damage.ratio}/{self.damage.empowering_stat})",
+        #       end=' ')
         
         self.damage.mult = 1.0
 
@@ -95,7 +105,7 @@ class CheckEvade(Behavior):
         
         return target.try_to_evade(user)
         
-class GainEvasionHealth(Behavior):
+class GainEvasionHealth(FlexibleAPBehavior):
     '''
     Target gains evasion health based on their EVA x passed in multiplier 
     '''
@@ -103,16 +113,16 @@ class GainEvasionHealth(Behavior):
         super().__init__(for_self)    
         self.eva_mult = eva_mult
         
-    def execute(self, user:BattlePeep, target:BattlePeep):
-        target = super().execute(user, target)
+    def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
+        target = super().execute(user, target, ap)
         
-        amount = int(round(target.stats.get_stat_active("eva") * self.eva_mult))
+        amount = int(round(target.stats.get_stat_active("eva") * self.eva_mult)) * ap
         
-        print(f"EVA Health: +{amount}")
+        #print(f"EVA Health: +{amount}")
         
         target.change_evasion_health(amount)
         
-class GainDefenseHealth(Behavior):
+class GainDefenseHealth(FlexibleAPBehavior):
     '''
     Target gains evasion health based on their EVA x passed in multiplier 
     '''
@@ -120,12 +130,12 @@ class GainDefenseHealth(Behavior):
         super().__init__(for_self)    
         self.def_mult = def_mult
         
-    def execute(self, user:BattlePeep, target:BattlePeep):
-        target = super().execute(user, target)
+    def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
+        target = super().execute(user, target, ap)
         
-        amount = int(round(target.stats.get_stat_active("def") * self.def_mult))
+        amount = int(round(target.stats.get_stat_active("def") * self.def_mult)) * ap
         
-        print(f"DEF Health: +{amount}")
+        #print(f"DEF Health: +{amount}")
         
         target.change_defense_health(amount)
 
@@ -283,11 +293,14 @@ class DMG_MULT(Flag):
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Battle Action ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~''' 
 class BattleAction():
-    def __init__(self, name:str, ap_cost:int, behaviors:list[Behavior]):
+    def __init__(self, name:str, ap_cost:int, behaviors:list[Behavior], ap_flexible:bool = False):
         self.name = name
         self.ap = ap_cost
-        self.flexible = self.get_ap_flexibility()
+        # ap_flexible means for every ap_cost passed into the cast, its effects will occur
+        # what each ap does is up for the FlexibleBehaviors to decide
+        self.flexible = ap_flexible
         self.behaviors = behaviors
+        
         self.evadable = False
         self.unevadable = False
         self.for_self = False
@@ -331,10 +344,6 @@ class BattleAction():
     def __repr__(self):
         return f"BattleAction(name={self.name}, ap_cost={self.ap}, behaviors={self.behaviors})"
     
-    def get_ap_flexibility(self):
-        if self.ap < 0:
-            return True
-        return False
                 
     def reset_behaviors(self):
             self.behaviors_modified = copy.deepcopy(self.behaviors)
@@ -350,7 +359,10 @@ class BattleAction():
         #TODO: what is default    
         #return "dmg"
         
-    def cast(self, user:BattlePeep, target:BattlePeep):
+    def cast(self, user:BattlePeep, target:BattlePeep, ap_spent:int=0):
+        
+        if self.flexible and ap_spent % self.ap != 0:
+            raise Exception("AP spent must be a multiple of the action's AP cost when marked as flexible")
         
         auged_dmg = 0
         dmg_mult = 1
@@ -378,7 +390,9 @@ class BattleAction():
             elif not cur_cond: 
                 sorting_out_condition = False
                 continue
-            # Everything below is executed ONLY if conditions are met
+            ''' @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                Everything below is executed ONLY if conditions are met 
+                @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'''
             
             # check if the target would evade this attack
             if isinstance(behavior, CheckEvade):
@@ -395,6 +409,7 @@ class BattleAction():
             if isinstance(behavior, ABORT):
                 return
             
+            # store damage mult to apply to subsequent damage behaviors
             if isinstance(behavior, DMG_MULT):
                 dmg_mult *= behavior.mult
             
@@ -410,8 +425,14 @@ class BattleAction():
                 behavior.damage.mult = dmg_mult
                 behavior.damage.amount = auged_dmg
                 auged_dmg = 0
-                
-            behavior.execute(user, target)
+            
+            '''
+            EXECUTE
+            '''
+            if isinstance(behavior, FlexibleAPBehavior):
+                behavior.execute(user, target, ap_spent//self.ap)   
+            else: 
+                behavior.execute(user, target)
             
     def cast_aoe(self, user:BattlePeep, targets:list[BattlePeep]):
         # TODO: raise error if this is not an aoe move

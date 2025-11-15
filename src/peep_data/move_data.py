@@ -1,18 +1,14 @@
 '''
 Here will contain all move sets for all peeps
 '''
-from battle.battle_action import (BattleAction, Damage, Peep_State,
+from battle.alteration import AlterationFactory
+from battle.battle_action import (BattleAction, Damage, Peep_State, 
                                   create_dmg_preset, create_specific_phys_dmg, 
                                   DealDamage, AugmentDamage, GainEvasionHealth, Condition, ChangeState,
-                                  ReduceEvasionHealth, GainDefenseHealth,
+                                  ReduceEvasionHealth, GainDefenseHealth, ApplyAlteration,
                                   ReverseCondition, YesCondition, ABORT, CheckEvade, UNEVADABLE, DMG_MULT)
 
 UNIVERSAL_MOVES = [
-
-    BattleAction("Block", 1, [
-        # Give defense health
-        GainDefenseHealth(0.3, for_self=True),
-        ]),
 
     BattleAction("Attack", 6, [
         DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
@@ -30,7 +26,30 @@ UNIVERSAL_MOVES = [
     BattleAction("Evade", 1, [
         # give evasion health
         GainEvasionHealth(0.3, for_self=True),
-        ]),
+        ],
+        ap_flexible=True),
+    
+    BattleAction("Block", 1, [
+        # Give defense health
+        GainDefenseHealth(0.3, for_self=True),
+        ],
+        ap_flexible=True),
+    
+    BattleAction('Bulwark', 5, [
+        # give lots of defense health, but requires more investment
+        GainDefenseHealth(1.85, for_self=True),
+        ],
+        ap_flexible=True),
+    
+    BattleAction('Harden', 3, [
+        # give lots of defense health, but requires more investment
+        ApplyAlteration(
+            AlterationFactory.create_alteration
+            (
+                "def", 1.5, 1 ), 
+            for_self=True),
+        ],
+        ),
     
     BattleAction("Shove", 5, [
         UNEVADABLE(),

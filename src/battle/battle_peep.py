@@ -94,6 +94,10 @@ class BattlePeep():
          
     
     def turn(self):
+        # Evasion health decays when turn begins (excluding starting evasion)
+        if self.turns_passed != 0:
+            self.battle_handler.evasion_health = 0
+        
         if self.battle_handler.stance == Peep_State.DEAD:
             return
         
@@ -159,7 +163,7 @@ class BattlePeep():
         
         if past_evade_hp + evade_hp_dmg >= 0:
             # ignore attack if evasion health fully absorbed attack
-            print(f"EVADED!")
+            print(f"EVADED!", end=" ")
             return True
         
         return False
@@ -208,7 +212,7 @@ class BattlePeep():
                 amount = -1
                 
             self.change_defense_health( amount )
-            print(f"| Resisted by {affect.resisting_stat}: {resisting_stat_amnt}! {amnt_before} -> {amount}", end="")
+            #print(f"| Resisted by {affect.resisting_stat}: {resisting_stat_amnt}! {amnt_before} -> {amount}", end="")
         
         # apply damage   
         depleted = self.stats.resource_change('hp', amount)
@@ -314,9 +318,8 @@ class BattleHandler():
         self.bleed_out += amount
         #print(f"\nrecieved dmg while bleeding: {temp} -> {self.bleed_out}")
         
-        if self.bleed_out > self.bleed_out_max:
-            self.bleed_out = self.bleed_out_max
-        elif self.bleed_out <= 0:
+       
+        if self.bleed_out <= 0:
             self.bleed_out = 0
             self.die()
             

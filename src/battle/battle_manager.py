@@ -1,7 +1,9 @@
+import copy
 import random
+import time
 from .battle_peep import BattlePeep, Peep_State
 from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, rat_chz
-from .battle_ai import what_do
+from .battle_ai import BattleAI, MoveChoice
 
 #temp_actions = [knife_stab, basic_heal, basic_dmg, rat_chz]
 
@@ -28,7 +30,7 @@ class BattleManager():
         if valid_members == []: return 0
         
         anchor = min(valid_members, key = lambda peep: peep.initiative())
-        print("Anchor: " + anchor.name + " with init: " + str(anchor.initiative()))
+        print("\nAnchor: " + anchor.name + " with init: " + str(anchor.initiative()))
         self.init_anchor = anchor.initiative()
     
     def get_member_names(self):
@@ -63,7 +65,14 @@ class BattleManager():
         # order peep turns by initiative
         for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
             
+            peep_copy = copy.deepcopy(peep)
+            
             peep.turn()
+            
+            self_evade_decayed = peep_copy.battle_handler.evasion_health != peep.battle_handler.evasion_health
+            
+            if self_evade_decayed:
+                print(f'{peep.name}: {peep_copy.battle_handler.evasion_health} -> {peep.battle_handler.evasion_health} EvaP', end=" ")
             
             peep.turns_passed += 1
             
@@ -76,17 +85,28 @@ class BattleManager():
             else:
                 continue
             
-            chosen_moves = what_do(peep, self.members, None)
+            peep_ai = BattleAI(peep)
+            peep_ai.what_do(self.members)
             
-            for c in chosen_moves:
+            chosen_moves = peep_ai.choices
+            
+            ap_calc = peep_copy.stats.get_stat_resource('ap')
+            
+            for cm in chosen_moves:
                 
-                cur_move, chosen_targ = c[0], c[1]
+                cur_move, chosen_targ = cm.move, cm.target
                 
                 target_name = chosen_targ.name
                 
+                print(f'({ap_calc} -> {ap_calc - cm.ap_spent} AP spent)', end=" ")
+                
                 #value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
-                print(f'{peep.name} used {cur_move.name}' 
-                    + f' on {target_name}', end=" ")
+                if peep.name != target_name:
+                    print(f'{peep.name} used {cur_move.name}' + f' on {target_name}', end=" ")
+                else:
+                    print(f'{peep.name} used {cur_move.name}', end=" ")
+                
+                ap_calc -= cm.ap_spent
                 
                 # get target by provided name
                 target:BattlePeep = None
@@ -94,21 +114,37 @@ class BattleManager():
                     if member.name == target_name:
                         target = member
                         break
+                
+                target_copy = copy.deepcopy(target)
+                
                     
-                # cast moves multiple times if ap flexible
-                if len(c) == 3:
-                    for i in range(c[2]):
-                        cur_move.cast(peep, target)
-                else:
-                    cur_move.cast(peep, target)
+                # pass in ap spent if an ap flexible move was utilized
+                
+                cur_move.cast(peep, target, cm.ap_spent)
+                
+                affected_targ_hp = target.stats.get_stat_resource('hp') != target_copy.stats.get_stat_resource('hp')
+                affected_targ_defAp = target.battle_handler.defense_health != target_copy.battle_handler.defense_health
+                affected_targ_evaAp = target.battle_handler.evasion_health != target_copy.battle_handler.evasion_health
+                affected_targ_bleed = target.battle_handler.bleed_out != target_copy.battle_handler.bleed_out
                 
                 # printing action effect
-                if not target.stats.resource_is_depleted('hp'):
-                    print(f'({target.name} = {target.stats.get_stat_cur("hp").val_resource}/{target.stats.get_stat_cur("hp").val_active} HP)')
-                else:
-                    print(f'({target.name} = {target.battle_handler.bleed_out}/{target.battle_handler.bleed_out_max} Bleed)')
+                if affected_targ_evaAp:
+                    print(f'({target_copy.battle_handler.evasion_health} -> {target.battle_handler.evasion_health} EvaP)', end=" ")
+                    
+                if affected_targ_defAp:
+                    print(f'({target_copy.battle_handler.defense_health} -> {target.battle_handler.defense_health} DefP)', end=" ")
+                    
+                if affected_targ_hp:
+                    print(f'({target_copy.stats.get_stat_resource("hp")} -> {target.stats.get_stat_resource("hp")} HP)', end=" ")
+                    
+                if affected_targ_bleed:
+                    print(f'({target_copy.battle_handler.bleed_out} -> {target.battle_handler.bleed_out} Bleed)', end=" ")
+                print()
+                
             
             peep.end_turn()
+            print()
+            time.sleep(0.01)
             
         # update anchor after round
         self.get_anchor_init()
