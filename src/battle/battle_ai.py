@@ -19,9 +19,10 @@ class BattleAI:
         self.myself = myself
         #TODO: allow peeps with space in their name to work
         cleaned_name = self.myself.name.split()[0]
-        self.moves = MOVE_SETS[cleaned_name]
+        self.moves:list[BattleAction] = MOVE_SETS[cleaned_name]
         self.choices:list[MoveChoice] = []
         self.my_ap = self.myself.stats.get_stat_resource('ap')
+        self.can_still_cast = True
 
     def what_do(self, battlers:list[BattlePeep]):
         '''
@@ -37,14 +38,20 @@ class BattleAI:
         
         '''
         
+        if self.myself.is_player:
+            return self.what_player_do(battlers)
+            
+        
         used_flex_move = False
         
-        while self.myself.stats.get_stat_resource('ap') > 0 and len(self.moves) > 0:
+        # choose moves while energy remains, there are moves left, 
+        # and less than 3 moves have been chosen
+        while self.can_still_cast:
             
             # coin flip to save 50% ish of ap for next round
             save_ap = 0
             if self.my_ap <= self.myself.stats.get_stat_active('ap') // 2:
-                save_ap = randint (0, 10)
+                save_ap = randint (0, 6)
             
             if save_ap > 1:
                 break
@@ -79,6 +86,7 @@ class BattleAI:
                     move = MoveChoice(random_move, self.myself, amount_to_spend)
             
                     self.update_peep_move_state(move)
+                    #used_flex_move = True
                 else:
                     move = MoveChoice(random_move, self.myself, random_move.ap)
             
@@ -151,9 +159,11 @@ class BattleAI:
             move = MoveChoice(random_move, random_target, random_move.ap)
             
             self.update_peep_move_state(move)
-
-
+        
+    
     def update_peep_move_state(self, move:MoveChoice):
         self.choices.append(move)
         self.my_ap -= move.ap_spent
         self.moves = [m for m in self.moves if self.my_ap >= m.ap]
+        self.can_still_cast = self.my_ap > 0 and len(self.moves) > 0 and len(self.choices) < 3
+        

@@ -99,6 +99,7 @@ class Simulator(ABC):
     def get_choice_with_exit(self, choices:list, prompt: str = ""):
         '''
         calls get_choice but adds an exit option where None can be returned
+        Will always return a copy of the object in provided list and not the index
         
         Returns:
             copy of object chosen

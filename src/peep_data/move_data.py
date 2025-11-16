@@ -42,14 +42,13 @@ UNIVERSAL_MOVES = [
         ap_flexible=True),
     
     BattleAction('Harden', 3, [
-        # give lots of defense health, but requires more investment
+        # provides defense buff
         ApplyAlteration(
             AlterationFactory.create_alteration
             (
                 "def", 1.5, 1 ), 
             for_self=True),
-        ],
-        ),
+        ]),
     
     BattleAction("Shove", 5, [
         UNEVADABLE(),
@@ -74,10 +73,50 @@ UNIVERSAL_MOVES = [
         ]),
 ]
 
+''' Enemy moves '''
+RAT_MOVES = [
+    BattleAction("Bite", 3, [
+        DealDamage(create_dmg_preset(0.95, Damage.DamageType.Physical))
+    ]),
+    
+    BattleAction("Scurry", 4, [
+        ApplyAlteration(
+        AlterationFactory.create_alteration(
+            "eva", 1.5, 2), 
+        for_self=True),
+        GainEvasionHealth(0.6, for_self=True)
+    ]),
+    
+    BattleAction("Cheese Bounty", 6, [
+        DealDamage(create_dmg_preset(0.4, Damage.DamageType.Healing), for_self=True),
+        DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
+        
+    ]),
+    
+    BattleAction('Caca Time', 4, [
+        # attack stress gauge
+        ApplyAlteration(
+        AlterationFactory.create_alteration(
+            "def", 1.5, 2), 
+        for_self=True),
+    ]),
+    
+    BattleAction("Mighty Squeak", 8, [
+        # Summon rat if rat hole present
+    ]),
+    
+    BattleAction("RATATOUILLE", 8, [
+        # Give allies regen
+        # heal all allies stress health
+    ])
+    ]
+
+
 # current economy: 
 # for every 2 ap, 0.3 of a stat can be used as dmg
 # for every 1 ap, 0.3 of a stat can be used defensively
-
+# for every 1 ap, 0.2 of a stat is used for healing
+''' PEOPLE MOVES '''
 HUMAN_MOVES = [
     BattleAction("Punch", 2, [
         AugmentDamage(create_specific_phys_dmg(0.1, 'dex')),

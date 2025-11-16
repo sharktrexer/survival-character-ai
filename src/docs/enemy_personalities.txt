@@ -35,6 +35,7 @@ Desperate
     !!!!!!!!!! - HUN !!!!!!!!!!
     > Scrappy and good at raids. 
         Likes disgusting enemies.
+        A non-status effect inflicting offensive move will recieve a Wound (DOT)
     / Prioritize High HP/HUN enemies | Other Desperate allies
     Regular
         [Offensive, Status Effect, Gauge Effect] <^> [Alert, Debuff]
@@ -51,7 +52,7 @@ Desperate
 Privileged
     !!!!!!!!!! + HUN !!!!!!!!!!
     > Enjoy indirect combat, letting others do the work. Selfish. 
-        Bargains currency/items for actions
+        Bargains currency/items for actions or team switching
         Easily disgusted
     / Prioritize High REC/STR enemies | high creativity allies
     Regular
@@ -70,7 +71,7 @@ Privileged
 
 Go Getter
     !!!!!!!!!! + AP !!!!!!!!!!
-    > Great Team Player. 
+    > Great Team Player. Can do a 4th action every turn. 
     / Prioritizes low AP enemies | positive stat personality allies
     Regular
         [Offensive, Defensive, Heal] <^> [Buff, Gauge Heal]
@@ -88,11 +89,16 @@ Go Getter
 Lazy
     !!!!!!!!!! - AP !!!!!!!!!!
     > Mostly keeps up with self and ignores allies
+        Will fall asleep every 5 turns, or 2 turns of not being targeted. 
+            While asleep cannot do anything, but heals 10% of all Gauges every turn.
+            Getting hit will stop the sleeping
+            Take 50% less damage while asleep   
+        Enjoys debuffing AP of enemies
     / Prioritizes Low TRES/EVA/DEF & High AP enemies | Prioritizes Self Only
     Regular
         [Debuff, Status Effect, Gauge Damage] <^> [Offensive, Defensive]
     Team Failing
-        [Status Effect] <^> [Defensive]
+        [Debuff, Status Effect] <^> [Defensive]
     Team Suceeding
         [Gauge Damage, Debuff] <^> [Offensive]
     Critical Health
@@ -105,10 +111,12 @@ Lazy
 
 Sumo
     !!!!!!!!!! + HP !!!!!!!!!!
-    > Enjoys being targeted. Defensive at their core
+    > Enjoys being targeted. Defensive at their core. Like Pushing a lot
+        Recieved resource healing increased by 20%
+        Also Str Buff
     / Prioritizes low HP/ITMD + High CHA/ITMD enemies | High HP/CHA/REC & low HP allies
     Regular
-        [Offensive, Defensive, Buff] <^> [Heal, Gauge Damage]
+        [Offensive, Defensive, Buff] <^> [Heal, Taunt, Gauge Damage]
     Team Failing
         [Defensive, Buff] <^> [Heal]
     Team Suceeding
@@ -119,20 +127,22 @@ Sumo
         [] <^> []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Slender
+Fiesty
     !!!!!!!!!! - HP !!!!!!!!!!
-    > Small and fiesty, like a chihuahua 
-    / Prioritize high REC & low FEAR enemies | High DEF/HP allies
+    > Like a chihuahua, helpful and cute to allies, aggressive towards enemies (when safe)
+        Random move gain Taunt effect
+        small AP buff
+    / Prioritize high REC/HP & low FEAR enemies | High DEF/HP allies
     Regular
-        [Heal, Offensive, Defensive] <^> [Gauge Heal, Status Effect]
+        [Heal, Offensive, Defensive] <^> [Gauge Heal, Status Effect, Alert]
     Team Failing
         [Heal, Defensive] <^> [Gauge Heal]
     Team Suceeding
-        [Offensive, Heal] <^> [Status Effect]
+        [Offensive, Heal] <^> [Status Effect, Alert]
     Critical Health
         [Heal, Defensive] <^> [Status Effect]
-    Special
-        [] <^> []
+    When Priority Ally is around
+        [Offensive, Selfless Defensive]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Seductive
@@ -156,6 +166,7 @@ Seductive
 Insecure
     !!!!!!!!!! - CHA !!!!!!!!!!
     > Easily manipulated and often forgotten. Most of their moves debuff themselves lol
+        also TRES debuff
     / low CHA/DEX/STR enemies | high CHA/ITMD/FEAR allies
     Regular
         [Offensive, Gauge Damage, Alert] <^> [Status Effect, Debuff]
@@ -173,6 +184,9 @@ Carefree
     !!!!!!!!!! + TRES !!!!!!!!!!
     > Can be reasoned with and enjoy conversation. Start as neutral to player. 
         Even when an enemy, can calm you down.
+        Random support move gains Stress Heal
+        Gain Carefree Catastrophe = Deal high damage to enemy and heal their Stress
+            Once per battle
     / low TRES/FEAR/DEF enemies | high TRES/CRE allies
     Regular
         [Gauge Heal, Heal, Defensive] <^> [Offensive, Buff]
@@ -237,8 +251,8 @@ Nerd
         [Defensive] <^> [Offensive]
     Critical Health
         [Defensive, Heal, Alert] <^> [Gauge Heal]
-    Special
-        [] <^> []
+    High CHA commanding ally is critical
+        [Sacrifical]
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -246,7 +260,9 @@ KILLER
     !!!!!!!!!! + FEAR !!!!!!!!!!
     > Strong and unafraid
         Gain stats of actions used to knock down enemies
-        Deal bonus damage against bleeding out enemies
+        Bleeding Out Defense Reduced from 80% -> 40%
+        Gain Action Reap = Bring enemy to bleed out state if health <=25%
+        Fear Gauge stays at 100% 
     / low FEAR/ITMD/EVA enemies | high FEAR/ITMD/STR allies
     Regular
         [Offensive, Gauge Damage, Debilitating Status Effect] <^> [Command, Buff]
@@ -282,138 +298,162 @@ Victim
 
 Artisan
     !!!!!!!!!! + CRE !!!!!!!!!!
-    > 
-    / 
+    > Changes up strategy often. Likes to combo
+        Gain a move that best suites self's stats from pool of stage enemies
+    / low CRE/HUN enemies | high CRE & low HUN allies
     Regular
-        [] <^> []
+        [All] <^> [All]
     Team Failing
-        [] <^> []
+        [Defensive, Heal, Gauge Heal] <^> [Status Effect, Summon]
     Team Suceeding
-        [] <^> []
+        [Buff, Offensive, Gauge Effect] <^> [Heal, Summon]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Heal, Defensive, Summon] <^> [Debuff, Gauge Damage]
+    Low Hunger Targets
+        [Command, Gauge Effect] <^> [Offensive, Alterations]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Spammers
     !!!!!!!!!! - CRE !!!!!!!!!!
-    > 
-    / 
+    > Repeat the same moves over and over
+    / low INT/REC/DEF/EVA enemies | high HP/DEF/ITMD allies
     Regular
-        [] <^> []
+        [Offensive, Heal, Defensive] <^> [Alteration, Alert]
     Team Failing
-        [] <^> []
+        [Heal, Defensive] <^> [Alert]
     Team Suceeding
-        [] <^> []
+        [Offensive] <^> [Alteration]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Heal, Offensive] <^> [Alert, Alteration]
+    Low INT Enemy Target Available
+        Exploit weakness (Elemental, Statistical, Resourceful)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Scientist
     !!!!!!!!!! + Int !!!!!!!!!!
-    > 
-    / 
+    > Magically oriented, combos are more intricate, buffs a lot. 
+        Side effects are to be expected, negative moves have positive effects and vice versa
+        Nerfed DEF/EVA/STR stats
+        Elemental Resistances and strengths buffed
+    / low INT/EVA/REC/CRE & high INT enemies | high DEF/STR/EVA/DEX allies
     Regular
-        [] <^> []
+        [Offensive, Alteration, Heal] <^> [Status Effect, Gauge Effect]
     Team Failing
-        [] <^> []
+        [Heal, Alteration] <^> [Gauge Effect]
     Team Suceeding
-        [] <^> []
+        [Offensive, Alteration] <^> [Status Effect]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Heal] <^> [Status Effect]
+    High INT allies
+        [Team Attack, Alteration]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Neanderthal
     !!!!!!!!!! - INT !!!!!!!!!!
-    > 
-    / 
+    > Doesn't react to the changing tide of battle without being commanded
+        Buffed STR
+    / lowest HP enemy | lowest HP ally
     Regular
-        [] <^> []
-    Team Failing
-        [] <^> []
-    Team Suceeding
-        [] <^> []
+        [Offensive, Defensive, Heal] <^> [Gauge Effect, Sacrificial Alteration]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Heal, Defensive] <^> [Sacrifical Alteration]
+    
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Medic
     !!!!!!!!!! + REC !!!!!!!!!!
-    > 
-    / 
+    > A leader that is always accompanied. 
+        SIGNATURE moves are more powerful though may contain side effects
+        Slight INT buff and STR debuff
+    / high STR/DEX/INT enemies / low HP/REC & high HP/INT allies
     Regular
-        [] <^> []
+        [Heal, Offensive, Defensive] <^> [Command, Buff, Sacrificial]
     Team Failing
-        [] <^> []
+        [HEAL] <^> [Command]
     Team Suceeding
-        [] <^> []
+        [Defensive, Offensive, Heal] <^> [Buff]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [HEAl, Defensive] <^> [Command, Sacrificial]
+    All Teammates are Downed/Dead
+        [Sacrificial Signature Team Revive]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Patient
     !!!!!!!!!! - REC !!!!!!!!!!
-    > 
-    / 
+    > Can't heal, treated as pawn, always Debilitated
+        Can be let loose by a Medic to RAGE (kinda like Borderlands children + Ubercharge)
+    / high DEF/EVA targets | high REC & low HUN/TRES allies
     Regular
-        [] <^> []
+        [Offensive, Defensive, Taunting Status Effects] <^> [Alert, Sacrificial]
     Team Failing
-        [] <^> []
+        [Defensive, Taunting] <^> [Alert]
     Team Suceeding
-        [] <^> []
+        [Offensive, Taunting] <^> [Alert]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Defensive] <^> [Sacrifical]
+    Enraged
+        [Offensive, Taunting] <^> [Crazy Sacrificial Signature Move]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Sharpshooter
     !!!!!!!!!! + DEX !!!!!!!!!!
-    > 
-    / 
+    > Specializes in ranged attacks and likes to stay in the backline
+        Always targets enemies that fly or have evasion health
+        One attack move gains an EVA Debuff Affliction effect.
+        Small REC buff and EVA debuff
+        Bargains to not use one of their moves if enemy doesn't use a move too
+    / low FEAR/ITMD & high EVA enemies | high REC/DEF allies 
     Regular
-        [] <^> []
+        [Offensive, Gauge Effect, Heal] <^> [Alterations, Alert, Pacify/Bargain]
     Team Failing
-        [] <^> []
+        [Offensive, Heal] <^> [Debuff]
     Team Suceeding
-        [] <^> []
+        [Offensive, Gauge Damage] <^> [Pacify, Buff]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Heal] <^> [Alert, Pacify(Bargain)]
+    Enemy with incredibly EVA present
+        [Bargain for them to stop using an evasive move, 
+            in exchange to not use a very dextrous move]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clumsy
     !!!!!!!!!! - DEX !!!!!!!!!!
-    > 
-    / 
+    > Focused on AOE but not very effective. Also likes shoving and stopping dances
+        May sometimes hurt allies or support enemies
+        Will lay life on the line for strong allies when they most need it
+    / Anything except high EVA enemies
     Regular
-        [] <^> []
+        [Offensive, Heal, Alteration] <^> [Pacify, Sacrificial]
     Team Failing
-        [] <^> []
+        [Offensive, Heal] <^> [Pacify]
     Team Suceeding
-        [] <^> []
+        [Offensive, Buff, Heal] <^> [Pacify]
     Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        [Debuff, Heal] <^> [Sacrificial]
+    Strong Ally in Danger
+        [Sacrificial BodyGuard]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Ninja
     !!!!!!!!!! + EVA !!!!!!!!!!
-    > 
-    / 
+    > Master of battle flow 
+        has a random, powerful Ninja Technique that best matches stat values
+        Depending on which base stat is higher, gain INT or REC buff
+            with INT buff also gain magical offensive move
+            otherwise, heal move
+        Always will gain a physical move
+        Obtains random elemental resistance, if technique is not elemental
+            otherwise, gain resistance according to technique elemental attribution
+
+        Techniques:
+            Smokescreen = Self and Allies gain evasion Hp based off this units evasion. Darkness
+            Spirit of the Koi = Awesome Healing Pond. Water
+            Explosive Star = Aoe move
+            Abominable Snowman = powerful summon of Ice. Ice
+
+    / low DEX enemies | 
     Regular
-        [] <^> []
+        [Offensive, Redirection Effects, Heal, Defensive] <^> [Status Effect, Summon]
     Team Failing
         [] <^> []
     Team Suceeding
@@ -426,80 +466,108 @@ Ninja
 
 Slowpoke
     !!!!!!!!!! - EVA !!!!!!!!!!
-    > 
-    / 
+    > Useful as cover, can only do 2 actions in one turn and actions cost more ap 
+        A stat appropriate move will be buffed but require charging
+            charging require a full turn of waiting and a turn of all ap usage on cast
+        Gains DEF buff and REC debuff
+    / low EVA enemies | high HUN allies
     Regular
-        [] <^> []
+        [Bodyguard, Offensive, Defensive] <^> [Command, Buff]
     Team Failing
-        [] <^> []
+        [BodyGuard, Defensive] <^> [Buff, Command]
     Team Suceeding
-        [] <^> []
+        [BodyGuard, Offensive] <^> [Buff]
     Critical Health
-        [] <^> []
+        [Defensive] <^> [Command]
     Special
         [] <^> []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Sentinel
     !!!!!!!!!! + DEF !!!!!!!!!!
-    > 
-    / 
+    > Honorable, defending those who need it most. Have a stat appropriate Chivalrous Action
+        If below 50% hp and haven't been healed for 2 turns, start to fall back
+
+    Chivalry: 
+        Honorable = Ally cannot die unless you do. While ally is at 1 hp, take x2 damage
+        Undaunting = Allies get 20% damage reduction, you gain 60% damage reduction. 
+            Cannot evade or move.
+        Immense Courage = Become invincible for 3 turns. Dmg dealt reduced by 60%
+        Living Dead = Health will not fall below 1 health. 
+            Be healed to full or otherwise start to bleed out in 3 turns, at 20% Blood.
+        Glorious Embrace = Charitable Soul but works on self too 
+            (Includes high REC buff to permanent stats)
+        Magnanimity = Hurt self to give ally a massive DEF and REC buff + 50% damage reduction
+            for 1 turn
+        Undeniable Benevolance = Bleed out self to 50% Blood, 
+            All allies are invincible for 2 trns + 1 trn per 500 DEF. Max 5 trns
+    / high STR/DEX enemies | low DEF/HP/EVA allies
     Regular
-        [] <^> []
+        [Defensive, Offensive, Status Effects] <^> [Sacrificial, Buff]
     Team Failing
-        [] <^> []
+        [Heal(Chivalry), Defensive, Defensive Status Effects] <^> [Sacrificial(hurt self for others)]
     Team Suceeding
-        [] <^> []
+        [Offensive, Status Effects] <^> [Buff]
     Critical Health
-        [] <^> []
+        [Defensive, Heal(Chivalry)] <^> [Sacrificial]
     Special
         [] <^> []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Fragile
+Devilish
     !!!!!!!!!! - DEF !!!!!!!!!!
-    > 
-    / 
+    > Specializes in pure offense, and pawns off damage to easily manipulated allies
+        Always gains a move to have an ally take a hit for them
+        Will attack gauges of allies to ease ability of control
+        ITMD, FEAR buff and TRES, HP, REC debuff
+    / low DEF/EVA/REC/HUN/FEAR/TRES enemies | High DEF/EVA and low TRES/FEAR/ITMD allies
     Regular
-        [] <^> []
+        [Offensive, Command, Status Effects] <^> [Gauge Effects, Debuff, Summon]
     Team Failing
-        [] <^> []
+        [Command, Offensive] <^> [Debuff, Summon, Gauge Damage(Allies)]
     Team Suceeding
-        [] <^> []
+        [Offensive, Status Effects] <^> [Debuff, Gauge Effects]
     Critical Health
-        [] <^> []
+        [Selfish Status Effects, Command] <^> [Summon]
     Special
         [] <^> []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Buff
     !!!!!!!!!! + STR !!!!!!!!!!
-    > 
+    > Likes showing off, manipulating the landscape, objects and people
+        Gains a move to create a wall from slamming the ground
+        Enjoys shoving and getting attention from allies
+        Getting supported by allies Heals HP and TRES for self
+        Gains 'FLEX' stance to reflect attack and stack STR+HP buffs 
+        small CHA, ITMD, buff and AP nerf 
     / 
     Regular
-        [] <^> []
+        [Offensive, Gauge Effect, Buff] <^> [Defensive, Command]
     Team Failing
-        [] <^> []
+        [Gauge Heal, Offensive] <^> [Defensive]
     Team Suceeding
-        [] <^> []
+        [Offensive, Buff, Gauge Damage] <^> [Command]
     Critical Health
-        [] <^> []
+        [Buff, Selfish Gauge Heal, Offensive] <^> [Defensive]
     Special
         [] <^> []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Wimpy
     !!!!!!!!!! - STR !!!!!!!!!!
-    > 
-    / 
+    > Focuses on utility and avoids controntation as much as possible
+        Will cower behind allies that best resist the incoming attack
+        EVA, DEX buff, ITMD, CHA, FEAR nerf
+    / low HP & high EVA enemies | high DEF/STR/REC/INT/ITMD allies
     Regular
-        [] <^> []
+        [Alterations, Status Effects, Offensive, Defensive] <^> [Alert, Pacify, Heal]
     Team Failing
-        [] <^> []
+        [Status Effects, Buffs, Defensive] <^> [Heal, Alert]
     Team Suceeding
-        [] <^> []
+        [Offensive, Alterations, Status Effects] <^> [Pacify]
     Critical Health
-        [] <^> []
+        [Defensive, Status Effect] <^> [Pacify, Alert]
     Special
         [] <^> []
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -507,17 +575,8 @@ Wimpy
 Bland
     > No particular focus. Jack of all trades
         Stats are balanced out
-    / 
-    Regular
-        [] <^> []
-    Team Failing
-        [] <^> []
-    Team Suceeding
-        [] <^> []
-    Critical Health
-        [] <^> []
-    Special
-        [] <^> []
+        Use any move no matter the circumstance
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

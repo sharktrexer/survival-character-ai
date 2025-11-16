@@ -14,9 +14,7 @@ class Behavior:
     
     def execute(self, user:BattlePeep, target:BattlePeep):
         '''
-        Returns target to user if this behavior is for self
-        
-        Doesn't do anything else
+        The core of behavior logic
         '''
         if self.for_self:
             return user
@@ -344,6 +342,10 @@ class BattleAction():
     def __repr__(self):
         return f"BattleAction(name={self.name}, ap_cost={self.ap}, behaviors={self.behaviors})"
     
+    def __str__(self):
+        flexible_suffix = "(Flexible)" if self.flexible else ""
+        return f'{self.name} = {self.ap} AP {flexible_suffix}'
+    
                 
     def reset_behaviors(self):
             self.behaviors_modified = copy.deepcopy(self.behaviors)
@@ -359,7 +361,15 @@ class BattleAction():
         #TODO: what is default    
         #return "dmg"
         
-    def cast(self, user:BattlePeep, target:BattlePeep, ap_spent:int=0):
+    def cast(self, user:BattlePeep, target:BattlePeep, ap_spent:int):
+        '''
+        Calls of behaviors of the action utilizing passed in info
+        
+        @param user: user of the action
+        @param target: target of the action
+        @param ap_spent: amount of AP spent to cast this move. Only useful if this action is flexible
+            as it dictates how many 'uses' of this action's behavior's
+        '''
         
         if self.flexible and ap_spent % self.ap != 0:
             raise Exception("This action's cost must be a factor of ap_spent")
@@ -428,6 +438,8 @@ class BattleAction():
             
             '''
             EXECUTE
+            
+            If flexible, pass in ap spent divided by ap cost (how many 'uses')
             '''
             if isinstance(behavior, FlexibleAPBehavior):
                 behavior.execute(user, target, ap_spent//self.ap)   

@@ -2,7 +2,7 @@ import copy
 from sims.simulator import Simulator
 from collections import defaultdict
 
-from battle.battle_manager import BattleManager
+from battle.battle_manager import BattleManager, MoveChoice, BattleAI, BattleAction
 from battle.battle_peep import BattlePeep
 from battle.stats import Stat, make_stat
 from battle.peep_manager import PeepManager
@@ -150,7 +150,7 @@ class BattleSimulator(Simulator):
             verb_str = "Add"
         
         #TODO: choices should have more info on char, like init, etc
-        choices = VALID_NAMES if do_add else self.battler.get_member_names()
+        choices = copy.deepcopy(VALID_NAMES) if do_add else self.battler.get_member_names()
             
         if not choices:
             print("No members to remove.")
@@ -182,6 +182,8 @@ class BattleSimulator(Simulator):
                 suffix = "" if peep_copy_tracker[peep.name] == 0 else f" {peep_copy_tracker[peep.name]}"
                 peep_copy_tracker[peep.name] += 1
                 peep.name = f"{peep.name}{suffix}"
+                
+                peep.is_player = bool(self.get_choice(["No", "Yes"], prompt=f"Do you want to manually control {peep.name}?"))
                 
                 
             self.battler.change_member_list(peep, do_add)
@@ -216,7 +218,76 @@ class BattleSimulator(Simulator):
         if self.battler.rounds == 0:
             self.battler.start_round()
         
-        self.battler.next_round()
+        self.battler.rounds += 1
+        
+        print("\n~Round " + str(self.battler.rounds) + "~")
+        
+        for peep in sorted(self.battler.members, key = lambda peep: peep.initiative(), reverse=True):
+            self.battler.peep_start_turn(peep)
+            moves = None
+            if peep.is_player:  
+                moves = self.get_player_moves(peep)
+                
+            self.battler.peep_turn(peep, moves)
+        
+        # update anchor after round    
+        self.battler.get_anchor_init()
+    
+    def get_player_moves(self, peep:BattlePeep):
+        # pick a move
+            # if flexible, pick how much ap to use
+            # pick a target (default to self if move is self only)
+                # give enemies if damage, allies if heal
+            # force end turn if no more ap, no more moves, or 3 moves have been chosen
+        # end turn
+        peep_move_state = BattleAI(peep)
+        
+        while peep_move_state.can_still_cast:
+            
+            completed_move = MoveChoice(None, None, 0)
+            
+            ''' Get Move Choice'''
+            prompt = f"Choose a move for {peep.name} | {peep_move_state.my_ap}/{peep.stats.get_stat_resource("ap")} AP | {len(peep_move_state.choices)}/3 Moves Used:"
+            action_choice:BattleAction = self.get_choice_with_exit(peep_move_state.moves, prompt=prompt)
+            if action_choice == None:
+                return peep_move_state.choices
+            
+            completed_move.move = action_choice
+            
+            ''' Get Flexibility Ap Usage'''
+            if action_choice.flexible:
+                num_of_uses = peep_move_state.my_ap // action_choice.ap
+                
+                desired = {'uses':0}
+                cond = [lambda x: x >= 1 and x <= num_of_uses]
+                
+                print(f"How many times would you like to use {action_choice.name}?",
+                      f"The number of uses must be between 1 and {num_of_uses} (inclusive).")
+                self.obtain_number_inputs(input_form_dict=desired, conds=cond)
+                
+                completed_move.ap_spent = action_choice.ap * int(desired['uses'])
+                
+            ''' Get Target '''
+            if action_choice.for_self:
+                completed_move.target = peep
+            else:
+                # get enemies or allies based on move
+                get_same_team = action_choice.action_type == "heal"
+                prompt = f"Choose a target for {action_choice.name}:"
+                valid_targs = self.battler.get_members_by_team(peep.team, get_same_team)
+                targ_choice_ind = self.get_choice(choices=valid_targs, prompt=prompt)
+                target_choice = valid_targs[targ_choice_ind]
+                
+                completed_move.target = target_choice
+            
+            ''' Get Ap Spent If Not Flexible'''    
+            if completed_move.ap_spent == 0:
+                completed_move.ap_spent = action_choice.ap
+                
+            peep_move_state.update_peep_move_state(completed_move)
+            
+        return peep_move_state.choices
+            
         
     def simulate_multiple_rounds(self):
         
@@ -273,8 +344,7 @@ class BattleSimulator(Simulator):
                   "You should add some peeps using the modify battle option.")
         return no_peeps
     
-    def choose_player(self):
-        pass
+
         
 
 '''

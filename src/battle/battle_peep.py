@@ -73,6 +73,7 @@ class BattlePeep():
         return self.stats.initiative()
     
     def recieve_alt(self, alt: Alteration):
+        # reduce debuff effectiveness depending on how high hunger resource is
         self.stats.apply_alteration(alt)
         
     def cleanse_alt(self, alt: Alteration):
@@ -297,7 +298,7 @@ class BattleHandler():
         
         temp = self.bleed_out
         self.bleed_out = int(self.bleed_out - self.bleed_out_max * 0.1)
-        print(f"bleed out: {temp} -> {self.bleed_out}")
+        
         
         if self.bleed_out <= 0:
             self.die()
