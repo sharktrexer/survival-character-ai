@@ -1,4 +1,5 @@
 import copy
+from enum import Enum, auto
 from typing import Callable
 from .battle_peep import BattlePeep, Damage, Peep_State
 from .damage import create_dmg_preset, create_specific_phys_dmg
@@ -289,11 +290,14 @@ class DMG_MULT(Flag):
 
 ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Battle Action ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~''' 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 class BattleAction():
-    def __init__(self, name:str, ap_cost:int, behaviors:list[Behavior], ap_flexible:bool = False):
+    def __init__(self, name:str, ap_cost:int, behaviors:list[Behavior],
+                 valid_targets:list[TargetTypes] = [], 
+                 ap_flexible:bool = False):
         self.name = name
         self.ap = ap_cost
+        self.valid_targs = valid_targets
         # ap_flexible means for every ap_cost passed into the cast, its effects will occur
         # what each ap does is up for the FlexibleBehaviors to decide
         self.flexible = ap_flexible
@@ -505,25 +509,8 @@ class BattleAction():
                 
         return stat_2_dmg_dict
         
-'''
-basic_heal = BattleAction("Heal",[
-    DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
-])
-
-basic_dmg = BattleAction("Attack",[
-    DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
-])
-            
-rat_chz = BattleAction("Cheese Plate",[
-    DealDamage(create_dmg_preset(0.3, Damage.DamageType.Healing), for_self=True),
-    DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
-])
-
-knife_stab = BattleAction("Knife Stab",[
-    AugmentDamage(create_specific_phys_dmg(0.8, 'dex')),
-    AugmentDamage(create_specific_phys_dmg(0.1, 'int')),
-    DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical)),
-])
-
-
-'''
+class TargetTypes(Enum):
+    SELF = auto()
+    ALLY = auto()
+    ENEMY = auto()
+    OBJECT = auto()

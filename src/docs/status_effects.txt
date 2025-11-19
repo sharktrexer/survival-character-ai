@@ -1,0 +1,12 @@
+Charm
+    1 stack - lose 1/3 actions for turn to be used by applyer
+    5 stacks - lose 2 actions
+    10 stacks - lose 3 
+
+    If target has stacks of Charm from multiple applier's:
+        The applier with the most stacks takes precedent
+    If stacks are tied or >3 actions are trying to be charmed away:
+        No applier can impose their will. 
+        The charmed target's actions can't be controlled by anyone, but are still held back
+        If all actions of the charmed are held back, All 10+ stacks are reduced to 5, 
+            giving the charmed back one action to utillize again

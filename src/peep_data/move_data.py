@@ -2,7 +2,7 @@
 Here will contain all move sets for all peeps
 '''
 from battle.alteration import AlterationFactory
-from battle.battle_action import (BattleAction, Damage, Peep_State, 
+from battle.battle_action import (BattleAction, Damage, Peep_State, TargetTypes, 
                                   create_dmg_preset, create_specific_phys_dmg, 
                                   DealDamage, AugmentDamage, GainEvasionHealth, Condition, ChangeState,
                                   ReduceEvasionHealth, GainDefenseHealth, ApplyAlteration,
@@ -12,33 +12,40 @@ UNIVERSAL_MOVES = [
 
     BattleAction("Attack", 6, [
         DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
-        ]),
+        ],
+                 valid_targets=[TargetTypes.ENEMY],),
     
     BattleAction("Magic", 6, [
         DealDamage(create_dmg_preset(0.6, Damage.DamageType.Magical))
-        ]),
+        ],
+                 valid_targets=[TargetTypes.ENEMY],),
     
     BattleAction("Heal", 8, [
         UNEVADABLE(),
         DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
-        ]),
+        ],
+                 valid_targets=[TargetTypes.ALLY, TargetTypes.SELF],
+                 ),
     
     BattleAction("Evade", 1, [
         # give evasion health
         GainEvasionHealth(0.3, for_self=True),
         ],
+        valid_targets=[TargetTypes.SELF],
         ap_flexible=True),
     
     BattleAction("Block", 1, [
         # Give defense health
         GainDefenseHealth(0.3, for_self=True),
         ],
+        valid_targets=[TargetTypes.SELF],
         ap_flexible=True),
     
     BattleAction('Bulwark', 5, [
         # give lots of defense health, but requires more investment
         GainDefenseHealth(1.85, for_self=True),
         ],
+        valid_targets=[TargetTypes.SELF],
         ap_flexible=True),
     
     BattleAction('Harden', 3, [
@@ -48,7 +55,9 @@ UNIVERSAL_MOVES = [
             (
                 "def", 1.5, 1 ), 
             for_self=True),
-        ]),
+        ],
+        valid_targets=[TargetTypes.SELF],
+        ),
     
     BattleAction("Shove", 5, [
         UNEVADABLE(),
@@ -70,14 +79,18 @@ UNIVERSAL_MOVES = [
         ),
         ChangeState(Peep_State.KNOCKED_DOWN),
         DealDamage(create_dmg_preset(0.25, Damage.DamageType.Physical)),
-        ]),
+        ],
+        valid_targets=[TargetTypes.ENEMY],),
 ]
 
 ''' Enemy moves '''
 RAT_MOVES = [
     BattleAction("Bite", 3, [
         DealDamage(create_dmg_preset(0.95, Damage.DamageType.Physical))
-    ]),
+    ],
+    valid_targets=[TargetTypes.ENEMY],
+    ),
+
     
     BattleAction("Scurry", 4, [
         ApplyAlteration(
@@ -85,13 +98,15 @@ RAT_MOVES = [
             "eva", 1.5, 2), 
         for_self=True),
         GainEvasionHealth(0.6, for_self=True)
-    ]),
+    ],
+    valid_targets=[TargetTypes.SELF],),
     
     BattleAction("Cheese Bounty", 6, [
         DealDamage(create_dmg_preset(0.4, Damage.DamageType.Healing), for_self=True),
         DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
         
-    ]),
+    ],
+                 valid_targets=[TargetTypes.ALLY],),
     
     BattleAction('Caca Time', 4, [
         # attack stress gauge
@@ -99,16 +114,18 @@ RAT_MOVES = [
         AlterationFactory.create_alteration(
             "def", 1.5, 2), 
         for_self=True),
-    ]),
+    ],
+                 valid_targets=[TargetTypes.SELF],),
     
     BattleAction("Mighty Squeak", 8, [
         # Summon rat if rat hole present
     ]),
     
     BattleAction("RATATOUILLE", 8, [
-        # Give allies regen
+        # Give allies regen. +30% for 2 trns
         # heal all allies stress health
-    ])
+    ],
+                 valid_targets=[TargetTypes.ALLY],)
     ]
 
 
@@ -121,11 +138,15 @@ HUMAN_MOVES = [
     BattleAction("Punch", 2, [
         AugmentDamage(create_specific_phys_dmg(0.1, 'dex')),
         DealDamage(create_dmg_preset(0.2, Damage.DamageType.Physical))
-        ]),
+        ],
+                 valid_targets=[TargetTypes.ENEMY],
+                 ),
     BattleAction("Kick", 3, [
         AugmentDamage(create_specific_phys_dmg(0.15, 'eva')),
         DealDamage(create_dmg_preset(0.3, Damage.DamageType.Physical))
-        ]),
+        ],
+                 valid_targets=[TargetTypes.ENEMY],
+                 ),
 ]
 
 SEAN_MOVES = [
@@ -138,7 +159,8 @@ SEAN_MOVES = [
             YesCondition(),
             AugmentDamage(create_specific_phys_dmg(0.4, 'dex')),
             DealDamage(create_dmg_preset(0.3, Damage.DamageType.Physical))
-            ]),
+            ],
+                     valid_targets=[TargetTypes.ENEMY],),
 ]
 
 MOVE_SETS = {

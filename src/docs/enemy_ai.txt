@@ -1,0 +1,78 @@
+Require a comprehensive helper class to give helpful battle state info 
+and simulate casting of actions
+
+Simulating an action cast will produce vital info about its effect
+Before a simulation, all valid targets are gathered per each action
+This ensures uncastable actions are ignored
+
+Enemy can then compare the info against its goals to see if it a good move
+
+EXAMPLE 
+Goals:
+    Offensive, Defensive, Buff
+    Low def enemies | high rec allies
+    Selfishness: low
+
+Best Stats:
+    STR, DEF
+
+Worst Stat:
+    Int
+
+Allies:
+    low DEF, high REC Healer
+    Copy of Self
+
+Enemies:
+    low DEF 
+    high INT, DEF
+
+Moves:
+    > 0.5 Str, 0.5 Dex Attack 
+            (targ: low DEF enemy)
+    > 1 Int Attack
+            (targ: low DEF enemy)
+    > Block
+    > Evade
+    > Def Buff
+            (targ: low DEF Ally)
+
+
+
+TURN:
+    Gather best targets for each move first. 
+    If something force changes a target, that is ok, use the forced target in calcs.
+
+    Simulate moves:
+    
+    ACTION 1
+    >Str, DEX attack on low DEF Enemy = 15 dmg 
+        Compared with high priority Offensive Goal, x3 point(?), 
+        + 1 for amount of dmg calced with dmg / offensive stat value used = 1x3 = 3 points
+    >int attack on low DEF enemy = 5 dmg, ditto but +0.1 for damage = 0.1x3 = 0.3 points
+    >Block = 50 defP for self
+        Ap used on flexible move determined by defensive priority
+            Since 2nd priority, used 2/max priorities of Ap for cast
+        Compared to 2nd priority Defensive Goal, x2 point, 
+        defp / def stat used = 1.5 = 1x1.5 = 3 points 
+        If already have defP, AND gained defP < cur defp 
+            reduce points by -(cur defp/gained defp)
+    >Evade = 10 evaP
+        + x2 point
+        + 0.25 for little evahp gained = 0.5 points
+    >Def Buff = +20% Def for 3 trns
+        3rd priority = x1 points
+        per turn +0.5 = +1.5 
+        +0.2 per precent = +0.4 = 1.9 points
+        If prime target has buff already at high duration, -50% points
+        If haven't casted this in a while, +100% points
+
+    ACTION 2
+        if still cast, only travel through actions that are above or equal to median point
+        Median = 1.9
+        Look further into:
+            >Def Buff
+            >Block
+            >Str/Dex attack
+        Now go through simulate func again each,
+        passing in the user state
