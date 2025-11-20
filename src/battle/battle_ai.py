@@ -11,7 +11,7 @@ class MoveChoice:
         self.ap_spent = ap_spent
         
     def __repr__(self):
-        return f"MoveChoice(move={self.move}, target={self.target.name}, ap_spent={self.ap_spent})"
+        return f"{self.move}, {self.target.name} target, {self.ap_spent} spent)"
 
 class BattleAI:
     
@@ -36,13 +36,9 @@ class BattleAI:
         
         if enemies are looking low, try to finish them off
         
-        '''
+        '''            
         
-        if self.myself.is_player:
-            return self.what_player_do(battlers)
-            
-        
-        used_flex_move = False
+        used_flex_move = False # temporarily just use on for self move at a time
         
         # choose moves while energy remains, there are moves left, 
         # and less than 3 moves have been chosen
@@ -57,21 +53,15 @@ class BattleAI:
                 break
             
             # if only self moves are left then do them
-            for m in self.moves:
-                if m.for_self:
-                    do_self_move = True
-                else :
-                    do_self_move = False
-                    break
+            selfish_moves = [move for move in self.moves if move.for_self]
             
-            do_self_move = randint(0,1) or do_self_move
+            do_self_move = randint(0,1) and selfish_moves != []
             
             # coin flip to use a selfish move
             # depending on personality selfishness, will choose for self only moves
             # including moves that can be used on allies, but only targeting self
             # based on stats, choose to evade (eva) or block (def)
             if do_self_move:
-                selfish_moves = [move for move in self.moves if move.for_self]
                 random_move = selfish_moves[randint(0, len(selfish_moves)-1)]
                 
                 if random_move.flexible:

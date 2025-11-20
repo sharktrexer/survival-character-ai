@@ -344,7 +344,7 @@ class BattleAction():
         self.action_type = self.get_action_type()
     
     def __repr__(self):
-        return f"BattleAction(name={self.name}, ap_cost={self.ap}, behaviors={self.behaviors})"
+        return f"{self.name}, {self.ap} cost, {self.behaviors})"
     
     def __str__(self):
         flexible_suffix = "(Flexible)" if self.flexible else ""

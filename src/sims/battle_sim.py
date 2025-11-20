@@ -222,13 +222,69 @@ class BattleSimulator(Simulator):
         
         print("\n~Round " + str(self.battler.rounds) + "~")
         
+        # members by initiative
         for peep in sorted(self.battler.members, key = lambda peep: peep.initiative(), reverse=True):
+            
+            # start turn
             self.battler.peep_start_turn(peep)
-            moves = None
+
+            # player or AI moves
             if peep.is_player:  
                 moves = self.get_player_moves(peep)
+            else:
+                peep_brain = BattleAI(peep)
+                peep_brain.what_do(self.battler.members)
+                moves = peep_brain.choices
+            
+            
+            ''' Action Loop'''
+            for action in moves:
                 
-            self.battler.peep_turn(peep, moves)
+                # ap usage info
+                ap_calc = peep.stats.get_stat_resource('ap')
+                print(f'({ap_calc} -> {ap_calc - action.ap_spent} AP spent)', end=" ") 
+                
+                # basic action info
+                if peep.name != action.target.name:
+                    print(f'{peep.name} used {action.move.name}' + f' on {action.target.name}', end=" ")
+                else:
+                    print(f'{peep.name} used {action.move.name}', end=" ")  
+                
+                #past info
+                target = action.target
+                target_past = copy.deepcopy(target)
+                
+                # let the peep cast
+                self.battler.peep_action(peep, action)
+                
+                ''' Obtain What the move did to the target '''
+                affected_targ_stance = target.battle_handler.stance != target_past.battle_handler.stance
+                affected_targ_hp = target.stats.get_stat_resource('hp') != target_past.stats.get_stat_resource('hp')
+                affected_targ_defAp = target.battle_handler.defense_health != target_past.battle_handler.defense_health
+                affected_targ_evaAp = target.battle_handler.evasion_health != target_past.battle_handler.evasion_health
+                affected_targ_bleed = target.battle_handler.bleed_out != target_past.battle_handler.bleed_out
+                
+                # printing action effect
+                if affected_targ_stance:
+                    print(f'({target_past.battle_handler.stance} -> {target.battle_handler.stance})', end=" ")
+                
+                if affected_targ_evaAp:
+                    print(f'({target_past.battle_handler.evasion_health} -> {target.battle_handler.evasion_health} EvaP)', end=" ")
+                    
+                if affected_targ_defAp:
+                    print(f'({target_past.battle_handler.defense_health} -> {target.battle_handler.defense_health} DefP)', end=" ")
+                    
+                if affected_targ_hp:
+                    print(f'({target_past.stats.get_stat_resource("hp")} -> {target.stats.get_stat_resource("hp")} HP)', end=" ")
+                    
+                if affected_targ_bleed:
+                    print(f'({target_past.battle_handler.bleed_out} -> {target.battle_handler.bleed_out} Bleed)', end=" ")
+                print()
+            
+            # END TURN
+            self.battler.peep_end_turn(peep)   
+            print()
+            t.sleep(0.01)
         
         # update anchor after round    
         self.battler.get_anchor_init()

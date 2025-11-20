@@ -71,6 +71,18 @@ def populate_xp_dict():
     
 populate_xp_dict()
 
+class GrowingStat:
+    def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
+        # Naming
+        self.name = name
+        self.abreviation = abreviation
+        self.ex_names = ex_names
+        
+        # Numericals
+        self.value = val
+        self.apt = apt
+        self.apt_exp = 0 
+
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
         """
@@ -116,7 +128,7 @@ class Stat:
                 + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
     
     def __repr__(self):
-        return f"Stat(name={self.name!r}, val={self.value!r}, apt={self.apt!r})"
+        return f"{self.name} Stat, val={self.value}, apt={self.apt})"
     
     ''' 
                                 HELPER FUNCTIONS

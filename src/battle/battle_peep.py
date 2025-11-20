@@ -21,7 +21,7 @@ class BattlePeep():
         return self.name
     
     def __repr__(self):
-        return f"BattlePeep(name={self.name}, stats_dict={self.stats.__dict__}, team={self.team})"
+        return f"{self.name}, team={self.team}, stats_dict={self.stats.__dict__}, )"
     
     def get_info_as_str(self):
         peep_info = self.name + ":\n"
@@ -92,9 +92,7 @@ class BattlePeep():
         if evasion.apt >= 4:
             self.change_evasion_health(evasion.val_active // 3)    
         
-         
-    
-    def turn(self):
+    def start_turn(self):
         # Evasion health decays when turn begins (excluding starting evasion)
         if self.turns_passed != 0:
             self.battle_handler.evasion_health = 0

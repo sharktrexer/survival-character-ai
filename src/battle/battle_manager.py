@@ -1,7 +1,7 @@
 import copy
 import random
 import time
-from .battle_peep import BattlePeep, Peep_State
+from .battle_peep import BattlePeep, Peep_State, sn
 from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, rat_chz
 from .battle_ai import BattleAI, MoveChoice
 
@@ -58,10 +58,10 @@ class BattleManager():
         for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
             peep.start()
     
-    def peep_start_turn(self, peep:BattlePeep):
+    def peep_start_turn(self, peep:BattlePeep, user_results:dict[str, int] = {}):
         peep_past = copy.deepcopy(peep)
         
-        peep.turn()
+        peep.start_turn()
         
         self_evade_decayed = peep_past.battle_handler.evasion_health != peep.battle_handler.evasion_health
         self_bleed = peep_past.battle_handler.bleed_out != peep.battle_handler.bleed_out
@@ -87,75 +87,24 @@ class BattleManager():
         
         
     
-    def peep_turn(self, peep:BattlePeep, moves:list[MoveChoice] = None):
+    def peep_action(self, peep:BattlePeep, move:MoveChoice):
+        ''' Perform One Move '''
+        move.move.cast(peep, move.target, move.ap_spent)
+        peep.stats.resource_change('ap', -move.ap_spent)
         
-        if moves == None:
-            peep_ai = BattleAI(peep)
-            peep_ai.what_do(self.members)
-            
-            chosen_moves = peep_ai.choices
-        else:
-            chosen_moves = moves
         
-        for cm in chosen_moves:
-            
-            ap_calc = peep.stats.get_stat_resource('ap')
-            
-            
-            cur_move, chosen_targ = cm.move, cm.target
-            
-            target_name = chosen_targ.name
-            
-            print(f'({ap_calc} -> {ap_calc - cm.ap_spent} AP spent)', end=" ")
-            
-            #value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
-            if peep.name != target_name:
-                print(f'{peep.name} used {cur_move.name}' + f' on {target_name}', end=" ")
-            else:
-                print(f'{peep.name} used {cur_move.name}', end=" ")
-            
-            # get target by provided name
-            target:BattlePeep = None
-            for member in self.members:
-                if member.name == target_name:
-                    target = member
-                    break
-            
-            target_past = copy.deepcopy(target)
-            
-            ''' Perform Move '''
-            cur_move.cast(peep, target, cm.ap_spent)
-            peep.stats.resource_change('ap', -cm.ap_spent)
-            
-            ''' Obtain What the move did to the target '''
-            affected_targ_stance = target.battle_handler.stance != target_past.battle_handler.stance
-            affected_targ_hp = target.stats.get_stat_resource('hp') != target_past.stats.get_stat_resource('hp')
-            affected_targ_defAp = target.battle_handler.defense_health != target_past.battle_handler.defense_health
-            affected_targ_evaAp = target.battle_handler.evasion_health != target_past.battle_handler.evasion_health
-            affected_targ_bleed = target.battle_handler.bleed_out != target_past.battle_handler.bleed_out
-            
-            # printing action effect
-            if affected_targ_stance:
-                print(f'({target_past.battle_handler.stance} -> {target.battle_handler.stance})', end=" ")
-            
-            if affected_targ_evaAp:
-                print(f'({target_past.battle_handler.evasion_health} -> {target.battle_handler.evasion_health} EvaP)', end=" ")
-                
-            if affected_targ_defAp:
-                print(f'({target_past.battle_handler.defense_health} -> {target.battle_handler.defense_health} DefP)', end=" ")
-                
-            if affected_targ_hp:
-                print(f'({target_past.stats.get_stat_resource("hp")} -> {target.stats.get_stat_resource("hp")} HP)', end=" ")
-                
-            if affected_targ_bleed:
-                print(f'({target_past.battle_handler.bleed_out} -> {target.battle_handler.bleed_out} Bleed)', end=" ")
-            print()
-            
         
+    
+    def peep_turn(self, peep:BattlePeep, moves:list[MoveChoice]):
+        
+        for cm in moves:
+            self.peep_action(peep, cm)
+            
+        self.peep_end_turn(peep)
+            
+     
+    def peep_end_turn(self, peep:BattlePeep):
         peep.end_turn()
-        print()
-        time.sleep(0.01)
-        
         
     # def next_round(self):
     #     self.rounds += 1
