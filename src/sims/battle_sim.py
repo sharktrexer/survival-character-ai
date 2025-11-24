@@ -1,11 +1,13 @@
 import copy
+from battle.alteration import AP_BUFF
 from sims.simulator import Simulator
 from collections import defaultdict
 
-from battle.battle_manager import BattleManager, MoveChoice, BattleAI, BattleAction
-from battle.battle_peep import BattlePeep
+from battle.battle_manager import BattleData, BattleManager, MoveChoice, BattleAction
+from battle.battle_peep import BattlePeep, Peep_State as state
 from battle.stats import Stat, make_stat
 from battle.peep_manager import PeepManager
+from battle.battle_ai import BattleAI
 
 from peep_data.data_reader import PEEPS
 
@@ -194,7 +196,7 @@ class BattleSimulator(Simulator):
                 choices.remove(peep_name)
             
             print(f"\n{verb_str} more!")
-            t.sleep(0.2)
+            t.sleep(0.01)
             
 
     def print_current_peeps(self):
@@ -202,8 +204,9 @@ class BattleSimulator(Simulator):
         if not self.battler.members:
             print("None")
             return
+        
         for p in self.battler.members:
-            print("[",p.name, "] with init: ", str(p.initiative()))
+            print(f"[{p.get_label_as_str()}] with init: ", str(p.initiative()))
             
     def print_spawn_options(self):
         print("~Spawnables~")
@@ -227,9 +230,14 @@ class BattleSimulator(Simulator):
             
             # start turn
             self.battler.peep_start_turn(peep)
+            
+            if AP_BUFF in peep.stats.get_stat_cur('ap').buffs:
+                print(f'Gained AP BUFF due to initiative!')
 
-            # player or AI moves
-            if peep.is_player:  
+            # player or AI moves or no moves
+            if peep.stance() == state.DEAD or peep.stance() == state.BLEEDING_OUT:
+                moves = []
+            elif peep.is_player:  
                 moves = self.get_player_moves(peep)
             else:
                 peep_brain = BattleAI(peep)
@@ -238,47 +246,50 @@ class BattleSimulator(Simulator):
             
             
             ''' Action Loop'''
-            for action in moves:
+            for ac in moves:
+        
+                # !BATTLEDATA!
+                target = ac.target
+                bd = BattleData(copy.deepcopy(peep), copy.deepcopy(target))
                 
-                # ap usage info
-                ap_calc = peep.stats.get_stat_resource('ap')
-                print(f'({ap_calc} -> {ap_calc - action.ap_spent} AP spent)', end=" ") 
                 
-                # basic action info
-                if peep.name != action.target.name:
-                    print(f'{peep.name} used {action.move.name}' + f' on {action.target.name}', end=" ")
-                else:
-                    print(f'{peep.name} used {action.move.name}', end=" ")  
+                ''' THE BIG CAST '''
+                self.battler.peep_action(peep, ac)
+                ''' THE BIG CAST '''
                 
-                #past info
-                target = action.target
-                target_past = copy.deepcopy(target)
                 
-                # let the peep cast
-                self.battler.peep_action(peep, action)
+                bd.get_data_target(peep, target)
+                
+                peep_results = bd.user_diffs
+                targ_diffs = bd.targ_diffs
+                targ_changes = bd.targ_chges
                 
                 ''' Obtain What the move did to the target '''
-                affected_targ_stance = target.battle_handler.stance != target_past.battle_handler.stance
-                affected_targ_hp = target.stats.get_stat_resource('hp') != target_past.stats.get_stat_resource('hp')
-                affected_targ_defAp = target.battle_handler.defense_health != target_past.battle_handler.defense_health
-                affected_targ_evaAp = target.battle_handler.evasion_health != target_past.battle_handler.evasion_health
-                affected_targ_bleed = target.battle_handler.bleed_out != target_past.battle_handler.bleed_out
+                # ap usage info
+                print(f'({bd.user_b4.points_of("ap")} -> {peep.points_of("ap")} AP spent)', end=" ") 
+                
+                # basic action info
+                if peep.name != target.name:
+                    print(f'{peep.name} used {ac.move.name}' + f' on {target.name}', end=" ")
+                else:
+                    print(f'{peep.name} used {ac.move.name}', end=" ")  
+                
                 
                 # printing action effect
-                if affected_targ_stance:
-                    print(f'({target_past.battle_handler.stance} -> {target.battle_handler.stance})', end=" ")
+                if targ_diffs['dodge'] != 0:
+                    print(f'({bd.targ_b4.dodge()} -> {target.dodge()} Dodge)', end=" ")
+                    
+                if targ_diffs['armor'] != 0:
+                    print(f'({bd.targ_b4.armor()} -> {target.armor()} Armor)', end=" ")
+                    
+                if targ_diffs['health'] != 0:
+                    print(f'({bd.targ_b4.points_of("hp")} -> {target.points_of("hp")} HP)', end=" ")
                 
-                if affected_targ_evaAp:
-                    print(f'({target_past.battle_handler.evasion_health} -> {target.battle_handler.evasion_health} EvaP)', end=" ")
+                if targ_changes['stance'].new != targ_changes['stance'].old:
+                    print(f'({bd.targ_b4.stance()} -> {target.stance()})', end=" ")
                     
-                if affected_targ_defAp:
-                    print(f'({target_past.battle_handler.defense_health} -> {target.battle_handler.defense_health} DefP)', end=" ")
-                    
-                if affected_targ_hp:
-                    print(f'({target_past.stats.get_stat_resource("hp")} -> {target.stats.get_stat_resource("hp")} HP)', end=" ")
-                    
-                if affected_targ_bleed:
-                    print(f'({target_past.battle_handler.bleed_out} -> {target.battle_handler.bleed_out} Bleed)', end=" ")
+                if targ_diffs['blood'] != 0:
+                    print(f'({bd.targ_b4.blood()} -> {target.blood()} Bleed)', end=" ")
                 print()
             
             # END TURN
@@ -289,13 +300,14 @@ class BattleSimulator(Simulator):
         # update anchor after round    
         self.battler.get_anchor_init()
     
+    ''' TODO: option to choose 
+    OFFENSIVE (attacks, gauge attacks, debuff, negative status) 
+    DEFENSIVE (defends, heal, gauge heal, buff, positive status)
+    ACTION [affects objs or envrionment] 
+        (Barricade, Perceive, Interact, Shove, Throw, Pick Up, Summon)
+    SOCIAL (Alert, suggest, command, bargain)
+    '''
     def get_player_moves(self, peep:BattlePeep):
-        # pick a move
-            # if flexible, pick how much ap to use
-            # pick a target (default to self if move is self only)
-                # give enemies if damage, allies if heal
-            # force end turn if no more ap, no more moves, or 3 moves have been chosen
-        # end turn
         peep_move_state = BattleAI(peep)
         
         while peep_move_state.can_still_cast:
@@ -303,7 +315,7 @@ class BattleSimulator(Simulator):
             completed_move = MoveChoice(None, None, 0)
             
             ''' Get Move Choice'''
-            prompt = f"Choose a move for {peep.name} | {peep_move_state.my_ap}/{peep.stats.get_stat_resource("ap")} AP | {len(peep_move_state.choices)}/3 Moves Used:"
+            prompt = f"Choose a move for {peep.name} | {peep_move_state.my_ap}/{peep.value_of("ap")} AP | {len(peep_move_state.choices)}/3 Moves Used:"
             action_choice:BattleAction = self.get_choice_with_exit(peep_move_state.moves, prompt=prompt)
             if action_choice == None:
                 return peep_move_state.choices
@@ -324,9 +336,10 @@ class BattleSimulator(Simulator):
                 completed_move.ap_spent = action_choice.ap * int(desired['uses'])
                 
             ''' Get Target '''
-            if action_choice.for_self:
+            if action_choice.for_self_only:
                 completed_move.target = peep
             else:
+                #TODO: if no valid allies, then don't provide ally only moves!
                 # get enemies or allies based on move
                 get_same_team = action_choice.action_type == "heal"
                 prompt = f"Choose a target for {action_choice.name}:"
@@ -346,6 +359,9 @@ class BattleSimulator(Simulator):
             
         
     def simulate_multiple_rounds(self):
+        
+        if self.check_if_no_peeps():
+            return
         
         prpmt = "Would you like to simulate rounds fast?"
         bool_fast = self.get_choice(["No", "Yes"], prompt=prpmt)

@@ -6,10 +6,9 @@ from battle.battle_action import (BattleAction, Damage, Peep_State, TargetTypes,
                                   create_dmg_preset, create_specific_phys_dmg, 
                                   DealDamage, AugmentDamage, GainEvasionHealth, Condition, ChangeState,
                                   ReduceEvasionHealth, GainDefenseHealth, ApplyAlteration,
-                                  ReverseCondition, YesCondition, ABORT, CheckEvade, UNEVADABLE, DMG_MULT)
+                                  ReverseCondition, YesCondition, ABORT, AttackEvasion, UNEVADABLE, DMG_MULT)
 
-UNIVERSAL_MOVES = [
-
+TEST_MOVES = [
     BattleAction("Attack", 6, [
         DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
         ],
@@ -19,6 +18,11 @@ UNIVERSAL_MOVES = [
         DealDamage(create_dmg_preset(0.6, Damage.DamageType.Magical))
         ],
                  valid_targets=[TargetTypes.ENEMY],),
+]
+
+UNIVERSAL_MOVES = [
+
+    
     
     BattleAction("Heal", 8, [
         UNEVADABLE(),
@@ -62,19 +66,19 @@ UNIVERSAL_MOVES = [
     BattleAction("Shove", 5, [
         UNEVADABLE(),
         Condition((lambda me, tar: (
-            me.stats.get_stat_active("dex") > 
-            tar.stats.get_stat_active("eva") * tar.stats.get_resource_ratio("hp") +
+            me.value_of("dex") > 
+            tar.value_of("eva") * tar.stats.get_resource_ratio("hp") +
             tar.battle_handler.evasion_health // 4
             )), 
         ),
         ReduceEvasionHealth(0.25),
         ReverseCondition(),
-        CheckEvade(), 
+        AttackEvasion(), 
         ABORT(),
         Condition((lambda me, tar: (
-            me.stats.get_stat_active("str") * 1.5 > 
-            (tar.stats.get_stat_resource("hp") // 2) +
-            tar.stats.get_stat_active("def") * tar.stats.get_resource_ratio("hp")
+            me.value_of("str") * 1.5 > 
+            (tar.points_of("hp") // 2) +
+            tar.value_of("def") * tar.stats.get_resource_ratio("hp")
             )), 
         ),
         ChangeState(Peep_State.KNOCKED_DOWN),
@@ -90,7 +94,6 @@ RAT_MOVES = [
     ],
     valid_targets=[TargetTypes.ENEMY],
     ),
-
     
     BattleAction("Scurry", 4, [
         ApplyAlteration(
@@ -99,14 +102,16 @@ RAT_MOVES = [
         for_self=True),
         GainEvasionHealth(0.6, for_self=True)
     ],
-    valid_targets=[TargetTypes.SELF],),
+    valid_targets=[TargetTypes.SELF],
+    ),
     
     BattleAction("Cheese Bounty", 6, [
         DealDamage(create_dmg_preset(0.4, Damage.DamageType.Healing), for_self=True),
         DealDamage(create_dmg_preset(0.8, Damage.DamageType.Healing))
         
     ],
-                 valid_targets=[TargetTypes.ALLY],),
+                 valid_targets=[TargetTypes.ALLY],
+                 ),
     
     BattleAction('Caca Time', 4, [
         # attack stress gauge
@@ -115,17 +120,18 @@ RAT_MOVES = [
             "def", 1.5, 2), 
         for_self=True),
     ],
-                 valid_targets=[TargetTypes.SELF],),
+                 valid_targets=[TargetTypes.SELF],
+                 ),
     
-    BattleAction("Mighty Squeak", 8, [
-        # Summon rat if rat hole present
-    ]),
+    # BattleAction("Mighty Squeak", 8, [
+    #     # Summon rat if rat hole present
+    # ]),
     
-    BattleAction("RATATOUILLE", 8, [
-        # Give allies regen. +30% for 2 trns
-        # heal all allies stress health
-    ],
-                 valid_targets=[TargetTypes.ALLY],)
+    # BattleAction("RATATOUILLE", 8, [
+    #     # Give allies regen. +30% for 2 trns
+    #     # heal all allies stress health
+    # ],
+    #              valid_targets=[TargetTypes.ALLY],)
     ]
 
 
@@ -174,7 +180,7 @@ MOVE_SETS = {
     'Jayce': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Rebecca': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Sean': HUMAN_MOVES + UNIVERSAL_MOVES + SEAN_MOVES,
-    'Rat': UNIVERSAL_MOVES,
+    'Rat': UNIVERSAL_MOVES + RAT_MOVES,
     'Heavy Slime': UNIVERSAL_MOVES,
     'Ent': UNIVERSAL_MOVES,
     'Double Rat': UNIVERSAL_MOVES,

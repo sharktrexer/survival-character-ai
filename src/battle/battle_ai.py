@@ -1,17 +1,109 @@
+from collections import namedtuple
+from enum import Enum, auto
 from random import randint
 from battle.battle_peep import Peep_State
+from battle.battle_manager import BattleManager, MoveChoice
 from .battle_action import BattleAction, BattlePeep
 from peep_data.move_data import MOVE_SETS
 
-class MoveChoice:
+'''
+TARGETING
+Before each action, a prime ally and enemy target are chosen
+-Basic priority:
+    Enemies that are weak to your stats 
+        (High dex targets High Eva, High STR targets low DEF)
+    Allies that compensate for your weaknesses
+        (Low eva/def/rec targets high eva/def/rec)
+-Then the targets that meet the personality's stat criteria
+
+-Then custom criteria
+    Knocked down targets
+    Targets with x status effect
+    Targets with x% of resource
     
-    def __init__(self, move:BattleAction, target:BattlePeep, ap_spent:int):
-        self.move = move
-        self.target = target
-        self.ap_spent = ap_spent
-        
-    def __repr__(self):
-        return f"{self.move}, {self.target.name} target, {self.ap_spent} spent)"
+After simulating a 1/3 move per action on a target, 
+if overall points are low choose a new target
+and temporarily decrease target's targetability (they will not be targeted as much)
+'''
+
+
+'''
+QUIRK
+-Empathy: Ratio of Selfish (Target self) to Selfless (Target allies)
+    selfishness increase as critical health approaches
+-Stacking: how often they like to repeat effects
+-Focus: how often they stay focused on one target vs changing it up
+'''
+
+'''
+GOAL
+-Offensive: -Health, -Dodge, -Armor
+-Heal: +Health
+Above bases points on percent of dmg healed/dealt vs max health
+-Defensive: +Dodge, +Armor
+    more points given when unprotected or without much protection
+-Alteration: +Buff, +Debuff
+    recieve points based on power of Alteration
+    if target would be more affected by this Alteration
+    if it would refresh an almost expiring Alteration
+    
+
+'''
+
+'''
+> Offensive (Dealing damage to enemies)
+> Defensive (Gaining Defense or Evasion Health)
+> Heal (Restoring health back)
+> Status effect (Applying a status effect)
+    Defensive (reduce damage taken or prevent negative effects)
+    Offensive (deal damage or increase vulnerability)
+    Redirection (Force change the target of a recieved or outgoing action)
+        Pacify (Force target to target another, offensive moves are worse)
+        Taunt (Force target to target you, non-offensive moves are worse)
+        Counter
+        Bodyguard (Let self take damage for ally)
+        Hostage (Force a target to take damage for self)
+    Limitation (Preventing certain actions being cast)
+    Team Switching (Set a target to work for you or against others)
+    Trapping (Force attacker to be hurt if they try to attack)
+> Alteration (Applying an alteration)
+    Buff
+    Debuff
+> Gauge Effect (Affecting Fear, Stress, Energy, Hunger resources)
+    Damage
+    Heal
+> Socialize (Encourage allies to do something)
+    Suggest (Offer for the ally to combo with you)
+    Command (Force a target to use an action)
+        (Works when target has less ITMD/CHA Aptitude and high FEAR)
+        (Works best on targets afflicted with negative psychic effects)
+    Bargain (Offer a target something to get them to do something else)
+        (Can be used regardless of stat differences, though CHA helps)
+        (Offers could be Healing Gauges, Self locking out an action, etc)
+    Alert (Attract allies from other rooms or spawning objects)
+> Summon (Create new allies out of thin air)
+> Sacrificial (Hurting self for some benefit)
+> Stance Change (Change stance of something)
+    Dancing
+    Prone
+    Flying
+    Grappling
+'''
+
+class BattleAffects(Enum):
+    HEALTH = auto()
+    EVADE = auto()
+    ARMOR = auto()
+
+Desire = namedtuple('affect', 'sign')
+    
+class Goal:
+    def __init__(self, name:str, desires:list[BattleAffects], priority:int):
+        self.name = name
+        self.desires = desires
+        self.priority = priority
+
+
 
 class BattleAI:
     
@@ -21,7 +113,7 @@ class BattleAI:
         cleaned_name = self.myself.name.split()[0]
         self.moves:list[BattleAction] = MOVE_SETS[cleaned_name]
         self.choices:list[MoveChoice] = []
-        self.my_ap = self.myself.stats.get_stat_resource('ap')
+        self.my_ap = self.myself.points_of('ap')
         self.can_still_cast = True
 
     def what_do(self, battlers:list[BattlePeep]):
@@ -46,14 +138,14 @@ class BattleAI:
             
             # coin flip to save 50% ish of ap for next round
             save_ap = 0
-            if self.my_ap <= self.myself.stats.get_stat_active('ap') // 2:
+            if self.my_ap <= self.myself.value_of('ap') // 2:
                 save_ap = randint (0, 6)
             
             if save_ap > 1:
                 break
             
             # if only self moves are left then do them
-            selfish_moves = [move for move in self.moves if move.for_self]
+            selfish_moves = [move for move in self.moves if move.for_self_only]
             
             do_self_move = randint(0,1) and selfish_moves != []
             
@@ -89,12 +181,12 @@ class BattleAI:
             enemies = [battler for battler in battlers if battler.team != self.myself.team]
                 
             # only get alive peeps
-            allies_v = [ally for ally in allies if ally.battle_handler.stance != Peep_State.DEAD]
-            enemies_v = [enemy for enemy in enemies if enemy.battle_handler.stance != Peep_State.DEAD]
+            allies_v = [ally for ally in allies if ally.stance() != Peep_State.DEAD]
+            enemies_v = [enemy for enemy in enemies if enemy.stance() != Peep_State.DEAD]
             
             # sort peeps by hp
-            allies_by_hp = sorted(allies_v, key = lambda peep: peep.stats.get_stat_resource('hp')/peep.stats.get_stat_active('hp'), reverse=True)
-            enemies_by_hp = sorted(enemies_v, key = lambda peep: peep.stats.get_stat_resource('hp')/peep.stats.get_stat_active('hp'), reverse=True)
+            allies_by_hp = sorted(allies_v, key = lambda peep: peep.points_of('hp')/peep.value_of('hp'), reverse=True)
+            enemies_by_hp = sorted(enemies_v, key = lambda peep: peep.points_of('hp')/peep.value_of('hp'), reverse=True)
             
             heal_chance = 0.5
             dmg_chance = 0.5
@@ -102,7 +194,7 @@ class BattleAI:
             ''' MOVE TYPE CHOICE '''   
             chance_inc = 1 / len(allies_v)
             for a in allies_v:
-                if a.stats.get_stat_resource('hp')/a.stats.get_stat_active('hp') <= 0.5:
+                if a.points_of('hp')/a.value_of('hp') <= 0.5:
                     heal_chance += chance_inc 
                     dmg_chance -= chance_inc
                     # increase chance to pick a support move
@@ -127,7 +219,7 @@ class BattleAI:
                 do_heal = True
             
             # only get allies that have less than 75% hp
-            best_ally_targets = [ally for ally in allies_by_hp if ally.stats.get_stat_resource('hp')/ally.stats.get_stat_active('hp') <= 0.75]
+            best_ally_targets = [ally for ally in allies_by_hp if ally.points_of('hp')/ally.value_of('hp') <= 0.75]
             
             if do_heal:
                 random_target = best_ally_targets[randint(0, len(best_ally_targets)-1)]
@@ -157,3 +249,10 @@ class BattleAI:
         self.moves = [m for m in self.moves if self.my_ap >= m.ap]
         self.can_still_cast = self.my_ap > 0 and len(self.moves) > 0 and len(self.choices) < 3
         
+        
+def simulate(ai:BattleAI, battle:BattleManager):
+    # get ai state and battle data from each move
+    # calculate points based on goals
+    # call simulate again on moves where points >= median of points from all move
+    # return all simulates += moves for Ai to execute
+    pass

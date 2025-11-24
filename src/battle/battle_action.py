@@ -42,15 +42,17 @@ class DealDamage(Behavior):
     def execute(self, user:BattlePeep, target:BattlePeep):
         target = super().execute(user, target)
         
-        self.damage.give_value(user.stats.get_stat_active(self.damage.empowering_stat))
+        self.damage.give_value(user.value_of(self.damage.empowering_stat))
         
         # print(f"HIT: {self.damage.amount} (+{self.damage.ratio}/{self.damage.empowering_stat})",
         #       end=' ')
         
-        target.affect_hp(self.damage)
+        evaded = target.affect_hp(self.damage, attacker=user)
         
         self.damage.amount = 0
         self.damage.mult = 1.0
+        
+        return evaded
         
         
 class AugmentDamage(Behavior):
@@ -71,7 +73,7 @@ class AugmentDamage(Behavior):
         
         target = super().execute(user, target)
         
-        self.damage.give_value(user.stats.get_stat_active(self.damage.empowering_stat))
+        self.damage.give_value(user.value_of(self.damage.empowering_stat))
         
         # print(f"Augment: {self.damage.amount} ({self.damage.ratio}/{self.damage.empowering_stat})",
         #       end=' ')
@@ -89,10 +91,11 @@ class ChangeState(Behavior):
         
         target.change_state(self.state)
 
-class CheckEvade(Behavior):
+class AttackEvasion(Behavior):
     '''
-    Used to check if the target would evade whatever has this behavior
-    Automatically applied to the start of the behaviors list of an action that uses DealDamage
+    Used to attack the target's evasion health with user's dexterity
+    
+    Returns if target used evasion health to evade attack
     '''
     def __init__(self):
         self.for_self = False
@@ -115,7 +118,7 @@ class GainEvasionHealth(FlexibleAPBehavior):
     def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
         target = super().execute(user, target, ap)
         
-        amount = int(round(target.stats.get_stat_active("eva") * self.eva_mult)) * ap
+        amount = int(round(target.value_of("eva") * self.eva_mult)) * ap
         
         #print(f"EVA Health: +{amount}")
         
@@ -132,7 +135,7 @@ class GainDefenseHealth(FlexibleAPBehavior):
     def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
         target = super().execute(user, target, ap)
         
-        amount = int(round(target.stats.get_stat_active("def") * self.def_mult)) * ap
+        amount = int(round(target.value_of("def") * self.def_mult)) * ap
         
         #print(f"DEF Health: +{amount}")
         
@@ -298,24 +301,28 @@ class BattleAction():
         self.name = name
         self.ap = ap_cost
         self.valid_targs = valid_targets
-        # ap_flexible means for every ap_cost passed into the cast, its effects will occur
-        # what each ap does is up for the FlexibleBehaviors to decide
         self.flexible = ap_flexible
+        ''' flexible means any ap that is a factor of ap spent will provide extra effect.
+        what each ap factor does is up for the FlexibleBehaviors to decide '''
         self.behaviors = behaviors
         
         self.evadable = False
         self.unevadable = False
-        self.for_self = False
+        self.for_self_only = TargetTypes.SELF in valid_targets and len(valid_targets) == 1
+        '''
+        An action is for self when the only valid target is SELF.
+        '''
         
         # check that AugmentDamage(s) come before DealDamage (excluding Flags & Conditions) 
         # also while we're checking, if there is a DealDamage then this action is evadable
         # unless it is unevadable through behavior flag      
         auging = False
         for behavior in self.behaviors:
-            # check that non Flag, Condition behaviors are setting this action for self
-            if not isinstance(behavior, Flag) and not isinstance(behavior, Condition):
-                if behavior.for_self:
-                    self.for_self = True
+            # # check that non Flag, Condition behaviors are setting this action for self
+            # if not isinstance(behavior, Flag) and not isinstance(behavior, Condition):
+            #     if behavior.for_self:
+            #         self.for_self = True
+            #         #TODO: what if a move does something for self and target?
             
             if isinstance(behavior, AugmentDamage):
                 auging = True
@@ -328,8 +335,8 @@ class BattleAction():
             elif auging and not (isinstance(behavior, Condition) or isinstance(behavior, Flag)):
                 break
             
-        if self.evadable:
-            self.behaviors.insert(0, CheckEvade())
+        # if self.evadable:
+        #     self.behaviors.insert(0, AttackEvasion())
             
         if auging:
             raise Exception(
@@ -409,7 +416,7 @@ class BattleAction():
                 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'''
             
             # check if the target would evade this attack
-            if isinstance(behavior, CheckEvade):
+            if isinstance(behavior, AttackEvasion):
                 # stop cast if evaded
                 if behavior.execute(user, target):
                     return
@@ -434,11 +441,12 @@ class BattleAction():
                 auged_dmg += behavior.damage.amount
                 continue
             
-            # add aug dmg to DealDamage behavior   
+            # add aug dmg to DealDamage behavior
             if auged_dmg != 0 and isinstance(behavior, DealDamage):
                 behavior.damage.mult = dmg_mult
                 behavior.damage.amount = auged_dmg
                 auged_dmg = 0
+                
             
             '''
             EXECUTE
@@ -447,8 +455,16 @@ class BattleAction():
             '''
             if isinstance(behavior, FlexibleAPBehavior):
                 behavior.execute(user, target, ap_spent//self.ap)   
-            else: 
-                behavior.execute(user, target)
+                continue
+            
+            # check if evaded. If it has been, abort
+            if isinstance(behavior, DealDamage):
+                if behavior.execute(user, target):
+                    return
+                else:
+                    continue
+            
+            behavior.execute(user, target)
             
     def cast_aoe(self, user:BattlePeep, targets:list[BattlePeep]):
         # TODO: raise error if this is not an aoe move

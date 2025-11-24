@@ -35,7 +35,7 @@ class Simulator(ABC):
             exit_code = self.choose_func()
             if exit_code == 0:
                 return
-            t.sleep(0.2)
+            t.sleep(0.05)
     
     @abstractmethod
     def welcome(self):

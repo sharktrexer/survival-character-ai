@@ -36,5 +36,5 @@ class PeepManager:
     @staticmethod    
     def kill_peep(peep:BattlePeep):
         the_kill = Damage(1,'str','hun')
-        the_kill.give_value(EON.stats.get_stat_active('hun'))
-        peep.affect_hp(the_kill)
+        the_kill.give_value(EON.value_of('hun'))
+        peep.affect_hp(the_kill, attacker=EON)

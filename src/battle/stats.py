@@ -128,7 +128,7 @@ class Stat:
                 + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
     
     def __repr__(self):
-        return f"{self.name} Stat, val={self.value}, apt={self.apt})"
+        return f"{self.name} Stat, {self.val_active} Active, {self.apt} Apt, {self.multiplier} Mult"
     
     ''' 
                                 HELPER FUNCTIONS
@@ -375,6 +375,8 @@ STAT_TYPES = {
         "hunger": Stat("hunger", 0, 0, "hun", ["hu", "hung", "hambre"]),
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
+
+GAUGE_STATS = ["health", "hunger", "energy", "stress", "fear"]
 
 def convert_whole_number_to_multiplier(whole_num:int, affected_number:int) -> float:
     '''

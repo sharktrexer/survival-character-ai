@@ -1,11 +1,21 @@
 import copy
 import random
 import time
-from .battle_peep import BattlePeep, Peep_State, sn
+from collections import namedtuple
+from .battle_peep import BattlePeep, Peep_State, sn, GAUGE_STATS
 from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, rat_chz
-from .battle_ai import BattleAI, MoveChoice
 
 #temp_actions = [knife_stab, basic_heal, basic_dmg, rat_chz]
+
+class MoveChoice:
+    
+    def __init__(self, move:BattleAction, target:BattlePeep, ap_spent:int):
+        self.move = move
+        self.target = target
+        self.ap_spent = ap_spent
+        
+    def __repr__(self):
+        return f"{self.move}, {self.target.name} target, {self.ap_spent} spent)"
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
@@ -59,31 +69,37 @@ class BattleManager():
             peep.start()
     
     def peep_start_turn(self, peep:BattlePeep, user_results:dict[str, int] = {}):
-        peep_past = copy.deepcopy(peep)
+
+        # establish past peep data
+        bd_start = BattleData(copy.deepcopy(peep), None)
+        
+        # calc growth if unit is alive
+        if peep.points_of('hp') > 0: 
+            self.do_gain_bonus_AP_from_init(peep)
         
         peep.start_turn()
         
-        self_evade_decayed = peep_past.battle_handler.evasion_health != peep.battle_handler.evasion_health
-        self_bleed = peep_past.battle_handler.bleed_out != peep.battle_handler.bleed_out
-        self_died = peep.battle_handler == Peep_State.DEAD and peep_past.battle_handler != Peep_State.DEAD
+        # grab changes
+        bd_start.get_data_self(peep)
         
-        if self_evade_decayed:
-            print(f'{peep.name}: {peep_past.battle_handler.evasion_health} -> {peep.battle_handler.evasion_health} EvaP', end=" ")
+        # establish past knock down data
+        bd_knocked = BattleData(copy.deepcopy(peep), None)
         
-        if self_bleed:
-            print(f'{peep.name}: {peep_past.battle_handler.bleed_out} -> {peep.battle_handler.bleed_out} Blood', end=" ")
+        peep.handle_knock_down()
         
-        if self_died:
-            print(f'{peep.name}: DIED!', end=" ")
+        # grab changes
+        bd_knocked.get_data_self(peep)
         
+        # PRINT
+        bd_start.print_self_changes(bd_knocked.user_b4, bd_start.user_diffs)
+        bd_knocked.print_self_changes(peep, bd_knocked.user_diffs)
+            
         peep.turns_passed += 1
         
         print()
         print(peep.get_label_as_str())
         
-        # calc growth if unit is alive
-        if not peep.stats.resource_is_depleted('hp'): 
-            self.do_gain_bonus_AP_from_init(peep)
+
         
         
     
@@ -104,104 +120,7 @@ class BattleManager():
             
      
     def peep_end_turn(self, peep:BattlePeep):
-        peep.end_turn()
-        
-    # def next_round(self):
-    #     self.rounds += 1
-        
-    #     print("\n~Round " + str(self.rounds) + "~")
-        
-    #     # order peep turns by initiative
-    #     for peep in sorted(self.members, key = lambda peep: peep.initiative(), reverse=True):
-            
-    #         peep_past = copy.deepcopy(peep)
-            
-    #         peep.turn()
-            
-    #         self_evade_decayed = peep_past.battle_handler.evasion_health != peep.battle_handler.evasion_health
-            
-    #         if self_evade_decayed:
-    #             print(f'{peep.name}: {peep_past.battle_handler.evasion_health} -> {peep.battle_handler.evasion_health} EvaP', end=" ")
-            
-    #         peep.turns_passed += 1
-            
-    #         print()
-    #         print(peep.get_label_as_str())
-            
-    #         # calc growth if unit is alive
-    #         if not peep.stats.resource_is_depleted('hp'): 
-    #             self.do_gain_bonus_AP_from_init(peep)
-    #         else:
-    #             continue
-            
-    #         peep_ai = BattleAI(peep)
-    #         peep_ai.what_do(self.members)
-            
-    #         chosen_moves = peep_ai.choices
-            
-    #         ap_calc = peep_past.stats.get_stat_resource('ap')
-            
-    #         for cm in chosen_moves:
-                
-    #             cur_move, chosen_targ = cm.move, cm.target
-                
-    #             target_name = chosen_targ.name
-                
-    #             print(f'({ap_calc} -> {ap_calc - cm.ap_spent} AP spent)', end=" ")
-                
-    #             #value = cur_move.get_value(peep.stats.get_stat_cur(cur_move.stat).val_active)
-    #             if peep.name != target_name:
-    #                 print(f'{peep.name} used {cur_move.name}' + f' on {target_name}', end=" ")
-    #             else:
-    #                 print(f'{peep.name} used {cur_move.name}', end=" ")
-                
-    #             ap_calc -= cm.ap_spent
-                
-    #             # get target by provided name
-    #             target:BattlePeep = None
-    #             for member in self.members:
-    #                 if member.name == target_name:
-    #                     target = member
-    #                     break
-                
-    #             target_past = copy.deepcopy(target)
-                
-                    
-    #             # pass in ap spent if an ap flexible move was utilized
-                
-    #             cur_move.cast(peep, target, cm.ap_spent)
-                
-    #             affected_targ_stance = target.battle_handler.stance != target_past.battle_handler.stance
-    #             affected_targ_hp = target.stats.get_stat_resource('hp') != target_past.stats.get_stat_resource('hp')
-    #             affected_targ_defAp = target.battle_handler.defense_health != target_past.battle_handler.defense_health
-    #             affected_targ_evaAp = target.battle_handler.evasion_health != target_past.battle_handler.evasion_health
-    #             affected_targ_bleed = target.battle_handler.bleed_out != target_past.battle_handler.bleed_out
-                
-    #             # printing action effect
-    #             if affected_targ_stance:
-    #                 print(f'({target_past.battle_handler.stance} -> {target.battle_handler.stance})', end=" ")
-                
-    #             if affected_targ_evaAp:
-    #                 print(f'({target_past.battle_handler.evasion_health} -> {target.battle_handler.evasion_health} EvaP)', end=" ")
-                    
-    #             if affected_targ_defAp:
-    #                 print(f'({target_past.battle_handler.defense_health} -> {target.battle_handler.defense_health} DefP)', end=" ")
-                    
-    #             if affected_targ_hp:
-    #                 print(f'({target_past.stats.get_stat_resource("hp")} -> {target.stats.get_stat_resource("hp")} HP)', end=" ")
-                    
-    #             if affected_targ_bleed:
-    #                 print(f'({target_past.battle_handler.bleed_out} -> {target.battle_handler.bleed_out} Bleed)', end=" ")
-    #             print()
-                
-            
-    #         peep.end_turn()
-    #         print()
-    #         time.sleep(0.01)
-            
-    #     # update anchor after round
-    #     self.get_anchor_init()
-            
+        peep.end_turn()            
             
     def do_gain_bonus_AP_from_init(self, peep: BattlePeep):
         
@@ -239,5 +158,124 @@ class BattleManager():
             
             return do_gain_bonus
     
-
+    def get_action_affect(self, action:BattleAction, user:BattlePeep, target:BattlePeep, ap_used:int):
+    # pass in copies!
+    # use copy of battle manager!
+    # simulate a cast on copies of user, target, action
+    # see what has changed, status effects, alterations, healths, resources, summons
+    # how much of each? was it positive or negative?
+        
+        user_past = copy.deepcopy(user)
+        target_past = copy.deepcopy(target)
+        
+        bd = BattleData(user_past, target_past)
+        
+        self.peep_action(user, action)
+        
+        bd.get_data_target(user, target)
+        
+        user_results = {}
+        target_results = bd.targ_diffs
+        
+        return bd
+    
    
+    
+class BattleData():
+
+        
+    def __init__(self, past_user:BattlePeep, past_target:BattlePeep):
+        '''  compare and store stats 4 easy access
+        
+        for user and target each: (and in future how it would affect everyone in battle!)
+        
+        get difference of all health (regular, evade, defense, blood, etc)
+        
+            get difference of resource values
+            change of states
+            get difference of alterations
+            get difference of status effects
+            was the action successful?
+        
+        '''
+        self.user_b4 = past_user
+        self.targ_b4 = past_target
+        self.user_diffs: dict[str,int]  = {}
+        self.user_chges: dict[str,BattleChange]  = {}
+        self.targ_diffs: dict[str,int]  = {}
+        self.targ_chges: dict[str,BattleChange] = {}
+        
+        pass
+    
+    def get_data_self(self, user:BattlePeep):
+        self.user_diffs = BattleData.get_all_battle_resource_data(user, self.user_b4)
+        self.user_chges['stance'] = BattleChange(new=user.stance(), old=self.user_b4.stance())
+        
+    
+    def print_self_changes(self, user:BattlePeep, results:dict):
+        
+        if results[sn('ap')] != 0:
+            print(f'{self.user_b4.points_of("ap")} -> {user.points_of('ap')} AP', end=" ")
+        
+        if user.stance() != self.user_b4.stance():
+            print(f'({self.user_b4.stance()} -> {user.stance()})', end=" ")
+        
+        if results['dodge'] != 0:
+            print(f'{self.user_b4.dodge()} -> {user.dodge()} Dodge', end=" ")
+        
+        if results['blood'] != 0:
+            print(f'{self.user_b4.blood()} -> {user.blood()} Blood', end=" ")
+        
+        if user.stance() == Peep_State.DEAD and self.user_b4.stance() != Peep_State.DEAD:
+            print(f'DIED!', end=" ")
+            
+    def get_data_target(self, user:BattlePeep, target:BattlePeep):
+        
+        t_res = BattleData.get_all_battle_resource_data(target, self.targ_b4)
+        u_res = BattleData.get_all_battle_resource_data(user, self.user_b4)
+        
+        self.targ_chges['stance'] = BattleChange(new=target.stance(), old=self.targ_b4.stance())
+        self.user_chges['stance'] = BattleChange(new=user.stance(), old=self.user_b4.stance())
+        
+        
+        self.targ_diffs = t_res
+        self.user_diffs = u_res
+     
+    @staticmethod     
+    def get_all_battle_resource_data(p1:BattlePeep, p2:BattlePeep):
+        info = {}
+        
+        # gauge stats
+        for gs in GAUGE_STATS:
+            info[gs] = BattleData.points_difference(p1, p2, gs)
+        
+        # battle health    
+        for bh in ['armor', 'dodge', 'blood', 'temp']:
+            info[bh] = BattleData.battle_health_difference(p1, p2, bh)
+            
+        return info
+    
+    @staticmethod    
+    def points_difference(p1:BattlePeep, p2:BattlePeep, stat:str):
+        return p1.points_of(stat) - p2.points_of(stat)
+
+    @staticmethod    
+    def battle_health_difference(p1:BattlePeep, p2:BattlePeep, type:str):
+        health = None
+        match(type):
+            case 'dodge':
+                health = p1.dodge() - p2.dodge()
+            case 'blood':
+                health = p1.blood() - p2.blood()
+            case 'armor':
+                health = p1.armor() - p2.armor()
+            case 'temp':
+                health = 0
+            case _:
+                raise ValueError(f'Invalid battle health type {type}')
+        
+        return health
+        
+        
+BattleChange = namedtuple('Change', ['new', 'old'])
+ 
