@@ -31,7 +31,7 @@ TEMP_ENEMIES = [
         "hunger": make_stat("hun", 20, -1),
         "energy": make_stat("ap", 8, 0),
     }),
-    BattlePeep("Double Rat", {
+    BattlePeep("Double_Rat", {
         "strength": make_stat("str", 10, 0),
         "defense": make_stat("def", 10, 2),
         "evasion": make_stat("eva", 15, 2),
@@ -47,7 +47,7 @@ TEMP_ENEMIES = [
         "hunger": make_stat("hun", 20, -4),
         "energy": make_stat("ap", 10, 1),
     }),
-    BattlePeep("Heavy Slime", {
+    BattlePeep("Heavy_Slime", {
         "strength": make_stat("str", 20, 2),
         "defense": make_stat("def", 20, 4),
         "evasion": make_stat("eva", 4, -3),
@@ -304,7 +304,7 @@ class BattleSimulator(Simulator):
     OFFENSIVE (attacks, gauge attacks, debuff, negative status) 
     DEFENSIVE (defends, heal, gauge heal, buff, positive status)
     ACTION [affects objs or envrionment] 
-        (Barricade, Perceive, Interact, Shove, Throw, Pick Up, Summon)
+        (Barricade, Perceive, Interact, Shove, Throw, Pick Up, Summon, Cover Face, Cover Ears)
     SOCIAL (Alert, suggest, command, bargain)
     '''
     def get_player_moves(self, peep:BattlePeep):

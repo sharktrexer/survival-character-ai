@@ -109,9 +109,7 @@ class BattleAI:
     
     def __init__(self, myself:BattlePeep):
         self.myself = myself
-        #TODO: allow peeps with space in their name to work
-        cleaned_name = self.myself.name.split()[0]
-        self.moves:list[BattleAction] = MOVE_SETS[cleaned_name]
+        self.moves:list[BattleAction] = MOVE_SETS[self.myself.key_name]
         self.choices:list[MoveChoice] = []
         self.my_ap = self.myself.points_of('ap')
         self.can_still_cast = True

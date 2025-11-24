@@ -8,7 +8,8 @@ from .damage import Damage
 '''
 class BattlePeep():
     def __init__(self, name: str, stats_dict: dict):
-        self.name = name
+        self.name = name.replace('_', ' ')
+        self.key_name = name
         self.stats = StatBoard(stats_dict)
         self.battle_handler = BattleHandler()
         self.init_growth = 0
@@ -21,7 +22,7 @@ class BattlePeep():
         return self.name
     
     def __repr__(self):
-        return f"{self.name}, team={self.team}, stats_dict={self.stats.__dict__}, )"
+        return f"{self.key_name}, team={self.team}, stats_dict={self.stats.__dict__}, )"
     
     def get_info_as_str(self):
         peep_info = self.name + ":\n"

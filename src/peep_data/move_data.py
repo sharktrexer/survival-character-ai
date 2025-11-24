@@ -181,7 +181,7 @@ MOVE_SETS = {
     'Rebecca': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Sean': HUMAN_MOVES + UNIVERSAL_MOVES + SEAN_MOVES,
     'Rat': UNIVERSAL_MOVES + RAT_MOVES,
-    'Heavy Slime': UNIVERSAL_MOVES,
+    'Heavy_Slime': UNIVERSAL_MOVES,
     'Ent': UNIVERSAL_MOVES,
-    'Double Rat': UNIVERSAL_MOVES,
+    'Double_Rat': UNIVERSAL_MOVES,
 }
