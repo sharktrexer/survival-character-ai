@@ -7,7 +7,7 @@ from battle.battle_manager import BattleData, BattleManager, MoveChoice, BattleA
 from battle.battle_peep import BattlePeep, Peep_State as state
 from battle.stats import Stat, make_stat
 from battle.peep_manager import PeepManager
-from battle.battle_ai import BattleAI
+from battle.battle_ai import BattleAI, simulate
 
 from peep_data.data_reader import PEEPS
 
@@ -241,15 +241,17 @@ class BattleSimulator(Simulator):
                 moves = self.get_player_moves(peep)
             else:
                 peep_brain = BattleAI(peep)
-                peep_brain.what_do(self.battler.members)
-                moves = peep_brain.choices
+                dirty_moves = simulate(peep_brain, copy.deepcopy(self.battler))
+                moves = [move.move for move in dirty_moves]
+                #peep_brain.what_do(self.battler.members)
+                #moves = peep_brain.choices
             
             
             ''' Action Loop'''
             for ac in moves:
         
                 # !BATTLEDATA!
-                target = ac.target
+                target = self.battler.get_peep_by_name(ac.target)
                 bd = BattleData(copy.deepcopy(peep), copy.deepcopy(target))
                 
                 
@@ -337,7 +339,7 @@ class BattleSimulator(Simulator):
                 
             ''' Get Target '''
             if action_choice.for_self_only:
-                completed_move.target = peep
+                completed_move.target = peep.name
             else:
                 #TODO: if no valid allies, then don't provide ally only moves!
                 # get enemies or allies based on move
@@ -347,7 +349,7 @@ class BattleSimulator(Simulator):
                 targ_choice_ind = self.get_choice(choices=valid_targs, prompt=prompt)
                 target_choice = valid_targs[targ_choice_ind]
                 
-                completed_move.target = target_choice
+                completed_move.target = target_choice.name
             
             ''' Get Ap Spent If Not Flexible'''    
             if completed_move.ap_spent == 0:

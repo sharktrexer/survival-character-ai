@@ -9,19 +9,25 @@ from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, ra
 
 class MoveChoice:
     
-    def __init__(self, move:BattleAction, target:BattlePeep, ap_spent:int):
+    def __init__(self, move:BattleAction, target_name:str, ap_spent:int):
         self.move = move
-        self.target = target
+        self.target = target_name
         self.ap_spent = ap_spent
         
     def __repr__(self):
-        return f"{self.move}, {self.target.name} target, {self.ap_spent} spent)"
+        return f"{self.move}, {self.target} target, {self.ap_spent} spent)"
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
         self.rounds = 0
         self.members = members
         self.init_anchor = 0
+    
+    def get_peep_by_name(self, name:str):
+        for peep in self.members:
+            if peep.name == name:
+                return peep
+        return None
         
     def get_anchor_init(self):
         # TODO: perhaps only call this when a change is calculated 
@@ -105,7 +111,7 @@ class BattleManager():
     
     def peep_action(self, peep:BattlePeep, move:MoveChoice):
         ''' Perform One Move '''
-        move.move.cast(peep, move.target, move.ap_spent)
+        move.move.cast(peep, self.get_peep_by_name(move.target), move.ap_spent)
         peep.stats.resource_change('ap', -move.ap_spent)
         
         

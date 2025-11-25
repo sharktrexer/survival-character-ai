@@ -9,13 +9,23 @@ from battle.battle_action import (BattleAction, Damage, Peep_State, TargetTypes,
                                   ReverseCondition, YesCondition, ABORT, AttackEvasion, UNEVADABLE, DMG_MULT)
 
 TEST_MOVES = [
-    BattleAction("Attack", 6, [
-        DealDamage(create_dmg_preset(0.6, Damage.DamageType.Physical))
+    BattleAction("Attack", 2, [
+        DealDamage(create_dmg_preset(0.3, Damage.DamageType.Physical))
         ],
                  valid_targets=[TargetTypes.ENEMY],),
     
-    BattleAction("Magic", 6, [
-        DealDamage(create_dmg_preset(0.6, Damage.DamageType.Magical))
+    BattleAction("Big Attack", 4, [
+        DealDamage(create_dmg_preset(0.7, Damage.DamageType.Physical))
+        ],
+                 valid_targets=[TargetTypes.ENEMY],),
+    
+    BattleAction("Magic", 2, [
+        DealDamage(create_dmg_preset(0.3, Damage.DamageType.Magical))
+        ],
+                 valid_targets=[TargetTypes.ENEMY],),
+    
+    BattleAction("Critical", 2, [
+        DealDamage(create_specific_phys_dmg(0.3, 'dex'))
         ],
                  valid_targets=[TargetTypes.ENEMY],),
 ]
@@ -171,7 +181,7 @@ SEAN_MOVES = [
 
 MOVE_SETS = {
     'Adan': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Chris': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Chris': TEST_MOVES,
     'Cindy': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Ray': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Jimmy': HUMAN_MOVES + UNIVERSAL_MOVES,
@@ -180,7 +190,7 @@ MOVE_SETS = {
     'Jayce': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Rebecca': HUMAN_MOVES + UNIVERSAL_MOVES,
     'Sean': HUMAN_MOVES + UNIVERSAL_MOVES + SEAN_MOVES,
-    'Rat': UNIVERSAL_MOVES + RAT_MOVES,
+    'Rat': TEST_MOVES,
     'Heavy_Slime': UNIVERSAL_MOVES,
     'Ent': UNIVERSAL_MOVES,
     'Double_Rat': UNIVERSAL_MOVES,

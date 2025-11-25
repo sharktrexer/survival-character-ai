@@ -1,8 +1,9 @@
 from collections import namedtuple
+import copy
 from enum import Enum, auto
 from random import randint
 from battle.battle_peep import Peep_State
-from battle.battle_manager import BattleManager, MoveChoice
+from battle.battle_manager import BattleData, BattleManager, MoveChoice
 from .battle_action import BattleAction, BattlePeep
 from peep_data.move_data import MOVE_SETS
 
@@ -253,4 +254,65 @@ def simulate(ai:BattleAI, battle:BattleManager):
     # calculate points based on goals
     # call simulate again on moves where points >= median of points from all move
     # return all simulates += moves for Ai to execute
-    pass
+    if not ai.can_still_cast:
+        return []
+
+    allies = [battler for battler in battle.members if battler.team == ai.myself.team]
+    enemies = [battler for battler in battle.members if battler.team != ai.myself.team]
+        
+    # only get alive peeps
+    allies_v = [ally for ally in allies if ally.stance() != Peep_State.DEAD]
+    enemies_v = [enemy for enemy in enemies if enemy.stance() != Peep_State.DEAD]
+    
+    allies_by_hp = sorted(allies_v, key = lambda peep: peep.points_of('hp')/peep.value_of('hp'), reverse=True)
+    enemies_by_hp = sorted(enemies_v, key = lambda peep: peep.points_of('hp')/peep.value_of('hp'), reverse=True)
+    
+    sim_moves:list[ScoredMove] = []
+    
+    for move in ai.moves:
+        sim_act = MoveChoice(None, None, 0)
+        sim_act.move = move
+        sim_act.ap_spent = move.ap
+        
+        if move.action_type == 'heal':
+            ally = allies_by_hp[randint(0, (len(allies_by_hp)-1)//2)]
+            sim_act.target = ally.name
+        elif move.action_type == 'dmg':
+            enemy = enemies_by_hp[randint(0, (len(enemies_by_hp)-1)//2)]
+            sim_act.target = enemy.name
+        else:
+            continue
+        
+        sim_ai = copy.deepcopy(ai)
+        sim_battle = copy.deepcopy(battle)
+        
+        bd = BattleData(copy.deepcopy(sim_ai.myself), 
+                        copy.deepcopy(
+                            sim_battle.get_peep_by_name(sim_act.target)))
+            
+        sim_battle.peep_action(sim_ai.myself, sim_act)
+        sim_ai.update_peep_move_state(sim_act)
+        
+        bd.get_data_target(sim_ai.myself, 
+                           sim_battle.get_peep_by_name(sim_act.target))
+        
+        sim_moves.append( ScoredMove(
+            move=sim_act, score=bd.targ_diffs['health'] * -1 , ai=sim_ai, battle=sim_battle)
+                         )
+        
+    sorted_sim_moves = sorted(sim_moves, key = lambda move: move.score, reverse=True)
+    
+    # temp 'median' function    
+    sorted_sim_moves = sorted_sim_moves[0:len(sorted_sim_moves)//2]
+    
+    final_options:list[list[ScoredMove]] = []
+    
+    for sm in sorted_sim_moves:
+        final_options.append([sm] + simulate(sm.ai, sm.battle))
+        
+    final_options.sort(key = lambda scored_moves: sum([sm.score for sm in scored_moves]), reverse=True)
+    
+    return final_options[0]
+        
+        
+ScoredMove = namedtuple('ScoredMove', ['move', 'score', 'ai', 'battle'])

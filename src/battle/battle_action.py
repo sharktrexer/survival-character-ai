@@ -44,9 +44,6 @@ class DealDamage(Behavior):
         
         self.damage.give_value(user.value_of(self.damage.empowering_stat))
         
-        # print(f"HIT: {self.damage.amount} (+{self.damage.ratio}/{self.damage.empowering_stat})",
-        #       end=' ')
-        
         evaded = target.affect_hp(self.damage, attacker=user)
         
         self.damage.amount = 0

@@ -414,7 +414,7 @@ class BattleHandler():
             self.die()
         elif self.bleed_out >= self.bleed_out_max:
             self.bleed_out = self.bleed_out_max
-            self.battle_handler.state = Peep_State.STANDARD
+            self.stance = Peep_State.STANDARD
 
     def die(self):
         self.stance = Peep_State.DEAD
