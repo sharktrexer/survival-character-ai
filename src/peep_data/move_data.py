@@ -28,6 +28,14 @@ TEST_MOVES = [
         DealDamage(create_specific_phys_dmg(0.3, 'dex'))
         ],
                  valid_targets=[TargetTypes.ENEMY],),
+    
+    BattleAction("Heal", 2, [
+        UNEVADABLE(),
+        DealDamage(create_dmg_preset(0.25, Damage.DamageType.Healing))
+        ],
+                 valid_targets=[TargetTypes.ALLY, TargetTypes.SELF],
+                 ),
+    
 ]
 
 UNIVERSAL_MOVES = [

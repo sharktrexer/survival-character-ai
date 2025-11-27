@@ -238,7 +238,7 @@ class BattlePeep():
         
         if past_evade_hp + evade_hp_dmg >= 0:
             # ignore attack if evasion health fully absorbed attack
-            print(f"EVADED!", end=" ")
+            #print(f"EVADED!", end=" ")
             return True
         
         return False
@@ -405,7 +405,7 @@ class BattleHandler():
         If bleed out hp <= 0 then die
         '''
         # Should peep's stats or magic resist matter?
-        amount = amount if amount > 0 else int(amount * 0.2)
+        amount = amount if amount > 0 else int(amount * 0.2)-1
         
         self.bleed_out += amount
        

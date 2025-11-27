@@ -16,7 +16,7 @@ import time as t
 # TODO: put into its own file
 TEMP_ENEMIES = [
     BattlePeep("Rat", {
-        "strength": make_stat("str", 10, -2),
+        "strength": make_stat("str", 30, -2),
         "defense": make_stat("def", 5, 0),
         "evasion": make_stat("eva", 20, 4),
         "dexterity": make_stat("dex", 15, 2),
@@ -181,7 +181,7 @@ class BattleSimulator(Simulator):
             # give peep new name to differentiate it between copies
             if do_add:
                 peep = copy.deepcopy(peep)
-                suffix = "" if peep_copy_tracker[peep.name] == 0 else f" {peep_copy_tracker[peep.name]}"
+                suffix = "" if peep_copy_tracker[peep.name] == 0 else f" [{peep_copy_tracker[peep.name]}]"
                 peep_copy_tracker[peep.name] += 1
                 peep.name = f"{peep.name}{suffix}"
                 

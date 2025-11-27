@@ -275,29 +275,41 @@ def simulate(ai:BattleAI, battle:BattleManager):
         sim_act.ap_spent = move.ap
         
         if move.action_type == 'heal':
-            ally = allies_by_hp[randint(0, (len(allies_by_hp)-1)//2)]
+            ally = allies_by_hp[randint(0, (len(allies_by_hp)-1))]
             sim_act.target = ally.name
         elif move.action_type == 'dmg':
-            enemy = enemies_by_hp[randint(0, (len(enemies_by_hp)-1)//2)]
+            enemy = enemies_by_hp[randint(0, (len(enemies_by_hp)-1))]
             sim_act.target = enemy.name
         else:
             continue
         
         sim_ai = copy.deepcopy(ai)
         sim_battle = copy.deepcopy(battle)
+        target = sim_battle.get_peep_by_name(sim_act.target)
         
         bd = BattleData(copy.deepcopy(sim_ai.myself), 
-                        copy.deepcopy(
-                            sim_battle.get_peep_by_name(sim_act.target)))
+                        copy.deepcopy(target))
             
         sim_battle.peep_action(sim_ai.myself, sim_act)
         sim_ai.update_peep_move_state(sim_act)
         
-        bd.get_data_target(sim_ai.myself, 
-                           sim_battle.get_peep_by_name(sim_act.target))
+        bd.get_data_target(sim_ai.myself, target)
+        
+        prev_hp_per = bd.targ_b4.points_of('hp') / bd.targ_b4.value_of('hp')
+        cur_hp_per = target.points_of('hp') / target.value_of('hp')
+        
+        percent_change = cur_hp_per - prev_hp_per
+        
+        # if dmg (negative value), convert to positive for points
+        # this also means that if the dmg somehow healed the target, the points reflect that
+        if sim_act.move.action_type == 'dmg':
+            percent_change *= -1
+        
+        # 10% of health affected = 1 point
+        points = round(percent_change * 10, 3)
         
         sim_moves.append( ScoredMove(
-            move=sim_act, score=bd.targ_diffs['health'] * -1 , ai=sim_ai, battle=sim_battle)
+            move=sim_act, score=points, ai=sim_ai, battle=sim_battle)
                          )
         
     sorted_sim_moves = sorted(sim_moves, key = lambda move: move.score, reverse=True)
