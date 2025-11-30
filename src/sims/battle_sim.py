@@ -249,7 +249,9 @@ class BattleSimulator(Simulator):
             
             ''' Action Loop'''
             for ac in moves:
-        
+                if ac == None:
+                    continue
+                
                 # !BATTLEDATA!
                 target = self.battler.get_peep_by_name(ac.target)
                 bd = BattleData(copy.deepcopy(peep), copy.deepcopy(target))

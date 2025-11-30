@@ -4,6 +4,10 @@ from .alteration import Alteration
 from enum import Enum, auto
 from .damage import Damage
 
+BATTLE_STATS = [
+    'dodge', 'blood', 'armor', 'temp'
+]
+
 ''' A version of character that is battle oriented 
 '''
 class BattlePeep():
@@ -84,6 +88,12 @@ class BattlePeep():
         '''
         return self.battle_handler.bleed_out
     
+    def max_blood(self):
+        '''
+        This peep's bleed out max health
+        '''
+        return self.battle_handler.bleed_out_max
+    
     def health(self):
         '''
         This peep's current health value
@@ -114,16 +124,29 @@ class BattlePeep():
         '''
         return self.points_of('ap')
     
-    def points_of(self, stat_name:str):
+    def points_of(self, name:str):
         '''
         Get the resource value of a stat
+        Or any Battle Health available
         '''
-        return self.stats.get_stat_resource(sn(stat_name))
+        match name:
+            case 'dodge':
+                return self.dodge()
+            case 'armor':
+                return self.armor()
+            case 'blood':
+                return self.blood()
+            case 'temp':
+                return self.battle_handler.temp_health
+        
+        return self.stats.get_stat_resource(sn(name))
     
     def value_of(self, stat_name:str):
         '''
         Get the active value of a stat
         '''
+        if stat_name == 'blood':
+            return self.max_blood()
         return self.stats.get_stat_active(sn(stat_name))
     
     def get_all_stat_apts(self):
@@ -272,6 +295,11 @@ class BattlePeep():
             
             past_bleed_out = self.battle_handler.bleed_out
             
+            # 1/4 of def comes into play to resisting blood attacks
+            if amount < 0:
+                amount -= self.value_of("def") / 4
+                amount = 0 if amount > 0 else amount # stop blood damage from healing
+            
             self.battle_handler.affect_bleed_out(amount)
             '''
             If bleed out hp >= max hp then set current hp equal 
@@ -419,7 +447,7 @@ class BattleHandler():
     def die(self):
         self.stance = Peep_State.DEAD
         self.times_made_bleed = 0 # TODO: is resetting this the desired behavior?
-        print(f"died!")
+        #print(f"died!")
         
     def end_battle(self):
         # perhaps stance could be different if char is always flying

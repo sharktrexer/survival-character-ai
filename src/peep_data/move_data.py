@@ -8,6 +8,11 @@ from battle.battle_action import (BattleAction, Damage, Peep_State, TargetTypes,
                                   ReduceEvasionHealth, GainDefenseHealth, ApplyAlteration,
                                   ReverseCondition, YesCondition, ABORT, AttackEvasion, UNEVADABLE, DMG_MULT)
 
+# current economy: 
+# for every 1 ap, 0.15 of a stat can be used as dmg
+# for every 1 ap, 0.3 of a stat can be used defensively
+# for every 1 ap, 0.2 of a stat is used for healing
+
 TEST_MOVES = [
     BattleAction("Attack", 2, [
         DealDamage(create_dmg_preset(0.3, Damage.DamageType.Physical))
@@ -29,12 +34,26 @@ TEST_MOVES = [
         ],
                  valid_targets=[TargetTypes.ENEMY],),
     
-    BattleAction("Heal", 2, [
+    BattleAction("Heal", 5, [
         UNEVADABLE(),
-        DealDamage(create_dmg_preset(0.25, Damage.DamageType.Healing))
+        DealDamage(create_dmg_preset(0.9, Damage.DamageType.Healing))
         ],
                  valid_targets=[TargetTypes.ALLY, TargetTypes.SELF],
                  ),
+    
+    BattleAction("Evade", 1, [
+        # give evasion health
+        GainEvasionHealth(0.3, for_self=True),
+        ],
+        valid_targets=[TargetTypes.SELF],
+        ap_flexible=True),
+    
+    BattleAction("Block", 1, [
+        # Give defense health
+        GainDefenseHealth(0.3, for_self=True),
+        ],
+        valid_targets=[TargetTypes.SELF],
+        ap_flexible=True),
     
 ]
 
@@ -153,10 +172,7 @@ RAT_MOVES = [
     ]
 
 
-# current economy: 
-# for every 2 ap, 0.3 of a stat can be used as dmg
-# for every 1 ap, 0.3 of a stat can be used defensively
-# for every 1 ap, 0.2 of a stat is used for healing
+
 ''' PEOPLE MOVES '''
 HUMAN_MOVES = [
     BattleAction("Punch", 2, [
@@ -188,18 +204,18 @@ SEAN_MOVES = [
 ]
 
 MOVE_SETS = {
-    'Adan': HUMAN_MOVES + UNIVERSAL_MOVES,
+    'Adan': TEST_MOVES,
     'Chris': TEST_MOVES,
-    'Cindy': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Ray': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Jimmy': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Neo': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Lito': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Jayce': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Rebecca': HUMAN_MOVES + UNIVERSAL_MOVES,
-    'Sean': HUMAN_MOVES + UNIVERSAL_MOVES + SEAN_MOVES,
+    'Cindy': TEST_MOVES,
+    'Ray': TEST_MOVES,
+    'Jimmy': TEST_MOVES,
+    'Neo': TEST_MOVES,
+    'Lito': TEST_MOVES,
+    'Jayce': TEST_MOVES,
+    'Rebecca': TEST_MOVES,
+    'Sean': TEST_MOVES,
     'Rat': TEST_MOVES,
-    'Heavy_Slime': UNIVERSAL_MOVES,
-    'Ent': UNIVERSAL_MOVES,
-    'Double_Rat': UNIVERSAL_MOVES,
+    'Heavy_Slime': TEST_MOVES,
+    'Ent': TEST_MOVES,
+    'Double_Rat': TEST_MOVES,
 }

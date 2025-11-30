@@ -4,7 +4,7 @@ from enum import Enum, auto
 from random import randint
 from battle.battle_peep import Peep_State
 from battle.battle_manager import BattleData, BattleManager, MoveChoice
-from .battle_action import BattleAction, BattlePeep
+from .battle_action import BattleAction, BattlePeep, TargetTypes
 from peep_data.move_data import MOVE_SETS
 
 '''
@@ -34,19 +34,30 @@ QUIRK
     selfishness increase as critical health approaches
 -Stacking: how often they like to repeat effects
 -Focus: how often they stay focused on one target vs changing it up
+-Team Player: how often they target their allies vs the enemies
 '''
 
 '''
 GOAL
+%%% Basing Points off of percent affected of the stat %%%
 -Offensive: -Health, -Dodge, -Armor
--Heal: +Health
-Above bases points on percent of dmg healed/dealt vs max health
+    more points given towards -Dodge and -Armor if broken by action
+        or if target is sent to death
+    also bonus points given the closer the resulting values are to being 0
+-Heal: +Health, +Blood
+    if revive allows for the target to have a turn before enemies have one, 
+        more points
+-BloodThirsty: -Blood
+
+/// Basing points off of stat value to defensive value ///
 -Defensive: +Dodge, +Armor
     more points given when unprotected or without much protection
+
 -Alteration: +Buff, +Debuff
     recieve points based on power of Alteration
     if target would be more affected by this Alteration
     if it would refresh an almost expiring Alteration
+
     
 
 '''
@@ -254,9 +265,11 @@ def simulate(ai:BattleAI, battle:BattleManager):
     # calculate points based on goals
     # call simulate again on moves where points >= median of points from all move
     # return all simulates += moves for Ai to execute
-    if not ai.can_still_cast:
+    if ai == None or not ai.can_still_cast:
         return []
 
+    #TODO: replace below logic with better target selection function
+    
     allies = [battler for battler in battle.members if battler.team == ai.myself.team]
     enemies = [battler for battler in battle.members if battler.team != ai.myself.team]
         
@@ -280,51 +293,175 @@ def simulate(ai:BattleAI, battle:BattleManager):
         elif move.action_type == 'dmg':
             enemy = enemies_by_hp[randint(0, (len(enemies_by_hp)-1))]
             sim_act.target = enemy.name
+        elif move.for_self_only:
+            sim_act.target = ai.myself.name
         else:
             continue
         
+        # TODO: maybe pick some different ap uses and look into those futures!?
+        if move.flexible:
+            ap_2_spend = randint(1, ai.my_ap)
+            #if ap_2_spend > ai.myself.value_of('ap') // 2 and ai.myself.points_of('ap') >= ai.myself.value_of('ap'):
+                #ap_2_spend = ai.myself.value_of('ap') // 2
+            sim_act.ap_spent = ap_2_spend
+            '''
+            the less health you have the higher the ap used for defensive move
+            only use up to 50% of AP
+            take into account who has been targeting self. A lot per rounds passed?
+                engage the defending
+            '''
+        
+        # get copies of objs to simulate the affect of a move
         sim_ai = copy.deepcopy(ai)
         sim_battle = copy.deepcopy(battle)
         target = sim_battle.get_peep_by_name(sim_act.target)
         
         bd = BattleData(copy.deepcopy(sim_ai.myself), 
                         copy.deepcopy(target))
-            
+        
+        # update the state of battle and ai    
         sim_battle.peep_action(sim_ai.myself, sim_act)
         sim_ai.update_peep_move_state(sim_act)
         
-        bd.get_data_target(sim_ai.myself, target)
+        # grab changes
+        bd.get_data_target(sim_ai.myself, target)        
         
-        prev_hp_per = bd.targ_b4.points_of('hp') / bd.targ_b4.value_of('hp')
-        cur_hp_per = target.points_of('hp') / target.value_of('hp')
-        
-        percent_change = cur_hp_per - prev_hp_per
-        
-        # if dmg (negative value), convert to positive for points
-        # this also means that if the dmg somehow healed the target, the points reflect that
-        if sim_act.move.action_type == 'dmg':
-            percent_change *= -1
-        
-        # 10% of health affected = 1 point
-        points = round(percent_change * 10, 3)
+        points = calculate_points(bd)
         
         sim_moves.append( ScoredMove(
             move=sim_act, score=points, ai=sim_ai, battle=sim_battle)
                          )
-        
+    
+    #Add option to stop casting and save some ap
+    #TODO: check if gained roll over this turn, if so, save less
+    ap_saved_score = 0.8 - (ai.myself.points_of('ap') / ai.myself.value_of('ap'))
+    ap_saved_score = round(ap_saved_score, 1)
+    sim_moves.append( ScoredMove(
+            move=None, score=ap_saved_score, ai=None, battle=None)
+                         )
+    
+    # Descending order of moves by their point values    
     sorted_sim_moves = sorted(sim_moves, key = lambda move: move.score, reverse=True)
     
-    # temp 'median' function    
-    sorted_sim_moves = sorted_sim_moves[0:len(sorted_sim_moves)//2]
+    # temp 'median' function that ignores the lesser point moves
+    if len(sorted_sim_moves) != 1:
+        sorted_sim_moves = sorted_sim_moves[0:len(sorted_sim_moves)//2]
     
     final_options:list[list[ScoredMove]] = []
     
+    # simulate the next move, storing the list of the moves for a full turn
     for sm in sorted_sim_moves:
         final_options.append([sm] + simulate(sm.ai, sm.battle))
         
     final_options.sort(key = lambda scored_moves: sum([sm.score for sm in scored_moves]), reverse=True)
     
+    # only the highest scoring list prevails!
     return final_options[0]
         
         
 ScoredMove = namedtuple('ScoredMove', ['move', 'score', 'ai', 'battle'])
+'''
+Stores a move (user, targ, ap); its score, ai state, and battle state
+
+Allows for the next action to be simulated using the 
+state of the ai and battle after casting the stored move
+'''
+
+def calculate_points(bd:BattleData):
+    points = 0
+    
+    hp_percent_chng = bd.targ_percent_diff['health']
+    blood_percent_chng = bd.targ_percent_diff['blood']
+    armor_chng = 0
+    dodge_chng = 0
+    
+    '''
+    [Battle HP Points]
+    attacking target:
+        points = battle hp / user best respective offensive stat 
+            dodge / user dex or 0.5int
+            armor / user str or int
+            maybe depend on the battle action's stats used to deal damage?
+            (multiply by -1)
+ 
+        bonus points if battle hp is depleted
+        bonus points if battle hp can be broken in 15 strikes or less
+        
+    ally or self target:
+        points = battle hp diff / respective target defensive stat
+            /eva for dodge, /def for armor
+        
+        small bonus points if target had no battle hp of this type
+        small bonus if target has low health
+        moderate bonus if covering target's weakness (should be implicit though)
+            (ex: +points if a low def unit got armor)
+    '''
+        
+    # if towards enemy team, convert to positive for points
+    if bd.user_cur.team != bd.targ_cur.team:
+        hp_percent_chng *= -1
+        blood_percent_chng *= -1
+        
+        # how much the battle hp was reduced
+        if bd.targ_b4.points_of('armor') != 0:
+            armor_chng = 1 - (bd.targ_cur.points_of('armor') / bd.targ_b4.points_of('armor') )
+        if bd.targ_b4.points_of('dodge') != 0:
+            dodge_chng = 1 - (bd.targ_cur.points_of('dodge') / bd.targ_b4.points_of('dodge') )
+        
+        # bonus for getting battle hp to 0
+        if bd.targ_cur.points_of('armor') == 0 and bd.targ_diffs['armor'] != 0:
+            armor_chng += 1
+        if bd.targ_cur.points_of('dodge') == 0 and bd.targ_diffs['dodge'] != 0:
+            dodge_chng += 1
+        # TODO: add bonus points if hp can be broken in 15 strikes
+            
+    # battle action was for team    
+    else:
+        
+        # FOR SELF
+        if bd.targ_cur.name == bd.user_cur.name:
+            eva_power = bd.targ_cur.value_of('eva') / bd.targ_cur.value_of('def')
+            def_power = bd.targ_cur.value_of('def') / bd.targ_cur.value_of('eva')
+
+            eva_power *= 0.05
+            def_power *= 0.05
+            
+            armor_chng = (bd.targ_diffs['armor'] / bd.targ_cur.value_of('hp')) * def_power
+            dodge_chng = (bd.targ_diffs['dodge'] / bd.targ_cur.value_of('hp')) * eva_power
+        # FOR ALLY
+        else:    
+            # how much the defensive stat goes into the battle hp for points
+            armor_chng = bd.targ_diffs['armor'] / bd.targ_cur.value_of('def') 
+            dodge_chng = bd.targ_diffs['dodge'] / bd.targ_cur.value_of('eva') 
+        
+        # bonus points to giving a naked targ battle hp
+        if bd.targ_b4.points_of('armor') == 0 and bd.targ_diffs['armor'] > 0:
+            armor_chng += 0.5
+        if bd.targ_b4.points_of('dodge') == 0 and bd.targ_diffs['dodge'] > 0:
+            dodge_chng += 0.5
+            
+        # bonus points if ally has low hp
+        if bd.targ_cur.points_of('hp') <= bd.targ_cur.value_of('hp') // 3:
+            armor_chng = armor_chng + 0.3 if armor_chng > 0 else 0
+            dodge_chng = dodge_chng + 0.3 if dodge_chng > 0 else 0
+        
+    
+    # 10% of health or blood affected = 1 point
+    points += hp_percent_chng * 10
+    points += blood_percent_chng * 10
+    points += armor_chng
+    points += dodge_chng
+    return round(points, 3)
+
+'''
+
+take bd
+
+grab conditions from it (knocked down enemy & dealt 25% of their max hp in dmg)
+return if true
+
+Personality has different scores per conds
++100 points [KnockedDown, ResourceChange(-25%, hp)]
++50 points [ResourceChange(-50%, hp)]
++10 points [BuffStrongestAlly]
+'''

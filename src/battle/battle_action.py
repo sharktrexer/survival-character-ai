@@ -113,7 +113,7 @@ class GainEvasionHealth(FlexibleAPBehavior):
         self.eva_mult = eva_mult
         
     def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
-        target = super().execute(user, target, ap)
+        #target = super().execute(user, target, ap)
         
         amount = int(round(target.value_of("eva") * self.eva_mult)) * ap
         
@@ -130,7 +130,7 @@ class GainDefenseHealth(FlexibleAPBehavior):
         self.def_mult = def_mult
         
     def execute(self, user:BattlePeep, target:BattlePeep, ap:int):
-        target = super().execute(user, target, ap)
+        #target = super().execute(user, target, ap)
         
         amount = int(round(target.value_of("def") * self.def_mult)) * ap
         

@@ -22,15 +22,13 @@ from enum import Enum, auto
 
 def create_dmg_preset(ratio:int, type:Damage.DamageType):
     '''
-    Creates a specific damage object given the type
-    
-    EXCLUDES PHYSICAL
+    Creates a simple damage object given the type
     '''
     match type:
         case Damage.DamageType.Physical:
             return Damage(ratio, 'str', 'def')
         case Damage.DamageType.Healing:
-            return Damage(ratio, 'rec', 'hp', is_heal=True)
+            return Damage(ratio, 'rec', 'hp', is_heal=True, evadable=False)
         case Damage.DamageType.Magical:
             return Damage(ratio, 'int', 'rec')
         case Damage.DamageType.Evasion:
@@ -49,7 +47,6 @@ class Damage:
     class DamageType(Enum):
         Physical = auto()
         Healing = auto()
-        Evasion = auto()
         Magical = auto()
         Psychological = auto()
         Fear = auto()
@@ -59,7 +56,8 @@ class Damage:
                  empowering_stat: str,
                  resisting_stat_name:str,
                  associated_element_name:str='',
-                 is_heal = False
+                 is_heal = False,
+                 evadable = True
                  ):
         '''
         Parameters:
@@ -75,6 +73,8 @@ class Damage:
         self.element = associated_element_name
         self.is_heal = is_heal
         self.amount = 0
+        
+        self.evadable = evadable
         
         self.mult = 1.0 #added through exterior classes | applies to amount value
         

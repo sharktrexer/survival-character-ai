@@ -2,7 +2,7 @@ import copy
 import random
 import time
 from collections import namedtuple
-from .battle_peep import BattlePeep, Peep_State, sn, GAUGE_STATS
+from .battle_peep import BattlePeep, Peep_State, sn, GAUGE_STATS, BATTLE_STATS
 from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, rat_chz
 
 #temp_actions = [knife_stab, basic_heal, basic_dmg, rat_chz]
@@ -205,16 +205,22 @@ class BattleData():
         
         '''
         self.user_b4 = past_user
-        self.targ_b4 = past_target
+        self.user_cur = None
         self.user_diffs: dict[str,int]  = {}
         self.user_chges: dict[str,BattleChange]  = {}
+        self.user_percent_diff: dict[str,int]  = {}
+        
+        self.targ_b4 = past_target
+        self.targ_cur = None
         self.targ_diffs: dict[str,int]  = {}
         self.targ_chges: dict[str,BattleChange] = {}
+        self.targ_percent_diff: dict[str,int]  = {}
+        
         
         pass
     
     def get_data_self(self, user:BattlePeep):
-        self.user_diffs = BattleData.get_all_battle_resource_data(user, self.user_b4)
+        self.user_diffs = BattleData.get_all_battle_resource_data(user, self.user_b4)['diff']
         self.user_chges['stance'] = BattleChange(new=user.stance(), old=self.user_b4.stance())
         
     
@@ -236,51 +242,57 @@ class BattleData():
             print(f'DIED!', end=" ")
             
     def get_data_target(self, user:BattlePeep, target:BattlePeep):
-        
-        t_res = BattleData.get_all_battle_resource_data(target, self.targ_b4)
-        u_res = BattleData.get_all_battle_resource_data(user, self.user_b4)
-        
+        '''
+        Grabs relative battle data, usually after an action was cast
+        '''
+        t_info = BattleData.get_all_battle_resource_data(target, self.targ_b4)
+        self.targ_diffs = t_info['diff']
+        self.targ_percent_diff = t_info['percent diff']
         self.targ_chges['stance'] = BattleChange(new=target.stance(), old=self.targ_b4.stance())
+        self.targ_cur = target
+        
+        
+        u_info = BattleData.get_all_battle_resource_data(user, self.user_b4)
+        self.user_diffs = u_info['diff']
+        self.user_percent_diff = u_info['percent diff']
         self.user_chges['stance'] = BattleChange(new=user.stance(), old=self.user_b4.stance())
-        
-        
-        self.targ_diffs = t_res
-        self.user_diffs = u_res
+        self.user_cur = user
      
     @staticmethod     
-    def get_all_battle_resource_data(p1:BattlePeep, p2:BattlePeep):
-        info = {}
+    def get_all_battle_resource_data(cur:BattlePeep, past:BattlePeep):
+        '''
         
-        # gauge stats
-        for gs in GAUGE_STATS:
-            info[gs] = BattleData.points_difference(p1, p2, gs)
+        '''
+        info_diff = {}
+        info_percent_diff = {}
         
-        # battle health    
-        for bh in ['armor', 'dodge', 'blood', 'temp']:
-            info[bh] = BattleData.battle_health_difference(p1, p2, bh)
+        # gauge & battle stats
+        for gs in GAUGE_STATS + BATTLE_STATS:
+            info_diff[gs] = BattleData.points_difference(cur, past, gs)
             
-        return info
+            if gs in GAUGE_STATS or gs == 'blood':
+                info_percent_diff[gs] = BattleData.point_percent_diff(cur, past, gs)
+            
+        return {'diff' :info_diff, 'percent diff':info_percent_diff}
+    
     
     @staticmethod    
     def points_difference(p1:BattlePeep, p2:BattlePeep, stat:str):
         return p1.points_of(stat) - p2.points_of(stat)
 
-    @staticmethod    
-    def battle_health_difference(p1:BattlePeep, p2:BattlePeep, type:str):
-        health = None
-        match(type):
-            case 'dodge':
-                health = p1.dodge() - p2.dodge()
-            case 'blood':
-                health = p1.blood() - p2.blood()
-            case 'armor':
-                health = p1.armor() - p2.armor()
-            case 'temp':
-                health = 0
-            case _:
-                raise ValueError(f'Invalid battle health type {type}')
+    
+    @staticmethod
+    def point_percent_diff(p:BattlePeep, p_b4:BattlePeep, stat:str):
+        '''
         
-        return health
+        '''
+        if p_b4.value_of(stat) == 0 or p.value_of(stat) == 0:
+            return 0
+        
+        prev_hp_per = p_b4.points_of(stat) / p_b4.value_of(stat)
+        cur_hp_per = p.points_of(stat) / p.value_of(stat)
+        
+        return cur_hp_per - prev_hp_per
         
         
 BattleChange = namedtuple('Change', ['new', 'old'])
