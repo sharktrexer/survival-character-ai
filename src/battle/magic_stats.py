@@ -1,14 +1,39 @@
 from enum import Enum
 
+'''
+All magic damage pulls from INT + MagicStat
+
+Then some may apply another stat:
+    fire - 
+    ice - 
+    water - Rec 
+    earth - 
+    holy - 
+    psychic - Cha 
+    shadow - Itmd 
+    lightning - 
+    mundane - 
+    wind - 
+'''
+
 COUNTER_MAGIC_MULTS = [0.5, 0.25, 0.1]
 SAME_MAGIC_MULTS = [0.25, 0.1, 0.05]
 # magic of the same type will have half of much resistance as counters
 
-class Magic:
-    def __init__(self, name:str, resistance:float, strength:int):
+class MagicStat:
+    def __init__(self, name:str, resistance:float, priority:int):
         self.name = name
         self.resistance = resistance
-        self.strength = strength
+        self.priority = priority
+        
+class MagicBoard:
+    def __init__(self, magic_aptitudes:dict[str, int]):
+        '''
+        Parameters:
+            starting_magics (dict[str, int]): magic name, priority
+        '''
+        self.magics:dict[str, MagicStat] = {}
+        
 
 MAGIC_NAMES = [
     'fire',
@@ -38,7 +63,7 @@ def get_res_value(priority:int, magic_name:str):
     '''
     
     Returns:
-        list[tuple[str, float]] as [(magic_name, resist multiplier)]
+        dict[str, float] = magic_name, resist multiplier
         
         Where names are in the following order
         
@@ -57,9 +82,9 @@ def get_res_value(priority:int, magic_name:str):
     
     vuln_mag, countered_mag = get_magics_vul_and_countered_relation(magic_name)
     
-    return [(vuln_mag, -COUNTER_MAGIC_MULTS[priority]), 
-            (magic_name, SAME_MAGIC_MULTS[priority]),
-            (countered_mag, COUNTER_MAGIC_MULTS[priority])]
+    return {vuln_mag: -COUNTER_MAGIC_MULTS[priority], 
+            magic_name: SAME_MAGIC_MULTS[priority],
+            countered_mag: COUNTER_MAGIC_MULTS[priority]}
     
 #TODO: func to get and store all magic resists from a character's 3 different magics
     

@@ -9,11 +9,12 @@ Generic (most units will have this)
         It heals 25% per any enemy turn passed)
     Evade (Uses EVA,
         Every 1 ap used gives 30% of Eva as Evasion Health
-        Evasion health converts every recieved attack into 1x of attacker's dexterity
+        Evasion health converts every non-psychological action into 1x of attacker's dexterity
         Converted attack is only the 1x Dex and all other effects are ignored
         While Evasion Health is active, it takes damage instead of HP
         If the dexterity attack breaks the evasion health, the attacker takes the original attack
         User can choose to have attack be affected by evade or not to keep Evasion Health up)
+        Actions that target fear, hunger, stress, or are pshycological cannot be evaded
     Sabotage (Attacks gauge stat (not hp))
     Encourage (Heals gauge stat (not hp))
     
