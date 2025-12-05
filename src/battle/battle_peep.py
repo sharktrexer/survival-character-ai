@@ -268,17 +268,46 @@ class BattlePeep():
         
     def change_state(self, state:Peep_State):
         self.battle_handler.stance = state 
+    
+    def affect_fear(self, affect:Damage, attacker:BattlePeep):
+        
+        amount = affect.amount
+        
+        # When healing stress, 25% of attacker's rec is added
+        if affect.is_heal:
+            amount += (attacker.value_of('rec') // 4)
+        # If taking fear damage, 25% of self tres is used to resist
+        else:
+            amount -= (self.value_of('fear') // 4)
+        
+        self.stats.resource_change('fear', amount)
+    
+    def affect_stress(self, affect:Damage, attacker:BattlePeep):
+        
+        amount = affect.amount
+        
+        # When healing stress, 25% of attacker's rec is added
+        if affect.is_heal:
+            amount += (attacker.value_of('rec') // 4)
+        # If taking stress damage, 25% of self tres is used to resist
+        else:
+            amount -= (self.value_of('tres') // 4)
+        
+        self.stats.resource_change('tres', amount)
         
     def affect_hp(self, affect:Damage, attacker:BattlePeep):
         '''
-        Returns if evaded
-            affect of healths (hp, evade, defense, temp, blood)
+        Handles damage dealt to this peep. This includes
+        Evading attacks
+        
+        Returns:
+            if evaded
         '''
         I_evaded = False
         
         # Only evade damaging moves
         # in future, casting healing on undead could damage them and thus undead could evade
-        if not affect.is_heal: 
+        if affect.evadable: 
             I_evaded = self.try_to_evade(attacker)
         
         if I_evaded:

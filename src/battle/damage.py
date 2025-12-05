@@ -2,17 +2,33 @@
 Types of damage dealt by status effects, and actions:
 
     Physical damage: attacks with stat dependant on weapon type, DEF resists
-    Healing: heals with Rec, HP improves
     Magical damage: attacks with Int, REC resists
+        Also adds 0.5x Int to Dodge damage if evaded
     
-    Psychological damage: attacks with Cha, CHA + REC resists
+    Psychological damage: attacks with Cha, CHA resists
     
-    :::::::::::::Damage to Non-Health Points:::::::::::::
-    Evasion damage: attacks with Dex onto Evasion Health, EVA resists
+    Applying Non-Psychological Ailments (Status Effects or Debuffs)
+        Includes Physical or Magical related ailments
+    
+    All can be evaded by Dodge, where 1x Dex is used as damage against dodge
+    
+    :::::::::::::Cannot be Dodged:::::::::::::
+    Healing: heals with Rec, HP improves
+        Excluding Undead targets that take dmg from heals
+    Stress Heal: heals with Tres +0.25x Rec, TRES improves
+    Fear Heal: heals with Fear + 0.25x Rec, FEAR improves
+    
+    Applying Psychological Ailments 
+        Includes Stress, Hunger, Fear, Intimidation, Charisma Debuffs
+    
     Fear damage: attacks with Itmd onto Fear Health, FEAR resists
-    Stress damage: attacks with Cha or Itmd onto Stress Health, TRES resists 
+    Stress damage: attacks with stat onto Stress Health, TRES resists 
     
     Disgust Trauma: limits max hunger points
+    
+    Armor effects are determined by the defensive move used
+        Thus it can potentially defend against anything
+    
     
 
 Gear or special moves can add other stat values to any damage
@@ -31,12 +47,24 @@ def create_dmg_preset(ratio:int, type:Damage.DamageType):
             return Damage(ratio, 'rec', 'hp', is_heal=True, evadable=False)
         case Damage.DamageType.Magical:
             return Damage(ratio, 'int', 'rec')
-        case Damage.DamageType.Evasion:
-            return Damage(ratio, 'dex', 'eva')
-        case Damage.DamageType.Fear:
-            return Damage(ratio, 'itmd', 'fear')
-        case Damage.DamageType.Stress:
-            return Damage(ratio, 'cha', 'tres')
+        case Damage.DamageType.Psychological:
+            return Damage(ratio, 'cha', 'cha')
+
+def create_gauge_dmg(ratio:int, type:Damage.DamageType, empower_stat:str, is_heal:bool=False):
+        match type:
+            case Damage.DamageType.Stress:
+                if is_heal:
+                    return Damage(ratio, 'tres', 'tres', is_heal=True, evadable=False)
+                return Damage(ratio, empower_stat, 'tres', is_heal=False, evadable=False)
+            case Damage.DamageType.Fear:
+                if is_heal:
+                    return Damage(ratio, 'fear', 'fear', is_heal=True, evadable=False)
+                return Damage(ratio, 'itmd', 'fear', is_heal=False, evadable=False)
+
+def create_status_dmg(ratio:int, type:Damage.DamageType):
+    match type:
+        case Damage.DamageType.Magical:
+            return Damage(ratio, 'int', 'rec', evadable=False)
         
 def create_specific_phys_dmg(ratio:int, stat:str):
     return Damage(ratio, stat, 'def')

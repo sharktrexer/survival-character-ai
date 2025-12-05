@@ -127,6 +127,12 @@ class BattleManager():
      
     def peep_end_turn(self, peep:BattlePeep):
         peep.end_turn()            
+    
+    def check_battle_cond(self):
+        '''
+        Check if a team has won (all other teams are dead)
+        '''
+        pass
             
     def do_gain_bonus_AP_from_init(self, peep: BattlePeep):
         
@@ -163,27 +169,6 @@ class BattleManager():
                 peep.gained_ap_bonus = True
             
             return do_gain_bonus
-    
-    def get_action_affect(self, action:BattleAction, user:BattlePeep, target:BattlePeep, ap_used:int):
-    # pass in copies!
-    # use copy of battle manager!
-    # simulate a cast on copies of user, target, action
-    # see what has changed, status effects, alterations, healths, resources, summons
-    # how much of each? was it positive or negative?
-        
-        user_past = copy.deepcopy(user)
-        target_past = copy.deepcopy(target)
-        
-        bd = BattleData(user_past, target_past)
-        
-        self.peep_action(user, action)
-        
-        bd.get_data_target(user, target)
-        
-        user_results = {}
-        target_results = bd.targ_diffs
-        
-        return bd
     
    
     
