@@ -72,6 +72,13 @@ def populate_xp_dict():
 populate_xp_dict()
 
 class GrowingStat:
+    '''
+    A class to represent the permanent change to a stat.
+    
+    The Stat class can then take these values to calculate the active value
+    
+    Now the perm stat dict can contain these instead of Stat classes with redundant vars
+    '''
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
         # Naming
         self.name = name
@@ -81,7 +88,60 @@ class GrowingStat:
         # Numericals
         self.value = val
         self.apt = apt
-        self.apt_exp = 0 
+        self.apt_exp = XP_REQURED_PER_APT[self.apt] 
+    
+    def __str__(self):
+        return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4}" 
+                + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
+    
+    def xp_str(self):
+        return f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}"
+    
+    def reset_to(self, val:int, apt:int):
+        self.value = val
+        self.apt = apt
+        self.apt_exp = XP_REQURED_PER_APT[self.apt] 
+        
+    def update(self, val_amt:int, apt_xp_amt:int):
+        self.change_base_value(val_amt)
+        self.change_aptitude_xp(apt_xp_amt)
+        
+    def change_base_value(self, amount:int):
+        
+        # Reduce shrink by positive aptitude multipliers
+        if amount < 0 and self.apt > 0:
+            amount //= get_mult_of_aptitude(self.apt)
+        
+        # cap lowest value to 1
+        change = self.value + amount if self.value + amount > 1 else 1
+        
+        self.value = round(change)
+                
+    def change_aptitude_xp(self, amount:int):
+        self.apt_exp += amount
+        
+        #cap min and max values
+        if self.apt_exp < 0:
+            self.apt_exp = 0
+            self.apt = -4
+            return
+          
+        elif self.apt_exp > XP_REQURED_PER_APT[8]:
+            self.apt_exp = XP_REQURED_PER_APT[8]
+            self.apt = 8
+            return
+
+        #get apt with the exp value that is less than, yet closest to the current exp
+        for apt, req_xp in XP_REQURED_PER_APT.items():
+            if self.apt_exp >= req_xp:
+                self.apt = apt
+            else:
+                break
+            
+    def get_xp_req_to_next_apt_level(self):
+        if self.apt == 8: return 0
+        
+        return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
 
 class Stat:
     def __init__(self, name:str, val:int, apt:int, abreviation:str, ex_names:list):
@@ -103,7 +163,6 @@ class Stat:
         self.value = val
         self.val_resource = val
         self.apt = apt
-        self.apt_exp = 0 
         self.val_active = 0
         self.multiplier = 1.0
         '''separate mult modifier that is effected by everything else 
@@ -125,7 +184,7 @@ class Stat:
     def __str__(self):
         return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.val_active:<4}" 
                 + f"\nCurrent Modifier - {round(self.multiplier, 3):<4}"
-                + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
+                )
     
     def __repr__(self):
         return f"{self.name} Stat, {self.val_active} Active, {self.apt} Apt, {self.multiplier} Mult"
@@ -138,11 +197,6 @@ class Stat:
     
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
-    
-    def get_xp_req_to_next_apt_level(self):
-        if self.apt == 8: return 0
-        
-        return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
     
     def get_all_alterations(self) -> list[Alteration]:
         ''' returns the list of buffs + debuffs'''
@@ -194,20 +248,14 @@ class Stat:
     def set_new_vals_as_reset(self, val:int, apt:int):
         """
         Resets a stat to a new value and aptitude, resetting the resource value,
-        deleting all buffs, debuffs, extra mults, and setting the apt exp to the exp amount
-        of the corresponding aptitude level. 
+        deleting all buffs, debuffs, extra mults.
         """
         
         self.buffs = []
         self.debuffs = []
         self.ex_mults = 1.0
         self.set_new_vals(val, apt)
-        self.apt_exp = XP_REQURED_PER_APT[self.apt]
         self.val_resource = self.val_active
-        
-    def set_new_vals_as_update(self, val:int, apt:int, apt_exp:int):
-        self.set_new_vals(val, apt)
-        self.apt_exp = apt_exp
         
     def set_extra_mult(self, mult:float):
         '''
@@ -218,6 +266,15 @@ class Stat:
         self.calc_active_value()
         
     def calc_active_value(self):
+        '''
+        IMPORTANT:
+        
+        This functions calculates the active value of the stat. The active value dictates
+        the number used by any other part of the game.
+        
+        If any change to the stat is made that could affect the value of the stat, 
+        this function must be called
+        '''
         # reset
         self.multiplier = 1
         
@@ -306,42 +363,11 @@ class Stat:
         self.val_resource += amount
     
     def resource_set_to_percent(self, percent:float):
-        self.val_resource = int(self.val_active * percent)
+        '''
+        Sets the resource value to the given percent of the active value
+        '''
+        self.val_resource = round(self.val_active * percent)
     
-    
-    ''' 
-                            PERM CHANGE FUNCS
-    ''' 
-    def change_base_value(self, amount:int):
-        
-        # Reduce shrink by positive aptitude multipliers
-        if amount < 0 and self.apt > 0:
-            amount /= get_mult_of_aptitude(self.apt)
-        
-        # cap lowest value to 1
-        change = self.value + amount if self.value + amount > 1 else 1
-        
-        self.set_new_vals(change, self.apt)
-        
-    def change_aptitude_xp(self, amount:int):
-        self.apt_exp += amount
-        
-        #cap
-        if self.apt_exp < 0:
-            self.apt_exp = 0
-          
-        elif self.apt_exp > XP_REQURED_PER_APT[8]:
-            self.apt_exp = XP_REQURED_PER_APT[8]
-
-        
-        #get apt with the exp value that is less than, yet closest to the current exp
-        for apt, req_xp in XP_REQURED_PER_APT.items():
-            if self.apt_exp >= req_xp:
-                self.apt = apt
-            else:
-                break
-        
-        self.set_new_vals(self.value, self.apt)
          
 
 ''' 
@@ -497,7 +523,6 @@ def make_stat(name, val, apt):
     stat = copy.deepcopy(STAT_TYPES[name])
     stat.apt = apt
     stat.value = val
-    stat.apt_exp = XP_REQURED_PER_APT[stat.apt]
     stat.calc_active_value()
     stat.val_resource = stat.val_active
     return stat
@@ -519,7 +544,18 @@ class StatBoard:
         self.cur_stats = stats_dict
         # These stats dont ever have Alterations applied to them
         # and are only affected by permanent upgrades/effects
-        self.mem_stats = stats_dict
+        # TODO: change to GrowingStat dict
+        
+        temp = {}
+        for stat in stats_dict.values():
+            temp[stat.name] = GrowingStat(
+                name=stat.name, val=stat.value, apt=stat.apt,
+                abreviation=stat.abreviation, ex_names=stat.ex_names)
+        
+        self.mem_stats: dict[str, GrowingStat] = temp
+        '''
+        Contains GrowingStats that are simpler representations of each stat.
+        '''
         
         # list of mult changes to apply to stats. 
         # one entry equals the total mult change of one stat
@@ -548,33 +584,29 @@ class StatBoard:
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     '''
     
-    def set_cur_stat_to_mem_stat(self, mem_stat:Stat):
-        name = mem_stat.name
-        self.cur_stats[name].set_new_vals_as_update(mem_stat.value, mem_stat.apt, mem_stat.apt_exp)
-        
-    def change_apt_xp(self, stat_name:str, xp:int):
-        stat = self.get_stat_mem(stat_name)
-        stat.change_apt_xp(xp)
-        stat.set_cur_stat_to_mem_stat(stat.name)
-    
-    def change_stat_base_val(self, stat_name:str, amount:int):
-        stat = self.get_stat_mem(stat_name)
-        stat.change_base_val(amount)
-        self.set_cur_stat_to_mem_stat(stat.name)
-        
-    def mults_apply(self):
+    def grow_stat(self, stat_name:str, val_amt:int, apt_xp_amt:int):
         '''
-        Call to apply all multiplier changes to stats
+        Grows the memory stat by the passed in amounts
+        
+        then updates the current stat with the new values
         '''
-        total_mult = 1
-        for change in self.mult_changes:
-            total_mult *= change.mult
+        m_stat = self.get_stat_mem(stat_name)
+        m_stat.update(val_amt, apt_xp_amt)
+        self.get_stat_cur(stat_name).set_new_vals(m_stat.value, m_stat.apt)
+        
+    # def mults_apply(self):
+    #     '''
+    #     Call to apply all multiplier changes to stats
+    #     '''
+    #     total_mult = 1
+    #     for change in self.mult_changes:
+    #         total_mult *= change.mult
             
-        self.get_stat_cur(change.stat_name).set_extra_mult(total_mult)    
-    def mults_reset(self):
-        for change in self.mult_changes:
-            change.mult = 1
-        self.mults_apply()
+    #     self.get_stat_cur(change.stat_name).set_extra_mult(total_mult)    
+    # def mults_reset(self):
+    #     for change in self.mult_changes:
+    #         change.mult = 1
+    #     self.mults_apply()
     
     '''
         Reserved for stats like Hunger, Energy, Health, Stress, & Fear
@@ -666,7 +698,8 @@ class StatBoard:
     def get_all_stats_as_str(self):
         stats_2_str = ""
         for stat in self.cur_stats.values():
-            stats_2_str += str(stat) + "\n---------------------------\n"
+            m_stat = self.get_stat_mem(stat.name)
+            stats_2_str += str(stat) + str(m_stat) + "\n---------------------------\n"
         return stats_2_str
     
     def get_all_alts_as_str(self):

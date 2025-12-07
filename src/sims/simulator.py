@@ -496,7 +496,7 @@ class StatManipulationSimulator(Simulator):
                            self.reset_peep_to_default]
         
         self.stat_funcs = [self.show_stat_info, self.grow_or_shrink_stat, 
-                           self.set_stat_values_directly, self.manipulate_apt_level_by_xp,
+                           self.set_stat_values_directly,
                            self.manipulate_extra_modifiers, self.manage_stat_alterations,
                            self.reset_stat_to_default]
         
@@ -697,38 +697,22 @@ class StatManipulationSimulator(Simulator):
     
     def grow_or_shrink_stat(self, peep:BattlePeep, stat:Stat):
         print("\nCurrent Values: ")
-        print(stat.simple_str())
+        self.show_stat_info( peep, stat)
         
         # input form
-        change_in = {"val_change": 0}
-        conditions = [None]
+        change_in = {"val_change": 0, "xp_change": 0}
+        conditions = [None, None]
         
+        print("\nChoose a number to add to the stat value and another to add to the xp value.")
         self.obtain_number_inputs(input_form_dict=change_in, conds=conditions)
-        
-        new_val = stat.value + change_in['val_change']
-        
-        stat.set_new_vals(new_val, stat.apt)
+                
+        peep.stats.grow_stat(stat.name, int(change_in['val_change']), int(change_in['xp_change']))
         
         print("\nWith Your Set Values: ")
-        print(stat.simple_str())
-    
-    def manipulate_apt_level_by_xp(self, peep:BattlePeep, stat:Stat):
-        print("\nCurrent Stat Info: ")
-        print(stat)
-        
-        # input form
-        change_in = {"xp_change": 0}
-        conditions = [None]
-        
-        self.obtain_number_inputs(input_form_dict=change_in, conds=conditions)
-        
-        stat.change_aptitude_xp(change_in['xp_change'])
-        
-        print("\nAfter your aptitude xp change: ")
-        print(stat.simple_str())
+        self.show_stat_info(peep, stat)
     
     def show_stat_info(self, peep:BattlePeep, stat:Stat):
-        print(stat, "\n")
+        print(stat, peep.stats.get_stat_mem(stat.name).xp_str(), "\n")
         
     def manipulate_extra_modifiers(self, peep:BattlePeep, stat:Stat):
         print("\nNot yet implemented")
@@ -737,13 +721,12 @@ class StatManipulationSimulator(Simulator):
     def reset_stat_to_default(self, peep:BattlePeep, stat:Stat):
         
         print("\nPrevious Values: ")
-        print(stat)
+        self.show_stat_info(peep, stat)
         
         PeepManager.reset_stat_to_default(peep, stat)
         
         print("\nValues after reset: ")
-        print(stat)
-        print()
+        self.show_stat_info(peep, stat)
         
     def manage_stat_alterations(self, peep:BattlePeep, stat:Stat):
         

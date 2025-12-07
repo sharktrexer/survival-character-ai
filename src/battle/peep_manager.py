@@ -28,6 +28,7 @@ class PeepManager:
     def reset_stat_to_default(peep:BattlePeep, stat:Stat):
         default_stat = PEEPS[peep.name].get_stat(stat.name)
         stat.set_new_vals_as_reset(default_stat.value, default_stat.apt)
+        peep.stats.get_stat_mem(stat.name).reset_to(default_stat.value, default_stat.apt)
         
     @staticmethod
     def reset_peep_to_default(peep:BattlePeep):
