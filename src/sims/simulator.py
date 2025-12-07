@@ -869,4 +869,47 @@ class StatManipulationSimulator(Simulator):
         print("\nNot yet implemented")
         pass
        
+'''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+'''  
+
+class LodgeSimulator(Simulator):
     
+    def __init__(self):
+        self.name = "Lodge Simulator"
+        self.funcs = [self.choose_activity, 
+                      self.print_peep_info, self.print_time_info,
+                      self.reset,]
+        
+    def welcome(self):
+        print(f"Welcome to the {self.name}!\n",
+              "Here you can select diffierent activities in a day for a character.",
+              "These activities will increase their stats over time.",
+              "As days pass, seasons will change and with it, the duration of night and day.") 
+        t.sleep(0.2) 
+        self.choose_peep()
+        
+    def choose_peep(self):
+        print("\nNot yet implemented")
+        pass
+    
+    def reset(self):
+        print("\nNot yet implemented")
+        pass
+
+    def choose_activity(self):
+        print("\nNot yet implemented")
+        pass
+    
+    def print_peep_info(self):
+        print("\nNot yet implemented")
+        pass
+    
+    def print_time_info(self):
+        print("\nNot yet implemented")
+        pass

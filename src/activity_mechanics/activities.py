@@ -23,54 +23,28 @@ class Tag(Enum):
     MIXED = auto()
 
 class Activity():
+    '''
+    Class that defines the details of an activity
+    '''
     
     def __init__(self, name:str, 
                  tags:list[Tag], stat_changes:list[StatChange],  
-                 mins_req:float, 
-                 stress_effect:int,
-                 cost:list[Resource],
-                 production:list[Resource]):
+                 pips_req:float, 
+                 tres_perc_cost:float,
+                 cost:list[Resource] = [],
+                 production:list[Resource] = []):
         self.name = name
         self.tags = tags
         self.stat_changes = stat_changes
-        self.mins_required = mins_req
-        self.stress_effect = stress_effect
-        self.cost = cost
-        self.production = production
-    
-    def affect_peep(self, peep:BattlePeep, mins_passed:int):
+        self.pips_req = pips_req
+        self.stress_percent_cost = tres_perc_cost
+        self.rescource_cost = cost
+        self.produced_resc = production
         
-        time_mult = self.mins_required / mins_passed
-        
-        # stat effects
-        for stat_change in self.stat_changes:
-            
-            # get value proportional to time passed on activity
-            xp_change = stat_change.apt_xp_amount * time_mult
-            val_change = stat_change.val_amount * time_mult
-            #TODO: multiply by status effects on peep
-            
-            if stat_change.apt_xp_amount != 0:
-                peep.stats.change_apt_xp(stat_change.name, stat_change.apt_xp_amount)
-            if stat_change.val_amount != 0:
-                peep.stats.change_stat_base_val(stat_change.name, stat_change.val_amount)
-            # prevent func calls if a change is 0
-            
-        # stress resource effect
-        peep.stats.resource_change("stress", self.stress_effect)
-        
-        # give peep an item or items
-        if time_mult == 1:
-            self.give_reward()
-            
-    def do(self, peep:BattlePeep):
-        
-        do = self.exchanger.exchange(peep.resources)
-        if do:
-            #TODO: affect stress, 
-            self.affect_peep(peep)
-        
-        return do
-    
-    def give_reward():
-        pass
+workout = Activity("Workout", tags=[],
+                   stat_changes=[
+                       StatChange("str", 3, 1),
+                       StatChange("hun",-1, 0),
+                   ],
+                   pips_req=2,
+                   tres_perc_cost=0.1)

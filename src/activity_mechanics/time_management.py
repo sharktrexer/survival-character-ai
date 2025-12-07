@@ -12,9 +12,17 @@ class Season(Enum):
 class TimeOfDay(Enum):
     DAY = auto()
     NIGHT = auto()
-    
-MINS_PER_TURN = 10
+
+# Constants
+MINS_PER_PIP = 10
+MINS_PER_HR = 60    
+PIPS_PER_TURN = 1
+PIPS_PER_HR = 60 // MINS_PER_PIP
+
 HRS_IN_DAY = 24
+NUM_OF_SEASONS = 4
+DAYS_PER_SEASON = 5
+DAYS_PER_YEAR = 25
 
 def get_day_n_night_hrs_by_season(seas:Season):
     # day in hrs, night in hrs
@@ -25,6 +33,7 @@ def get_day_n_night_hrs_by_season(seas:Season):
     elif seas == Season.SUMMER:
         return 16, 8 # 16 hr day
 
+
 class TimeKeeper:
     def __init__(self):
         self.season = Season.WINTER
@@ -34,16 +43,20 @@ class TimeKeeper:
         self.time_of_day = TimeOfDay.DAY
         self.day_hrs, self.night_hrs = get_day_n_night_hrs_by_season(self.season)
     
+    def cur_year(self):
+        return self.days_passed // DAYS_PER_YEAR
+    
     def update_season(self):
-        
-        # every 5 days change season 
-        #    5   -   5   -   5   - 5
-        # Winter, Spring, Summer, Fall
-        #          4 seasons
-        #         |_________\
-        #     25 Days in the 'Year'
-        #     4 years in 100 days
-        season_input = self.days_passed // 5 % 4
+        '''
+        ### every 5 days change season 
+        #   5   -   5   -   5   - 5
+        ### Winter, Spring, Summer, Fall
+                 4 seasons
+            ##    /_________\\
+        25 Days in the 'Year'
+        4 years in 100 days
+        '''
+        season_input = (self.days_passed // DAYS_PER_SEASON) % NUM_OF_SEASONS
             
         match(season_input):
             case 0:
@@ -65,31 +78,33 @@ class TimeKeeper:
         Daytime is the the middle of the day
         
         '''
+        # declares night as the first and last hours of the day
         if ((self.cur_hr >= 0 and self.cur_hr < self.night_hrs / 2)
-            or self.cur_hr >= self.night_hrs / 2 + self.day_hrs
+            or (self.cur_hr >= self.night_hrs / 2 + self.day_hrs)
             ):
             self.time_of_day = TimeOfDay.NIGHT
         else:
             self.time_of_day = TimeOfDay.DAY
     
     def tick(self):
-        self.cur_min += 1
-        
-        self.update_time()
-        
-    def tick_turn(self):
-        self.cur_min += MINS_PER_TURN
+        self.tick_by_pip(1)
 
+    def tick_turn(self):
+        self.tick_by_pip(PIPS_PER_TURN)
+        
+    def tick_by_pip(self, pips:int):
+        self.cur_min += pips * MINS_PER_PIP
+        
         self.update_time()
             
     def update_time(self):
         
-        self.cur_hr = self.cur_min % 60
+        self.cur_hr = self.cur_min % MINS_PER_HR
         
         # check for a new day
-        if self.cur_hr == HRS_IN_DAY:
-            self.cur_min -= HRS_IN_DAY * 60
-            self.cur_hr = 0
+        if self.cur_hr >= HRS_IN_DAY:
+            self.cur_min -= HRS_IN_DAY * MINS_PER_HR
+            self.cur_hr = self.cur_min % MINS_PER_HR
             self.days_passed += 1
         
         self.update_season()
