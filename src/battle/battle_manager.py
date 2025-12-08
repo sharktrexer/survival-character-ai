@@ -9,13 +9,14 @@ from .battle_action import BattleAction #, basic_dmg, basic_heal, knife_stab, ra
 
 class MoveChoice:
     
-    def __init__(self, move:BattleAction, target_name:str, ap_spent:int):
+    def __init__(self, move:BattleAction, target_name:str, ap_spent:int, points:float = 0):
         self.move = move
         self.target = target_name
         self.ap_spent = ap_spent
+        self.points = points
         
     def __repr__(self):
-        return f"{self.move}, {self.target} target, {self.ap_spent} spent)"
+        return f"{self.move} at {self.target}, {self.ap_spent} spent)"
 
 class BattleManager():
     def __init__(self, members:list[BattlePeep]):
@@ -170,7 +171,9 @@ class BattleManager():
             
             return do_gain_bonus
     
-   
+    def get_avg_stat(self, stat:str, team:str, is_same_team:bool=False):
+        peeps = self.get_members_by_team(team, is_same_team)
+        return sum([peep.value_of(stat) for peep in peeps]) / len(peeps)
     
 class BattleData():
 

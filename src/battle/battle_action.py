@@ -351,8 +351,11 @@ class BattleAction():
         return f"{self.name}, {self.ap} cost, {self.behaviors})"
     
     def __str__(self):
-        flexible_suffix = "(Flexible)" if self.flexible else ""
+        flexible_suffix = "per use" if self.flexible else ""
         return f'{self.name} = {self.ap} AP {flexible_suffix}'
+    
+    def str_simp(self):
+        return f'{self.name}'
     
                 
     def reset_behaviors(self):

@@ -7,6 +7,9 @@ from battle.battle_manager import BattleData, BattleManager, MoveChoice
 from .battle_action import BattleAction, BattlePeep, TargetTypes
 from peep_data.move_data import MOVE_SETS
 
+PRINT_RECURSION = False
+SEE_ALL_FUTURES = False
+
 '''
 TARGETING
 Before each action, a prime ally and enemy target are chosen
@@ -260,7 +263,7 @@ class BattleAI:
         self.can_still_cast = self.my_ap > 0 and len(self.moves) > 0 and len(self.choices) < 3
         
         
-def simulate(ai:BattleAI, battle:BattleManager):
+def simulate(ai:BattleAI, battle:BattleManager, depth:int = 0):
     # get ai state and battle data from each move
     # calculate points based on goals
     # call simulate again on moves where points >= median of points from all move
@@ -326,7 +329,8 @@ def simulate(ai:BattleAI, battle:BattleManager):
         # grab changes
         bd.get_data_target(sim_ai.myself, target)        
         
-        points = calculate_points(bd)
+        points = calculate_points(bd, battle)
+        sim_ai.choices[-1].points = points
         
         sim_moves.append( ScoredMove(
             move=sim_act, score=points, ai=sim_ai, battle=sim_battle)
@@ -334,7 +338,7 @@ def simulate(ai:BattleAI, battle:BattleManager):
     
     #Add option to stop casting and save some ap
     #TODO: check if gained roll over this turn, if so, save less
-    ap_saved_score = 0.8 - (ai.myself.points_of('ap') / ai.myself.value_of('ap'))
+    ap_saved_score = 0.5 - (ai.myself.points_of('ap') / ai.myself.value_of('ap'))
     ap_saved_score = round(ap_saved_score, 1)
     sim_moves.append( ScoredMove(
             move=None, score=ap_saved_score, ai=None, battle=None)
@@ -344,16 +348,28 @@ def simulate(ai:BattleAI, battle:BattleManager):
     sorted_sim_moves = sorted(sim_moves, key = lambda move: move.score, reverse=True)
     
     # temp 'median' function that ignores the lesser point moves
-    if len(sorted_sim_moves) != 1:
+    if not SEE_ALL_FUTURES and len(sorted_sim_moves) != 1:
         sorted_sim_moves = sorted_sim_moves[0:len(sorted_sim_moves)//2]
     
     final_options:list[list[ScoredMove]] = []
     
     # simulate the next move, storing the list of the moves for a full turn
+    depth += 1
     for sm in sorted_sim_moves:
-        final_options.append([sm] + simulate(sm.ai, sm.battle))
+        final_options.append([sm] + simulate(sm.ai, sm.battle, depth))
         
     final_options.sort(key = lambda scored_moves: sum([sm.score for sm in scored_moves]), reverse=True)
+    
+    if PRINT_RECURSION:
+        print(f"\n~~~Choosing action {depth}/3 from ", end=" ")
+        for c in ai.choices:
+            print(f'[{c.points}: {c.move.str_simp()}]', end=" ")
+        print('~~~')
+        for l in final_options:
+            print (f'TOTAL: {round(sum([sm.score for sm in l]), 3)}', end=" ")
+            for action in l:
+                print(f'[{action.score}: {action.move}]', end=" ")
+            print()
     
     # only the highest scoring list prevails!
     return final_options[0]
@@ -367,7 +383,7 @@ Allows for the next action to be simulated using the
 state of the ai and battle after casting the stored move
 '''
 
-def calculate_points(bd:BattleData):
+def calculate_points(bd:BattleData, battle:BattleManager):
     points = 0
     
     hp_percent_chng = bd.targ_percent_diff['health']
@@ -419,15 +435,45 @@ def calculate_points(bd:BattleData):
     else:
         
         # FOR SELF
+        '''
+        self is evasive when self eva > average enemy dex
+        
+        use ap to dodge = 2x highest dex of enemy team
+        if not possible, use 25% of ap to dodge if self is evasive
+            and use 25% of ap to armor
+            
+        1  if highest enemy str >=20% of selfs hp
+        2  if took hp dmg on prev turn
+        3  if not evasive
+            then use block 25-70% of ap depending on difference of str to hp
+            and hp 
+        '''
         if bd.targ_cur.name == bd.user_cur.name:
             eva_power = bd.targ_cur.value_of('eva') / bd.targ_cur.value_of('def')
             def_power = bd.targ_cur.value_of('def') / bd.targ_cur.value_of('eva')
+            
+            if bd.user_b4.points_of('armor') > 0:
+                armor_chng -= 4
+            if bd.user_b4.points_of('dodge') > 0:
+                dodge_chng -= 4
 
             eva_power *= 0.05
             def_power *= 0.05
             
-            armor_chng = (bd.targ_diffs['armor'] / bd.targ_cur.value_of('hp')) * def_power
-            dodge_chng = (bd.targ_diffs['dodge'] / bd.targ_cur.value_of('hp')) * eva_power
+            avg_str = battle.get_avg_stat('str', bd.user_cur.team)
+            avg_dex = battle.get_avg_stat('dex', bd.user_cur.team)
+            
+            if avg_dex > bd.targ_diffs['dodge'] and bd.targ_diffs['dodge']  != 0:
+                 dodge_chng -= 4
+                 
+            if avg_dex * 3 < bd.user_cur.dodge():
+                dodge_chng -= 4
+                 
+            if avg_str // 4 > bd.targ_diffs['armor'] and bd.targ_diffs['armor'] != 0:
+                armor_chng -= 4
+            
+            armor_chng += (bd.targ_diffs['armor'] / bd.targ_cur.points_of('hp')) * def_power
+            dodge_chng += (bd.targ_diffs['dodge'] / bd.targ_cur.points_of('hp')) * eva_power
         # FOR ALLY
         else:    
             # how much the defensive stat goes into the battle hp for points
@@ -441,16 +487,18 @@ def calculate_points(bd:BattleData):
             dodge_chng += 0.5
             
         # bonus points if ally has low hp
-        if bd.targ_cur.points_of('hp') <= bd.targ_cur.value_of('hp') // 3:
-            armor_chng = armor_chng + 0.3 if armor_chng > 0 else 0
-            dodge_chng = dodge_chng + 0.3 if dodge_chng > 0 else 0
+        # if bd.targ_cur.points_of('hp') <= bd.targ_cur.value_of('hp') // 3:
+        #     armor_chng = armor_chng + 0.3 if armor_chng > 0 else 0
+        #     dodge_chng = dodge_chng + 0.3 if dodge_chng > 0 else 0
         
     
     # 10% of health or blood affected = 1 point
     points += hp_percent_chng * 10
     points += blood_percent_chng * 10
-    points += armor_chng
-    points += dodge_chng
+    if bd.targ_diffs['armor'] != 0:    
+        points += armor_chng
+    if bd.targ_diffs['dodge'] != 0:
+        points += dodge_chng
     return round(points, 3)
 
 '''
