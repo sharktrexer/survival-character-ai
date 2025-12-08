@@ -112,10 +112,8 @@ class GrowingStat:
         if amount < 0 and self.apt > 0:
             amount //= get_mult_of_aptitude(self.apt)
         
-        # cap lowest value to 1
-        change = self.value + amount if self.value + amount > 1 else 1
-        
-        self.value = round(change)
+        # cap lowest value to 1       
+        self.value = round(max(1, self.value + amount) )
                 
     def change_aptitude_xp(self, amount:int):
         self.apt_exp += amount
@@ -342,12 +340,8 @@ class Stat:
         self.val_resource += amount
         
         # cap
-        if self.val_resource > self.val_active:
-            self.val_resource = self.val_active
-        elif self.val_resource <= 0:
-            self.val_resource = 0
-            return True
-        return False
+        self.val_resource = round(clamp(self.val_resource, min_v=0, max_v=self.val_active))
+        return self.val_resource == 0
     
     def resource_change_unlimited(self, amount:int):
         '''
@@ -375,6 +369,9 @@ class Stat:
                         GENERIC FUNCTIONS, CLASSES, EQUATIONS & CONSTANTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
+
+def clamp(val, min_v, max_v):
+    return max(min_v, min(val, max_v))
 
 class StatChange():
     '''
@@ -644,10 +641,7 @@ class StatBoard:
     def resource_set_to_percent(self, stat_name:str, percent:float):
         
         # caps
-        if percent < 0:
-            percent = 0   
-        elif percent > 1:
-            percent = 1
+        percent = float(clamp(percent, min_v=0, max_v=1))
         
         self.cur_stats[sn(stat_name)].resource_set_to_percent(percent)
  
@@ -656,7 +650,7 @@ class StatBoard:
         if self.cur_stats["energy"].apt >= 0:
             return 8
         else:
-            return 8 + abs(self.cur_stats["energy"].apt)
+            return 8 - self.cur_stats["energy"].apt
     
     def sleep_by_min(self):
         #TODO: affect stress, fear, and hunger

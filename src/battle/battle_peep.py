@@ -380,15 +380,13 @@ class BattlePeep():
         self.battle_handler.evasion_health += int(round(amount))
         
         # cap
-        if self.battle_handler.evasion_health < 0:
-            self.battle_handler.evasion_health = 0
+        self.battle_handler.evasion_health = round(max(0, self.battle_handler.evasion_health))
             
     def change_defense_health(self, amount:int):
-        self.battle_handler.defense_health += int(round(amount))
+        self.battle_handler.defense_health += round(int(round(amount)))
         
         # cap
-        if self.battle_handler.defense_health < 0:
-            self.battle_handler.defense_health = 0
+        self.battle_handler.defense_health = round(max(0, self.battle_handler.defense_health))
  
  
 class Peep_State(Enum):
