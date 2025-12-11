@@ -43,6 +43,24 @@ class TimeKeeper:
         self.time_of_day = TimeOfDay.DAY
         self.day_hrs, self.night_hrs = get_day_n_night_hrs_by_season(self.season)
     
+    def __str__(self):
+        return f'''
+        Day {self.days_passed}, {self.time_of_day.name.lower()}time |
+         Time: {self.get_time_formatted()}
+         Season: {self.season.name[0].upper() + self.season.name[1:].lower()}'''
+    
+    def get_time_formatted(self):
+        hour = self.cur_hr
+        if self.cur_hr < 10:
+            hour =  f"0{self.cur_hr}"
+            
+        minute = self.cur_min
+        if self.cur_min < 10:
+            minute =  f"0{self.cur_min}"    
+            
+        return f"{hour}:{min}"
+        
+    
     def cur_year(self):
         return self.days_passed // DAYS_PER_YEAR
     
