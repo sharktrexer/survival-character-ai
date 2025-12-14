@@ -78,8 +78,10 @@ def fetch_sheet_data(sheet_range:str):
 
 def create_csv_from_sheet(path:str, sheet_range:str):
   data = fetch_sheet_data(sheet_range)
+  data_name = sheet_range.split('!')[0]
+  csv_name = path
   
-  print("\n SHEET DATA FETCHED SUCCESSFULLY \n")
+  print(f"\n {data_name} DATA FETCHED SUCCESSFULLY \n")
   
   path = os.path.join(CUR_PATH, path)
   
@@ -87,7 +89,7 @@ def create_csv_from_sheet(path:str, sheet_range:str):
     writer = csv.writer(csvf)
     writer.writerows(data)
     
-  print("\n CSV UPDATED SUCCESSFULLY \n")
+  print(f"\n {csv_name} UPDATED SUCCESSFULLY \n")
     
 def main():
   # Obtain character stat data
