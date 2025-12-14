@@ -24,10 +24,11 @@ class Lodge:
             return False
         
         # resource exchange, if possible
-        # MAKE SURE THIS IS THE LAST CHECK
-        lodge_has_enough_resources = self.resourcer.exchange(activity.rescource_cost)
-        if not lodge_has_enough_resources:
+        lodge_resources = self.resourcer.exchange(activity.rescource_cost, do_update=False)
+        if lodge_resources is None:
             return False
+        else:
+            self.resourcer.update_resources(lodge_resources)
         
         # time goes by
         #TODO: what happens if ambushed!?

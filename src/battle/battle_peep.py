@@ -149,6 +149,9 @@ class BattlePeep():
             return self.max_blood()
         return self.stats.get_stat_active(sn(stat_name))
     
+    def apt_of(self, stat_name:str):
+        return self.stats.get_stat_apt(sn(stat_name))
+    
     def get_all_stat_apts(self):
         return self.stats.get_all_stat_apts()
     

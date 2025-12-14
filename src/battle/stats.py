@@ -574,6 +574,9 @@ class StatBoard:
     def get_stat_resource(self, name):
         return self.cur_stats[sn(name)].val_resource
     
+    def get_stat_apt(self, name):
+        return self.cur_stats[sn(name)].apt
+    
 
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

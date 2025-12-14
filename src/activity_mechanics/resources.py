@@ -8,7 +8,8 @@ class ResourcesType(Enum):
     
     MATERIALS = auto()
     DEFENSE = auto()
-    GRIME = auto()
+    
+    CLEANLINESS = auto()
     
 class Resource():
     def __init__(self, r_type:ResourcesType, amount:int):
@@ -55,12 +56,12 @@ class ResourceManager:
         Grime works as a gauge, from 0-100 (clean to dirty)
         Anytime the grime resource could be changed, clamp it
         '''
-        self.resources[ResourcesType.GRIME].amount = (
-            max(0, min(self.resources[ResourcesType.GRIME].amount, 100))
+        self.resources[ResourcesType.CLEANLINESS].amount = (
+            max(0, min(self.resources[ResourcesType.CLEANLINESS].amount, 100))
             )
          
             
-    def exchange(self, cost:list[Resource]) -> bool:
+    def exchange(self, cost:list[Resource], do_update:bool = True) -> list[Resource]:
         """
         Exchanges resources according to the inputted cost.
         
@@ -75,11 +76,15 @@ class ResourceManager:
         
         for r in cost:
             if self.resources[r.type].amount < r.amount:
-                return False
+                return None
             temp_resources[r.type].amount -= r.amount
             temp_resources[r.type].amount = max(0, temp_resources[r.type].amount)
-            
-        self.resources = deepcopy(temp_resources)
+        
+        if do_update:    
+            self.update_resources(temp_resources)
+        return temp_resources
+    
+    def update_resources(self, resources:list[Resource]):
+        self.resources = deepcopy(resources)
         self.cap_grime()
-        return True
             
