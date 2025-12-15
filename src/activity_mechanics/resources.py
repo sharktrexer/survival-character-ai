@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from copy import deepcopy
+from utils.helpers import Calcs
 
 class ResourcesType(Enum):
     SEEDS = auto()
@@ -42,6 +43,7 @@ class ResourceManager:
             self.resources = {r.type: r for r in resources}
         else:
             self.resources = {r.type: r for r in EMPTY_RESOURCE_LIST}
+            self.resources[ResourcesType.CLEANLINESS].amount = 100
             
         self.cap_grime()
     
@@ -57,7 +59,7 @@ class ResourceManager:
         Anytime the grime resource could be changed, clamp it
         '''
         self.resources[ResourcesType.CLEANLINESS].amount = (
-            max(0, min(self.resources[ResourcesType.CLEANLINESS].amount, 100))
+            Calcs.clamp_int(self.resources[ResourcesType.CLEANLINESS].amount, min_v=0, max_v=100)
             )
          
             

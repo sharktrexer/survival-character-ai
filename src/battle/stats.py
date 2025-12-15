@@ -1,5 +1,5 @@
 import copy
-
+from utils.helpers import Calcs
 from .alteration import Alteration, AP_BUFF
 #from battle.multipliers import MultChange
 
@@ -340,7 +340,7 @@ class Stat:
         self.val_resource += amount
         
         # cap
-        self.val_resource = round(clamp(self.val_resource, min_v=0, max_v=self.val_active))
+        self.val_resource = Calcs.clamp_int(self.val_resource, min_v=0, max_v=self.val_active)
         return self.val_resource == 0
     
     def resource_change_unlimited(self, amount:int):
@@ -370,8 +370,7 @@ class Stat:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
 
-def clamp(val, min_v, max_v):
-    return max(min_v, min(val, max_v))
+
 
 class StatChange():
     '''
@@ -644,7 +643,7 @@ class StatBoard:
     def resource_set_to_percent(self, stat_name:str, percent:float):
         
         # caps
-        percent = float(clamp(percent, min_v=0, max_v=1))
+        percent = float(Calcs.clamp(percent, min_v=0, max_v=1))
         
         self.cur_stats[sn(stat_name)].resource_set_to_percent(percent)
  
