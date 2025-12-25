@@ -523,11 +523,6 @@ def make_stat(name, val, apt):
     stat.val_resource = stat.val_active
     return stat
 
-def divide_resource_max_by(stat:Stat, divisor:int):
-    if divisor < 1:
-        return 0
-    return round(stat.val_active / divisor, 2)
-
 ''' 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                                         STAT BOARD
@@ -647,27 +642,7 @@ class StatBoard:
         
         self.cur_stats[sn(stat_name)].resource_set_to_percent(percent)
  
-#TODO: these should be in a higher level class. Statboard doesn't need to know about sleeping
-    def calc_hrs_req_to_sleep(self):
-        if self.cur_stats["energy"].apt >= 0:
-            return 8
-        else:
-            return 8 - self.cur_stats["energy"].apt
-    
-    def sleep_by_min(self):
-        #TODO: affect stress, fear, and hunger
-        
-        health_stat = self.cur_stats[health_stat]
-        amnt_per_min = divide_resource_max_by (health_stat, self.calc_hrs_req_to_sleep() * 60)
-        health_stat.resource_change(amnt_per_min)
-        
-        '''
-        Time Spent Asleep:
-        With 0 Energy Aptitude or Higher: 
-            peeps need 8 hours of sleep.
-        Per point of Energy Apt below 0: 
-            peeps need +1 more hrs of sleep (12 max)'''
-        
+
     
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

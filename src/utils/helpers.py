@@ -1,6 +1,10 @@
 class Calcs():
     
     @staticmethod
+    def clamp_100(val):
+        return Calcs.clamp_int(val, min_v=0, max_v=100)
+    
+    @staticmethod
     def clamp_int(val:int, min_v:int, max_v:int):
         return int(Calcs.clamp(val, min_v, max_v))
     

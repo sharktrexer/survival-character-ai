@@ -16,11 +16,14 @@ PEEPS: list[BattlePeep] = []
 TITLES = []
 DESCS = []
 SIMPLE_PEEPS: list[Character] = []
+'''
+'''
+
+
 
 '''
 --------------------------------------------- CSV READS ---------------------------------------------
 '''
-
 def read_peep_stat_data():
     with open(STAT_PATH, 'r') as file:   
         reader = csv.DictReader(file)

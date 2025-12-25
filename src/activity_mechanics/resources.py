@@ -10,7 +10,6 @@ class ResourcesType(Enum):
     MATERIALS = auto()
     DEFENSE = auto()
     
-    CLEANLINESS = auto()
     
 class Resource():
     def __init__(self, r_type:ResourcesType, amount:int):
@@ -43,24 +42,13 @@ class ResourceManager:
             self.resources = {r.type: r for r in resources}
         else:
             self.resources = {r.type: r for r in EMPTY_RESOURCE_LIST}
-            self.resources[ResourcesType.CLEANLINESS].amount = 100
             
-        self.cap_grime()
     
     def obtain(self, gain:list[Resource]):
         for r in gain:
             self.resources[r.type].amount += r.amount
             
         self.cap_grime()
-    
-    def cap_grime(self):
-        '''
-        Grime works as a gauge, from 0-100 (clean to dirty)
-        Anytime the grime resource could be changed, clamp it
-        '''
-        self.resources[ResourcesType.CLEANLINESS].amount = (
-            Calcs.clamp_int(self.resources[ResourcesType.CLEANLINESS].amount, min_v=0, max_v=100)
-            )
          
             
     def exchange(self, cost:list[Resource], do_update:bool = True) -> list[Resource]:
