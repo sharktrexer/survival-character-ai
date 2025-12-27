@@ -1,3 +1,6 @@
+from activity_mechanics.activities import Activity, ACTIVITIES
+from activity_mechanics.lodge_manager import Lodge
+from activity_mechanics.resources import ResourceManager
 import visualization.graph_data as gd
 import time as t
 import copy
@@ -482,7 +485,6 @@ class DistSimulator(Simulator):
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 '''  
-
 class StatManipulationSimulator(Simulator):
     def __init__(self):
         self.name = "Stat Manipulation Simulator"
@@ -512,6 +514,7 @@ class StatManipulationSimulator(Simulator):
               "You can also view a deep dive of different equations used for stat calcuations.") 
         t.sleep(0.2)      
     
+    
     def view_stats_of_all_peeps(self):
         for peep in self.peeps:
             self.print_peep_info(peep)
@@ -537,8 +540,6 @@ class StatManipulationSimulator(Simulator):
     '''
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PEEP FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     '''        
-    def print_peep_info(self, peep:BattlePeep):
-        print(peep.get_info_as_str())
     
     def compare_peep(self, peep:BattlePeep):
         
@@ -558,6 +559,8 @@ class StatManipulationSimulator(Simulator):
                 print(f"{comparer.name}'s {stat_name}:", comparer.get_stat(stat_name).print_simple_str())
                 print()
             
+    def print_peep_info(self, peep:BattlePeep):
+        print(peep.get_info_as_str())
     
     def reset_peep_to_default(self, peep:BattlePeep):
         print("\nPrevious Values: ")
@@ -675,6 +678,9 @@ class StatManipulationSimulator(Simulator):
             self.mini_sim(func_list=self.stat_funcs, args=[peep, stat], prompt=prompt)
             #TODO: print stat info every time a stat altered function is called
     
+    
+    def show_stat_info(self, peep:BattlePeep, stat:Stat):
+        print(stat, peep.stats.get_stat_mem(stat.name).xp_str(), "\n")
        
     def set_stat_values_directly(self, peep:BattlePeep, stat:Stat):
         print("\nCurrent Values: ")
@@ -710,9 +716,6 @@ class StatManipulationSimulator(Simulator):
         
         print("\nWith Your Set Values: ")
         self.show_stat_info(peep, stat)
-    
-    def show_stat_info(self, peep:BattlePeep, stat:Stat):
-        print(stat, peep.stats.get_stat_mem(stat.name).xp_str(), "\n")
         
     def manipulate_extra_modifiers(self, peep:BattlePeep, stat:Stat):
         print("\nNot yet implemented")
@@ -882,9 +885,13 @@ class LodgeSimulator(Simulator):
     
     def __init__(self):
         self.name = "Lodge Simulator"
+        self.peeps = copy.deepcopy(PEEPS)
+        self.player:BattlePeep = None
+        self.activity_q: list[Activity] = []
         self.funcs = [self.choose_activity, 
                       self.print_peep_info, self.print_time_info,
                       self.reset,]
+        self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
         
     def welcome(self):
         print(f"Welcome to the {self.name}!\n",
@@ -895,21 +902,164 @@ class LodgeSimulator(Simulator):
         self.choose_peep()
         
     def choose_peep(self):
-        print("\nNot yet implemented")
-        pass
+        prompt = 'Please select a character to control.'
+        self.player = self.get_choice(self.peeps, get_index=False, prompt=prompt)
+        
+    def march_time_forward(self):
+        '''
+        Time goes forward by one pip. trigger everything that happens
+        
+        - make progress in current activity
+            - queue of activity and their peep doing it.
+                - from simple stat growth to eating to moving in the lodge
+            - Update each by one pip's worth of time
+            
+        - update
+            - Time Keeper
+            - How long each peep has been awake  
+            - hunger drain on everyone
+            - room dirtiness when completing a non-cleaning activity
+        '''
+        
+        
+        
+        self.lodge.time_keeper.tick()
     
     def reset(self):
-        print("\nNot yet implemented")
+        print(f"\n{self.player.get_info_as_str}")
+        self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
         pass
 
     def choose_activity(self):
-        print("\nNot yet implemented")
-        pass
+        print("Current Stats: ")
+        self.print_peep_info(self.player)
+        
+        prompt = 'Please select an activity to perform.'
+        a_choice:Activity = self.get_choice(copy.deepcopy(ACTIVITIES), get_index=False, prompt=prompt)
+        
+        # can the peep take the stress hit!?   
+        if not self.lodge.check_stress(self.player, a_choice):
+            print(f"You are too tired to do that! {a_choice.stress_cost} > {self.player.points_of('tres')}")
+            return
+        
+        self.lodge.do_activity(self.player, a_choice)
+        
+        print("Changed Stats: ")
+        self.print_peep_info(self.player)
+        #TODO: print gauge info
     
-    def print_peep_info(self):
-        print("\nNot yet implemented")
-        pass
+    def print_peep_info(self, peep:BattlePeep, past_peep:BattlePeep=None):
+        #print(peep.get_info_as_str())
+        
+        '''
+        print peep name
+        loop thru every stat & mem stat
+        print stat name
+        (chng) #Apt, (chng) #AV, (chng) #Val
+        (chng) # xp, #xp till lvl
+        
+        
+        up to 3 per line
+        '''
+        
+        print(f"\n{peep.name}")
+        stats_per_row = 0
+        line1 = []
+        line2 = []
+        line3 = []
+        for s in list(STAT_TYPES.values()):
+            s_name = s.abreviation.upper()
+            stat = peep.get_stat(s_name)
+            mem_stat = peep.get_stat_growth(s_name)
+            
+            if stats_per_row == 4:
+                print("".join(line1))
+                print("".join(line2))
+                print("".join(line3))
+                print()
+                line1 = []
+                line2 = []
+                line3 = []
+                stats_per_row = 0
+            
+            line1.append( f"{s_name}:")
+            line1[-1] = line1[-1].ljust(30)
+            line2.append( f"({stat.apt} Apt), {stat.val_active}AV, {stat.value}Val" )
+            line2[-1] = line2[-1].ljust(30)
+            line3.append( f"{mem_stat.apt_exp}xp, {mem_stat.get_req_xp_to_lvl()} xp til lvl" )
+            line3[-1] = line3[-1].ljust(30)
+            stats_per_row += 1
+        
+        if stats_per_row != 0:
+            print("".join(line1))
+            print("".join(line2))
+            print("".join(line3))
+            print()
+        
+        '''
+        Name:
+        Str                          Dex
+        -2 Apt, 100AV, 100Val        (+1) 1 Apt, (+18) 68AV, (+10) 60Val
+        200xp, 200xp til lvl         (+20) 200xp, 200xp til lvl
+        
+        '''
     
     def print_time_info(self):
-        print("\nNot yet implemented")
-        pass
+        print( f"{self.lodge.time_keeper} ")
+    
+    '''
+    Specific Activity Functions
+    
+    Cooking
+        Choose what recipe to make. Results vary if it was a success
+        Success if based on recipe difficulty vs peep's creativity value
+        
+        Chance to fight a food monster based on recipe difficulty and peep's cre apt
+        
+        Group:
+            In order, with the first being required before the next
+            Each entry reduces cooking time by one pip
+            Requires that stat to be high
+            
+            cre 
+            dex
+            str
+            int
+        
+    Eating
+        Choose what food to eat
+        Gain 25 hunger per 1 point of food eaten, affected by Hunger apt
+        
+    Drinking
+        Choose what to drink
+        
+        
+    Sleep
+        takes x amount of time to sleep based on peep's energy aptitude
+        Restores 75% of max stress, all health, all fear, all energy
+        Hunger is reduced by 75% of max hunger, based on peep's aptitude
+        Sometimes have a Stressful or Scary nightmare. 
+            Chance decreased by the respective stat's aptitude
+            That stat gauge will start with -20% of its max
+            energy will start at -10% of its max
+            Nightmares stack
+            
+    Farming
+        Plant seeds, where better plants require more seeds
+        Care for crops to speed up their growth
+            Water
+            Fertilize (uses materials?)
+            Sing
+            Pull Weeds
+            Kill Pests
+        Harvest fully grown crops to gain ingredients, based on plant and how it was cared for
+        
+    Barricade
+        Choose where to reinforce
+        And by how much 
+            Better barricades require more materials but give better conversion to defense
+            Defense helps resist against injuries or accidents
+            Strength increases efficacy of construction
+            1 barricade can be put up per enterance
+            
+    '''

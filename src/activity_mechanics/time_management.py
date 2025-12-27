@@ -1,5 +1,7 @@
 '''
 For keeping track of time in minutes, including per move in combat, and per actiivity done
+
+    
 '''
 from enum import Enum, auto
 
@@ -40,26 +42,44 @@ class TimeKeeper:
         self.days_passed = 0
         self.cur_hr = 0
         self.cur_min = 0
-        self.time_of_day = TimeOfDay.DAY
+        self.time_of_day = TimeOfDay.NIGHT
         self.day_hrs, self.night_hrs = get_day_n_night_hrs_by_season(self.season)
     
+    @staticmethod
+    def pips_to_hrs_str(pips:int):
+        mins = pips * MINS_PER_PIP
+        hrs = mins // MINS_PER_HR
+        mins = mins % MINS_PER_HR
+         
+        hr_str = f'{hrs}hr' if hrs > 0 else None
+        min_str = f'{mins}mins' if mins > 0 else None
+        
+        full_str = [hr_str, min_str]
+        
+        if None not in full_str:
+            return ', '.join(full_str)
+        
+        return full_str[0]
+        
+    
+    @staticmethod
+    def format_hrs_n_mins(hrs:int, mins:int):
+        if hrs < 10:
+            hrs =  f"0{hrs}"
+            
+        if mins < 10:
+            mins =  f"0{mins}"    
+            
+        return f"{hrs}:{mins}"
+    
     def __str__(self):
-        return f'''
-        Day {self.days_passed}, {self.time_of_day.name.lower()}time |
-         Time: {self.get_time_formatted()}
-         Season: {self.season.name[0].upper() + self.season.name[1:].lower()}'''
+        return (f'Day {self.days_passed}, {self.time_of_day.name.lower()}time |'
+        + f' {self.season.name[0].upper() + self.season.name[1:].lower()}'
+        + f'\n{self.get_time_formatted()}'
+        )
     
     def get_time_formatted(self):
-        hour = self.cur_hr
-        if self.cur_hr < 10:
-            hour =  f"0{self.cur_hr}"
-            
-        minute = self.cur_min
-        if self.cur_min < 10:
-            minute =  f"0{self.cur_min}"    
-            
-        return f"{hour}:{min}"
-        
+        TimeKeeper.format_hrs_n_mins(self.cur_hr, self.cur_min)
     
     def cur_year(self):
         return self.days_passed // DAYS_PER_YEAR
@@ -117,7 +137,9 @@ class TimeKeeper:
             
     def update_time(self):
         
-        self.cur_hr = self.cur_min % MINS_PER_HR
+        self.cur_hr += self.cur_min // MINS_PER_HR
+        
+        self.cur_min = self.cur_min % MINS_PER_HR
         
         # check for a new day
         if self.cur_hr >= HRS_IN_DAY:

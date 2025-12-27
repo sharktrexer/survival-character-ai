@@ -1,6 +1,7 @@
 from enum import Enum, auto
 
 from activity_mechanics.resources import Resource as ReS, ResourcesType as RT
+from activity_mechanics.time_management import PIPS_PER_HR, TimeKeeper
 from battle.stats import StatChange
 
 class Tag(Enum):
@@ -30,17 +31,20 @@ class Activity():
     
     def __init__(self, name:str, 
                  stat_changes:list[StatChange],  
-                 time_pip_cost:int, 
                  tres_cost:int, # how much stress used
                  location:str,
+                 ex_pip_cost:int=0, 
                  cost:list[ReS] = [],
                  production:list[ReS] = [],
                  tags:list[Tag] = []):
         self.name = name
         self.tags = tags
         self.stat_changes = stat_changes
-        self.time_pip_cost = time_pip_cost
-        self.pip_progress = 0
+        self.time_pip_cost = ex_pip_cost + PIPS_PER_HR
+        '''
+        How many pips it takes to complete the activity
+        At least one hour's worth is required
+        '''
         self.stress_cost = tres_cost
         self.location = location
         self.rescource_cost = cost
@@ -54,7 +58,7 @@ class Activity():
         
     def __str__(self):
         return (f"{self.name} {self.stat_chnges_as_str()}"
-            + f" [Pips: {self.time_pip_cost}] | [Stress: {self.stress_cost}]")
+            + f" [Takes: {TimeKeeper.pips_to_hrs_str(self.time_pip_cost)}] | [Stress: {self.stress_cost}]")
     
     def stat_chnges_as_str(self):
         str = []
@@ -73,7 +77,6 @@ ACTIVITIES = [
             StatChange("hun",-1, 0),
             StatChange("int", -1, -1),
         ],
-        time_pip_cost=4,
         tres_cost=15,
         location='Gym'),
     
@@ -83,7 +86,7 @@ ACTIVITIES = [
             StatChange("int", 3, 2),
             StatChange("str",-1, 0),
         ],
-        time_pip_cost=5,
+        ex_pip_cost=1,
         tres_cost=15,
         location='Foyer'),
     
@@ -92,7 +95,7 @@ ACTIVITIES = [
         stat_changes=[
             StatChange("tres", 1, 2),
         ],
-        time_pip_cost=6,
+        ex_pip_cost=2,
         tres_cost=-20,
         location='Outside'),
     
@@ -101,7 +104,7 @@ ACTIVITIES = [
         stat_changes=[
             StatChange("eva", 3, 2),
         ],
-        time_pip_cost=5,
+        ex_pip_cost=1,
         tres_cost=20,
         location='Outside'
         ),
@@ -112,7 +115,6 @@ ACTIVITIES = [
             StatChange("tres", 3, 0),
             StatChange("cha",-2, -2),
         ],
-        time_pip_cost=4,
         tres_cost=-15,
         location='Locker Room'),
     
@@ -123,7 +125,6 @@ ACTIVITIES = [
             StatChange("tres", 1, 0),
             StatChange("ap", -1, 0),
         ],
-        time_pip_cost=4,
         tres_cost=-10,
         location='Living Room'),
     
@@ -134,7 +135,7 @@ ACTIVITIES = [
             StatChange("tres", 1, 0),
             StatChange("rec", -1, -1),
         ],
-        time_pip_cost=6,
+        ex_pip_cost=2,
         tres_cost=-5,
         location='Locker Room'),
 
@@ -145,7 +146,7 @@ ACTIVITIES = [
             StatChange("fear", 1, 0),
             StatChange("cha", -1, -1),
         ],
-        time_pip_cost=4,
+        ex_pip_cost=2,
         tres_cost=-10,
         location='Locker Room'),
 
