@@ -92,10 +92,10 @@ class GrowingStat:
     
     def __str__(self):
         return (f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4}" 
-                + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}")
+                + f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_req_xp_to_lvl():<4}")
     
     def xp_str(self):
-        return f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_xp_req_to_next_apt_level():<4}"
+        return f"\nCurrent Apt Exp - {self.apt_exp:<4} Exp to Next Level - {self.get_req_xp_to_lvl():<4}"
     
     def reset_to(self, val:int, apt:int):
         self.value = val
@@ -136,7 +136,7 @@ class GrowingStat:
             else:
                 break
             
-    def get_xp_req_to_next_apt_level(self):
+    def get_req_xp_to_lvl(self):
         if self.apt == 8: return 0
         
         return XP_REQURED_PER_APT[self.apt + 1] - self.apt_exp
@@ -381,6 +381,9 @@ class StatChange():
         self.val_amount = val_amount
         self.apt_xp_amount = apt_xp_amount
         
+    def __repr__(self):
+        return f"StatChange({self.name}, {self.val_amount}, {self.apt_xp_amount})"
+        
 STAT_TYPES = {
         "strength": Stat("strength", 0, 0, "str", ["s", "fuerza"]),
         "defense": Stat("defense", 0, 0, "def", ["d", "defensa"]),
@@ -388,13 +391,13 @@ STAT_TYPES = {
         "dexterity": Stat("dexterity", 0, 0, "dex", ["dx", "destreza"]),
         "recovery": Stat("recovery", 0, 0, "rec", ["r", "recuperación"]),
         "intelligence": Stat("intelligence", 0, 0, "int", ["i", "intellect", "inteligencia"]),
-        "creativity": Stat("creativity", 0, 0, "cre", ["c", "create", "creatividad"]),
         "fear": Stat("fear", 0, 0, "fear", ["f", "spook", "miedo"]),
         "intimidation": Stat("intimidation", 0, 0, "itmd", ["it", "intim","intimidacion"]),
+        "creativity": Stat("creativity", 0, 0, "cre", ["c", "create", "creatividad"]),
         "charisma": Stat("charisma", 0, 0, "cha", ["ch", "char", "carisma"]),
         "stress": Stat("stress", 0, 0, "tres", ["ss", "estres"]),
-        "health": Stat("health", 0, 0, "hp", ["h", "health points", "salud", "puntos de salud"]),
         "hunger": Stat("hunger", 0, 0, "hun", ["hu", "hung", "hambre"]),
+        "health": Stat("health", 0, 0, "hp", ["h", "health points", "salud", "puntos de salud"]),
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
 
@@ -608,6 +611,7 @@ class StatBoard:
     def resource_change(self, stat_name, amount):
         '''
         Adds the passed in amount to the passed in stat's resource value
+        Resource value is clamped between 0 and stat's active value
         
         Returns:
             if the resource of the current stat is depleted

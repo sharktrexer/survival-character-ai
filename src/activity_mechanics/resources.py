@@ -33,7 +33,7 @@ class ResourceManager:
         Creates a resource list with the given resources
         If none is provided, default resource with each starting at 0 is created
         '''
-        if len(resources) != len(ResourcesType):
+        if len(resources) != 0 and len(resources) != len(ResourcesType):
             raise Exception((f"Incorrect number of resources provided:" 
                              f" entered {len(resources)} vs"
                              f" {len(ResourcesType)} types of resources!"))
@@ -50,29 +50,33 @@ class ResourceManager:
             
         self.cap_grime()
          
+    
+    def can_cover_the_cost(self, cost:list[Resource]): 
+        for r in cost:
+            if self.resources[r.type].amount < r.amount:
+                return False
             
-    def exchange(self, cost:list[Resource], do_update:bool = True) -> list[Resource]:
+        return True
+            
+    def exchange(self, cost:list[Resource]) -> list[Resource]:
         """
         Exchanges resources according to the inputted cost.
         
-        Returns True if the exchange was successful
-        
-        Otherwise, returns false and maintains current resources
+        Includes failsafe to abort if a resource cost is not met
         """
         if cost == []:
-            return True
+            return
         
         temp_resources = deepcopy(self.resources)
         
         for r in cost:
             if self.resources[r.type].amount < r.amount:
-                return None
+                raise Exception(f"Not enough resources to cover the cost! {self.resources[r.type].amount} < {r.amount}")
             temp_resources[r.type].amount -= r.amount
             temp_resources[r.type].amount = max(0, temp_resources[r.type].amount)
         
-        if do_update:    
-            self.update_resources(temp_resources)
-        return temp_resources
+        self.update_resources(temp_resources)
+
     
     def update_resources(self, resources:list[Resource]):
         self.resources = deepcopy(resources)

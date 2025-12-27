@@ -24,22 +24,46 @@ class Tag(Enum):
 class Activity():
     '''
     Class that defines the details of an activity
+    
+    An activity must take up at least one hour, and can use multiplies of 15 minutes (one pip)
     '''
     
     def __init__(self, name:str, 
                  stat_changes:list[StatChange],  
-                 pips_req:float, 
-                 tres_perc_cost:float,
+                 time_pip_cost:int, 
+                 tres_cost:int, # how much stress used
+                 location:str,
                  cost:list[ReS] = [],
                  production:list[ReS] = [],
                  tags:list[Tag] = []):
         self.name = name
         self.tags = tags
         self.stat_changes = stat_changes
-        self.pips_req = pips_req
-        self.stress_percent_cost = tres_perc_cost
+        self.time_pip_cost = time_pip_cost
+        self.pip_progress = 0
+        self.stress_cost = tres_cost
+        self.location = location
         self.rescource_cost = cost
         self.produced_resc = production
+        
+        
+        self.active_peeps: dict[str,int] = {}
+        '''
+        Dictionary of peep names who are doing the activity and their pip progress
+        '''
+        
+    def __str__(self):
+        return (f"{self.name} {self.stat_chnges_as_str()}"
+            + f" [Pips: {self.time_pip_cost}] | [Stress: {self.stress_cost}]")
+    
+    def stat_chnges_as_str(self):
+        str = []
+        
+        for s in self.stat_changes:
+            val_sign = '+' if s.val_amount > 0 else ''
+            apt_sign = '+' if s.apt_xp_amount > 0 else ''
+            str.append(f"| {s.name} ({val_sign}{s.val_amount}val {apt_sign}{s.val_amount}xp) ")
+        return "".join(str)
     
 ACTIVITIES = [        
     Activity(
@@ -49,8 +73,9 @@ ACTIVITIES = [
             StatChange("hun",-1, 0),
             StatChange("int", -1, -1),
         ],
-        pips_req=2,
-        tres_perc_cost=0.1),
+        time_pip_cost=4,
+        tres_cost=15,
+        location='Gym'),
     
     Activity(
         "Study", tags=[],
@@ -58,82 +83,70 @@ ACTIVITIES = [
             StatChange("int", 3, 2),
             StatChange("str",-1, 0),
         ],
-        pips_req=3,
-        tres_perc_cost=0.1),
+        time_pip_cost=5,
+        tres_cost=15,
+        location='Foyer'),
     
     Activity(
         "Meditate", tags=[],
         stat_changes=[
             StatChange("tres", 1, 2),
         ],
-        pips_req=2,
-        tres_perc_cost=-0.2,
-        ),
+        time_pip_cost=6,
+        tres_cost=-20,
+        location='Outside'),
     
     Activity(
         "Patrol", tags=[],
         stat_changes=[
-            StatChange("eva", 1, 2),
+            StatChange("eva", 3, 2),
         ],
-        pips_req=2,
-        tres_perc_cost=-0.2,
+        time_pip_cost=5,
+        tres_cost=20,
+        location='Outside'
         ),
     
     Activity(
         "Relieve Yourself", tags=[],
         stat_changes=[
+            StatChange("tres", 3, 0),
+            StatChange("cha",-2, -2),
+        ],
+        time_pip_cost=4,
+        tres_cost=-15,
+        location='Locker Room'),
+    
+    Activity(
+        "Game", tags=[],
+        stat_changes=[
+            StatChange("dex", 2, 3),
             StatChange("tres", 1, 0),
-            StatChange("cha",-1, -1),
+            StatChange("ap", -1, 0),
         ],
-        pips_req=1,
-        tres_perc_cost=-0.1),
-    
-    # RESOURCE 
+        time_pip_cost=4,
+        tres_cost=-10,
+        location='Living Room'),
     
     Activity(
-        "Clean", tags=[],
+        "Gaze Upon Your Visage", tags=[],
         stat_changes=[
-            StatChange("dex", 1, 2),
-            StatChange("rec", 1, 1),
-            StatChange("def", -1, 1),
+            StatChange("cha", 2, 1),
+            StatChange("tres", 1, 0),
+            StatChange("rec", -1, -1),
         ],
-        pips_req=2,
-        tres_perc_cost=0.3,
-        production=[ReS(RT.CLEANLINESS, 10)]),
-    
+        time_pip_cost=6,
+        tres_cost=-5,
+        location='Locker Room'),
+
     Activity(
-        "Farm", tags=[],
+        "Practice Your Mean Face", tags=[],
         stat_changes=[
-            StatChange("rec", 1, 4),
+            StatChange("itmd", 2, 1),
+            StatChange("fear", 1, 0),
+            StatChange("cha", -1, -1),
         ],
-        pips_req=4,
-        tres_perc_cost=0.1,
-        cost=[ReS(RT.SEEDS, 1)],
-        production=[ReS(RT.INGREDIENTS, 2)],
-        ),
-    
-    Activity(
-        "Cook", tags=[],
-        stat_changes=[
-            StatChange("cre", 1, 2),
-            StatChange("hun", 1, 1),
-        ],
-        pips_req=2,
-        tres_perc_cost=0.2,
-        cost=[ReS(RT.INGREDIENTS, 1)],
-        production=[ReS(RT.FOOD, 2)],
-        ),
-    
-    Activity(
-        "Barricade", tags=[],
-        stat_changes=[
-            StatChange("def", 1, 4),
-        ],
-        pips_req=4,
-        tres_perc_cost=0.3,
-        cost=[ReS(RT.MATERIALS, 5)],
-        production=[ReS(RT.DEFENSE, 5)],
-        ),
-    
+        time_pip_cost=4,
+        tres_cost=-10,
+        location='Locker Room'),
 
 ]

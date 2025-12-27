@@ -2,20 +2,19 @@ from copy import deepcopy
 import math
 import random
 from activity_mechanics.activities import Activity
-from activity_mechanics.cooking import Meal
+from activity_mechanics.cooking import Meal, MEALS
 from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
 from activity_mechanics.time_management import TimeKeeper
 from peep_data.data_reader import PEEPS
 
-from cooking import MEALS, Meal
-from farming import PLANTS, Plant
-from barricading import BARRICADES, Barricade
+from activity_mechanics.farming import PLANTS, Plant
+from activity_mechanics.barricading import BARRICADES, Barricade
 
 from battle.battle_peep import BattlePeep
 from utils.helpers import Calcs
 
 class Room:
-    def __init__(self, name, cleanliness=100):
+    def __init__(self, name, exits:list[Room]=[], cleanliness=100):
         self.name = name
         self.cleanliness = cleanliness
         
@@ -35,6 +34,9 @@ ROOMS = [
 class Lodge:
     '''
     Info stored representing the state of the lodge
+    
+    Track the location of each peep, current activity they are doing
+    
     '''
     def __init__(self, name, resourcer:ResourceManager):
         self.name = name
@@ -59,45 +61,32 @@ class Lodge:
         self.rooms[rand_room_key].clean(-5)
     
     def update_cleanliness(self):
-        self.cleanliness = sum([r.cleanliness for r in self.rooms])    
+        self.cleanliness = sum([r.cleanliness for r in list(self.rooms.values())])    
+    
+    def check_stress(self, peep:BattlePeep, activity:Activity):
+        '''
+        if the peep is calm enough to do the activity
+        '''
+        return peep.points_of('tres') - activity.stress_cost >= 0
+    
+    def exchange_resources(self, cost:list[Resource]):
+        self.resourcer.exchange(cost)
+    
+    def obtain_resources(self, gain:list[Resource]):
+        self.resourcer.obtain(gain)
         
     def do_activity(self, peep:BattlePeep, activity:Activity):
         
-        #TODO: can the peep take the hunger hit?
-        
-        # can the peep take the stress hit!?   
-        tres_effct = activity.stress_cost * peep.value_of('tres')
-        is_calm_enough = peep.points_of('tres') - tres_effct >= 0
-        if not is_calm_enough:
-            return False
-        
-        # resource exchange, if possible
-        lodge_resources = self.resourcer.exchange(activity.rescource_cost, do_update=False)
-        if lodge_resources is None:
-            return False
-        else:
-            self.resourcer.update_resources(lodge_resources)
-        
-        # dirty the room
-        if activity.location in list(self.rooms.keys()):
-            # every pip of time is equivelent to 0.5 points of dirtiness, ceiled up
-            dirtiness = math.ceil(0.5 * activity.time_cost)
-            self.rooms[activity.location].clean(dirtiness)
-        
         # time goes by
         #TODO: what happens if ambushed!?
-        self.time_keeper.tick_by_pip(activity.time_cost)
+        self.time_keeper.tick_by_pip(activity.time_pip_cost)
         
         # stat effects
         for chng in activity.stat_changes:
             peep.stats.grow_stat(chng.name, chng.val_amount, chng.apt_xp_amount)
             
         # stress resource effect
-        peep.stats.resource_change("stress", tres_effct)
-        
-        # get resources produced, if possible
-        #TODO: what if obtained vars is based on what happens in activity?
-        self.resourcer.obtain(activity.produced_resc)
+        peep.stats.resource_change("stress", activity.stress_cost)
         
     def cook(self, peep:BattlePeep, meal:Meal):
         dirtiness = -10
@@ -119,6 +108,8 @@ class Lodge:
     
     def calc_hrs_req_to_sleep(self, peep:BattlePeep):
         '''
+        Peeps can be awake for 16-12 hrs per day.
+        
         Time Spent Asleep:
         With 0 Energy Aptitude or Higher: 
             peeps need 8 hours of sleep.

@@ -64,6 +64,12 @@ class BattlePeep():
         '''
         return self.stats.get_stat_cur(name)
     
+    def get_stat_growth(self, name:str):
+        '''
+        given a name, returns the peep's current stat obj
+        '''
+        return self.stats.get_stat_mem(name)
+    
     def stance(self):
         '''
         This peep's PeepState
