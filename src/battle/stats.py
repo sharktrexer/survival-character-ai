@@ -193,6 +193,9 @@ class Stat:
     def simple_str(self):
         return f"{self.name.upper()}: \nApt - {self.apt:<3} Val - {self.value:<4} Active Val - {self.val_active:<4}" 
     
+    def resource_str(self):
+        return f'{self.val_resource}/{self.val_active}'
+    
     def get_all_names(self):
         return [self.name, self.name.lower(), self.abreviation] + self.ex_names
     
@@ -290,6 +293,8 @@ class Stat:
         
         # active value can't be less than 1
         self.val_active = final_val if final_val > 1 else 1
+        # resource value cannot be greater than active value
+        self.val_resource = self.val_active if self.val_resource > self.val_active else self.val_resource
     
     def get_alteration_mult(self):
         '''
@@ -401,7 +406,7 @@ STAT_TYPES = {
         "energy": Stat("energy", 0, 0, "ap", ["a", "action points", "energia", "puntos de accion"]),
 }
 
-GAUGE_STATS = ["health", "hunger", "energy", "stress", "fear"]
+GAUGE_STATS = [ "hunger", "stress", "fear", "health", "energy",]
 
 def convert_whole_number_to_multiplier(whole_num:int, affected_number:int) -> float:
     '''

@@ -946,7 +946,10 @@ class LodgeSimulator(Simulator):
         
         print("Changed Stats: ")
         self.print_peep_info(self.player)
-        #TODO: print gauge info
+        
+        print(self.player.get_gauge_info_str())
+        
+        self.print_time_info()
     
     def print_peep_info(self, peep:BattlePeep, past_peep:BattlePeep=None):
         

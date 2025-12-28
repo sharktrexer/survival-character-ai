@@ -79,7 +79,7 @@ class TimeKeeper:
         )
     
     def get_time_formatted(self):
-        TimeKeeper.format_hrs_n_mins(self.cur_hr, self.cur_min)
+        return TimeKeeper.format_hrs_n_mins(self.cur_hr, self.cur_min)
     
     def cur_year(self):
         return self.days_passed // DAYS_PER_YEAR

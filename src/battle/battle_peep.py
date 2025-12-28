@@ -30,6 +30,34 @@ class BattlePeep():
     def __repr__(self):
         return f"{self.key_name}, team={self.team}, stats_dict={self.stats.__dict__}, )"
     
+    def get_gauge_info_str(self):
+        '''
+        Returns a string of the status of all gauge stats of the peep
+        '''
+        '''
+        FORMATTING EXAMPLE:
+        
+        Hunger: 75/75         Stress: 50/50        Fear: 100/100
+        Health: 100/100       Energy: 10/10        
+        '''
+        
+        info = []
+        count = 0
+        for s_name in GAUGE_STATS:
+            stat = self.get_stat(s_name)
+            name_str = f"{stat.abreviation.upper()}:"
+            info.append(f"{name_str:<4} {stat.resource_str():^2}".ljust(20) )
+            
+            count += 1
+            
+            if count == 3:
+                info.append("\n")
+                count = 0
+        
+        info.append("\n")
+        return "".join(info)
+
+    
     def get_stat_info_pretty_str(self):
         '''
         Returns a prettified string of all the stats of the peep
@@ -60,7 +88,7 @@ class BattlePeep():
         for s in list(self.stats.cur_stats.values()):
             # grab info
             s_name = s.abreviation.upper()
-            stat = self.get_stat(s_name)
+            stat = s
             mem_stat = self.get_stat_growth(s_name)
             
             # convert rows into string
