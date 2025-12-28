@@ -46,7 +46,7 @@ class BattlePeep():
         for s_name in GAUGE_STATS:
             stat = self.get_stat(s_name)
             name_str = f"{stat.abreviation.upper()}:"
-            info.append(f"{name_str:<4} {stat.resource_str():^2}".ljust(20) )
+            info.append(f"{name_str:<5} {stat.resource_str():^2}".ljust(20) )
             
             count += 1
             
@@ -58,10 +58,10 @@ class BattlePeep():
         return "".join(info)
 
     
-    def get_stat_info_pretty_str(self):
+    def get_stat_info_pretty_str(self, past_self:BattlePeep=None):
         '''
         Returns a prettified string of all the stats of the peep
-        
+        Pass in a past peep version to display the stat differences
         '''
         '''
         FORMATTING EXAMPLE
@@ -71,6 +71,9 @@ class BattlePeep():
         (-2 Apt), 100AV, 100Val      (1 Apt) [+1], 68AV [+18], 60Val [+10]
         200xp, 200xp til lvl         200xp [-20], 200xp til lvl 
         '''
+        
+        if past_self != None and self.name != past_self.name:
+            raise Exception("This function is only used for comparing the stats of the same peep")
         
         # max number of stats printed in one row (each row makes up 3 lines)
         MAX_STATS_PER_ROW = 4
@@ -85,12 +88,39 @@ class BattlePeep():
         stats_per_row = 0
         stat_row_str: list[list[str]] = [[],[],[]]
         
-        for s in list(self.stats.cur_stats.values()):
+        for stat in list(self.stats.cur_stats.values()):
             # grab info
-            s_name = s.abreviation.upper()
-            stat = s
+            s_name = stat.abreviation.upper()
             mem_stat = self.get_stat_growth(s_name)
             
+            # track changes in stat info
+            changes = {'apt':'', 'active': '', 'val': '', 'xp': ''}
+            stat_did_change = False
+            
+            if past_self != None:
+                
+                past_stat = past_self.get_stat(s_name)
+                past_mem_stat = past_self.get_stat_growth(s_name)
+                
+                # grab differences
+                changes['apt'] = str(stat.apt - past_stat.apt)
+                changes['active'] = str(stat.val_active - past_stat.val_active)
+                changes['val'] = str(stat.value - past_stat.value)
+                changes['xp'] = str(mem_stat.apt_exp - past_mem_stat.apt_exp)
+                
+                # format into [+#] or [-#]
+                for c in changes:
+                    diff = int(changes[c])
+                    # ignore no change
+                    if diff == 0:
+                        changes[c] = ''
+                        continue
+                    # otherwise format
+                    stat_did_change = True
+                    if diff > 0:
+                        changes[c] = f"+{diff}"
+                    changes[c] = f" [{changes[c]}]"
+                    
             # convert rows into string
             if stats_per_row == MAX_STATS_PER_ROW:
                 for line in stat_row_str:
@@ -101,10 +131,16 @@ class BattlePeep():
                 stat_row_str = [[],[],[]]
                 stats_per_row = 0
             
+            adjust = 36
+            
+            # signify that stat has been modified
+            if stat_did_change:
+                s_name = f"!{s_name}!"
+            
             # format info into strings
-            stat_row_str[0].append( f"{s_name}:".ljust(30) )
-            stat_row_str[1].append( f"({stat.apt} Apt), {stat.val_active}AV, {stat.value}Val".ljust(30) )
-            stat_row_str[2].append( f"{mem_stat.apt_exp}xp, {mem_stat.get_req_xp_to_lvl()} xp til lvl".ljust(30) )
+            stat_row_str[0].append( f"{s_name}:".ljust(adjust) )
+            stat_row_str[1].append( f"({stat.apt} Apt){changes['apt']}, {stat.val_active}AV{changes['active']}, {stat.value}Val{changes['val']}".ljust(adjust) )
+            stat_row_str[2].append( f"{mem_stat.apt_exp}xp{changes['xp']}, {mem_stat.get_req_xp_to_lvl()} xp til lvl".ljust(adjust) )
             
             stats_per_row += 1
         
@@ -149,13 +185,13 @@ class BattlePeep():
     
     def get_stat(self, name:str) -> Stat:
         '''
-        given a name, returns the peep's current stat obj
+        given a stat name, returns the peep's stat obj
         '''
         return self.stats.get_stat_cur(name)
     
     def get_stat_growth(self, name:str):
         '''
-        given a name, returns the peep's current stat obj
+        given a stat name, returns the peep's growth stat obj
         '''
         return self.stats.get_stat_mem(name)
     

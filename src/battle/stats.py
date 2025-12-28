@@ -110,7 +110,7 @@ class GrowingStat:
         
         # Reduce shrink by positive aptitude multipliers
         if amount < 0 and self.apt > 0:
-            amount //= get_mult_of_aptitude(self.apt)
+            amount = round(amount / get_mult_of_aptitude(self.apt))
         
         # cap lowest value to 1       
         self.value = round(max(1, self.value + amount) )
@@ -293,8 +293,7 @@ class Stat:
         
         # active value can't be less than 1
         self.val_active = final_val if final_val > 1 else 1
-        # resource value cannot be greater than active value
-        self.val_resource = self.val_active if self.val_resource > self.val_active else self.val_resource
+        
     
     def get_alteration_mult(self):
         '''
@@ -594,7 +593,10 @@ class StatBoard:
         '''
         m_stat = self.get_stat_mem(stat_name)
         m_stat.update(val_amt, apt_xp_amt)
-        self.get_stat_cur(stat_name).set_new_vals(m_stat.value, m_stat.apt)
+        c_stat = self.get_stat_cur(stat_name)
+        c_stat.set_new_vals(m_stat.value, m_stat.apt)
+        # resource value cannot be greater than active value after a shrink
+        c_stat.val_resource = c_stat.val_active if c_stat.val_resource > c_stat.val_active else c_stat.val_resource
         
     # def mults_apply(self):
     #     '''

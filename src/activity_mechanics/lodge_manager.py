@@ -86,7 +86,9 @@ class Lodge:
             peep.stats.grow_stat(chng.name, chng.val_amount, chng.apt_xp_amount)
             
         # stress resource effect
-        peep.stats.resource_change("stress", activity.stress_cost)
+        peep.stats.resource_change("stress", -activity.stress_cost)
+        
+        #TODO: hunger resource affect
         
     def cook(self, peep:BattlePeep, meal:Meal):
         dirtiness = -10
