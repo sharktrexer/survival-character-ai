@@ -105,21 +105,6 @@ class Lodge:
     
     def game(self, peep:BattlePeep, game):
         pass
-    
-    def calc_hrs_req_to_sleep(self, peep:BattlePeep):
-        '''
-        Peeps can be awake for 16-12 hrs per day.
-        
-        Time Spent Asleep:
-        With 0 Energy Aptitude or Higher: 
-            peeps need 8 hours of sleep.
-        Per point of Energy Apt below 0: 
-            peeps need +1 more hrs of sleep (12 max)
-        '''
-        if peep.apt_of('ap)') >= 0:
-            return 8
-        else:
-            return 8 - self.cur_stats["energy"].apt
 
     def end_day(self):
         self.creep_grime()

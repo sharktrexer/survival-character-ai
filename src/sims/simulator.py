@@ -949,60 +949,9 @@ class LodgeSimulator(Simulator):
         #TODO: print gauge info
     
     def print_peep_info(self, peep:BattlePeep, past_peep:BattlePeep=None):
-        #print(peep.get_info_as_str())
         
-        '''
-        print peep name
-        loop thru every stat & mem stat
-        print stat name
-        (chng) #Apt, (chng) #AV, (chng) #Val
-        (chng) # xp, #xp till lvl
+        print(peep.get_stat_info_pretty_str())
         
-        
-        up to 3 per line
-        '''
-        
-        print(f"\n{peep.name}")
-        stats_per_row = 0
-        line1 = []
-        line2 = []
-        line3 = []
-        for s in list(STAT_TYPES.values()):
-            s_name = s.abreviation.upper()
-            stat = peep.get_stat(s_name)
-            mem_stat = peep.get_stat_growth(s_name)
-            
-            if stats_per_row == 4:
-                print("".join(line1))
-                print("".join(line2))
-                print("".join(line3))
-                print()
-                line1 = []
-                line2 = []
-                line3 = []
-                stats_per_row = 0
-            
-            line1.append( f"{s_name}:")
-            line1[-1] = line1[-1].ljust(30)
-            line2.append( f"({stat.apt} Apt), {stat.val_active}AV, {stat.value}Val" )
-            line2[-1] = line2[-1].ljust(30)
-            line3.append( f"{mem_stat.apt_exp}xp, {mem_stat.get_req_xp_to_lvl()} xp til lvl" )
-            line3[-1] = line3[-1].ljust(30)
-            stats_per_row += 1
-        
-        if stats_per_row != 0:
-            print("".join(line1))
-            print("".join(line2))
-            print("".join(line3))
-            print()
-        
-        '''
-        Name:
-        Str                          Dex
-        -2 Apt, 100AV, 100Val        (+1) 1 Apt, (+18) 68AV, (+10) 60Val
-        200xp, 200xp til lvl         (+20) 200xp, 200xp til lvl
-        
-        '''
     
     def print_time_info(self):
         print( f"{self.lodge.time_keeper} ")

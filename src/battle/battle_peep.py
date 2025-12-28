@@ -14,19 +14,80 @@ class BattlePeep():
     def __init__(self, name: str, stats_dict: dict):
         self.name = name.replace('_', ' ')
         self.key_name = name
-        self.stats = StatBoard(stats_dict)
-        self.battle_handler = BattleHandler()
-        self.init_growth = 0
-        self.gained_ap_bonus = False
         self.is_player = False
         self.team = None
+        self.stats = StatBoard(stats_dict)
+        self.battle_handler = BattleHandler()
+        
+        self.init_growth = 0
+        self.gained_ap_bonus = False
         self.turns_passed = 0
+        self.pips_passed_awake = 0
         
     def __str__(self):
         return self.name
     
     def __repr__(self):
         return f"{self.key_name}, team={self.team}, stats_dict={self.stats.__dict__}, )"
+    
+    def get_stat_info_pretty_str(self):
+        '''
+        Returns a prettified string of all the stats of the peep
+        
+        '''
+        '''
+        FORMATTING EXAMPLE
+        
+        Chris:
+        Str                          Dex
+        (-2 Apt), 100AV, 100Val      (1 Apt) [+1], 68AV [+18], 60Val [+10]
+        200xp, 200xp til lvl         200xp [-20], 200xp til lvl 
+        '''
+        
+        # max number of stats printed in one row (each row makes up 3 lines)
+        MAX_STATS_PER_ROW = 4
+        
+        #list of string to represent full stat info in a prettified str
+        str_info = []
+        
+        # adding name
+        str_info.append(f"\n{self.name}")
+        
+        # adding stat rows
+        stats_per_row = 0
+        stat_row_str: list[list[str]] = [[],[],[]]
+        
+        for s in list(self.stats.cur_stats.values()):
+            # grab info
+            s_name = s.abreviation.upper()
+            stat = self.get_stat(s_name)
+            mem_stat = self.get_stat_growth(s_name)
+            
+            # convert rows into string
+            if stats_per_row == MAX_STATS_PER_ROW:
+                for line in stat_row_str:
+                    str_info.append("".join(line))
+                str_info.append('')
+                
+                # reset info for next row
+                stat_row_str = [[],[],[]]
+                stats_per_row = 0
+            
+            # format info into strings
+            stat_row_str[0].append( f"{s_name}:".ljust(30) )
+            stat_row_str[1].append( f"({stat.apt} Apt), {stat.val_active}AV, {stat.value}Val".ljust(30) )
+            stat_row_str[2].append( f"{mem_stat.apt_exp}xp, {mem_stat.get_req_xp_to_lvl()} xp til lvl".ljust(30) )
+            
+            stats_per_row += 1
+        
+        # making sure to convert leftover row into string
+        if stats_per_row != 0:
+            for line in stat_row_str:
+                str_info.append("".join(line))
+            str_info.append('')
+        
+        # convert into final string with proper line breaks
+        return '\n'.join(str_info)
     
     def get_info_as_str(self):
         peep_info = self.name + ":\n"
@@ -171,6 +232,21 @@ class BattlePeep():
         '''
         return self.stats.initiative()
     
+    def get_hrs_req_to_sleep(self):
+        '''
+        Peeps can be awake for 16-12 hrs per day.
+        
+        Time Spent Asleep:
+        With 0 Energy Aptitude or Higher: 
+            peeps need 8 hours of sleep.
+        Per point of Energy Apt below 0: 
+            peeps need +1 more hrs of sleep (12 max)
+        '''
+        if self.apt_of('ap)') >= 0:
+            return 8
+        else:
+            return 8 - self.cur_stats["energy"].apt
+    
     def recieve_alt(self, alt: Alteration):
         # reduce debuff effectiveness depending on how high hunger resource is
         self.stats.apply_alteration(alt)
@@ -244,6 +320,8 @@ class BattlePeep():
     def end_turn(self):
         # revert energy bonus
         self.gained_ap_bonus = False
+        self.turns_passed = 0
+        self.init_growth = 0
     
     def end_battle(self):
         # recover wih 10% health if knocked out at end of battle
