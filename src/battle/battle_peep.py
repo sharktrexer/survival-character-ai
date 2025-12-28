@@ -85,8 +85,9 @@ class BattlePeep():
         str_info.append(f"\n{self.name}")
         
         # adding stat rows
+        adjust = 36
         stats_per_row = 0
-        stat_row_str: list[list[str]] = [[],[],[]]
+        stat_row_str: list[list[str]] = [[],[],[],[],[]]
         
         for stat in list(self.stats.cur_stats.values()):
             # grab info
@@ -119,19 +120,19 @@ class BattlePeep():
                     stat_did_change = True
                     if diff > 0:
                         changes[c] = f"+{diff}"
-                    changes[c] = f" [{changes[c]}]"
+                    changes[c] = f"`[{changes[c]}]"
                     
             # convert rows into string
             if stats_per_row == MAX_STATS_PER_ROW:
                 for line in stat_row_str:
-                    str_info.append("".join(line))
-                str_info.append('')
+                    if line != []:
+                        str_info.append("".join(line))
+                str_info.append(''.ljust(adjust * MAX_STATS_PER_ROW, '-'))
                 
                 # reset info for next row
-                stat_row_str = [[],[],[]]
+                stat_row_str = [[],[],[],[],[]]
                 stats_per_row = 0
             
-            adjust = 36
             
             # signify that stat has been modified
             if stat_did_change:
@@ -139,8 +140,14 @@ class BattlePeep():
             
             # format info into strings
             stat_row_str[0].append( f"{s_name}:".ljust(adjust) )
-            stat_row_str[1].append( f"({stat.apt} Apt){changes['apt']}, {stat.val_active}AV{changes['active']}, {stat.value}Val{changes['val']}".ljust(adjust) )
-            stat_row_str[2].append( f"{mem_stat.apt_exp}xp{changes['xp']}, {mem_stat.get_req_xp_to_lvl()} xp til lvl".ljust(adjust) )
+            chng_notify = f'{changes['apt']:<9}{changes['active']:<6}{changes['val']:<6}'
+            if chng_notify != '':
+                stat_row_str[1].append(chng_notify.ljust(adjust))
+            stat_row_str[2].append( f"({stat.apt} Apt), {stat.val_active}AV, {stat.value}Val".ljust(adjust) )
+            chng_notify = f'{changes["xp"]:<5}'
+            if chng_notify != '':
+                stat_row_str[3].append(chng_notify.ljust(adjust))
+            stat_row_str[4].append( f"{mem_stat.apt_exp}xp, {mem_stat.get_req_xp_to_lvl()} xp til lvl".ljust(adjust) )
             
             stats_per_row += 1
         
