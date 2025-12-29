@@ -910,9 +910,10 @@ class LodgeSimulator(Simulator):
         Time goes forward by one pip. trigger everything that happens
         
         - make progress in current activity
-            - queue of activity and their peep doing it.
-                - from simple stat growth to eating to moving in the lodge
+            - list of activities with peep names and their progress
             - Update each by one pip's worth of time
+            - if activity is complete, let lodge manager inflict the effects
+            - remove peep from activity, and activity from list if no more peeps
             
         - update
             - Time Keeper
@@ -931,30 +932,34 @@ class LodgeSimulator(Simulator):
         pass
 
     def choose_activity(self):
+        # print current info and store it
         print("Current Stats: ")
-        self.print_peep_info(self.player)
+        print(self.player.get_stat_info_pretty_str(past_self=past_peep))
+
+        past_peep = copy.deepcopy(self.player)
         
+        # get player choice
         prompt = 'Please select an activity to perform.'
         a_choice:Activity = self.get_choice(copy.deepcopy(ACTIVITIES), get_index=False, prompt=prompt)
         
         # can the peep take the stress hit!?   
         if not self.lodge.check_stress(self.player, a_choice):
-            print(f"You are too tired to do that! {a_choice.stress_cost} > {self.player.points_of('tres')}")
+            print(f"You are too stressed to do that! {a_choice.stress_cost} > {self.player.points_of('tres')}")
             return
         
+        # commence changes
         self.lodge.do_activity(self.player, a_choice)
         
+        # display changed data
         print("Changed Stats: ")
-        self.print_peep_info(self.player)
+        print(self.player.get_stat_info_pretty_str(past_self=past_peep))
+
         
-        print(self.player.get_gauge_info_str())
+        print("Gauge Changes: ")
+        print(self.player.get_gauge_info_str(past_self=past_peep))
         
         self.print_time_info()
-    
-    def print_peep_info(self, peep:BattlePeep, past_peep:BattlePeep=None):
-        
-        print(peep.get_stat_info_pretty_str())
-        
+
     
     def print_time_info(self):
         print( f"{self.lodge.time_keeper} ")

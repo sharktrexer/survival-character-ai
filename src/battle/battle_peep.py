@@ -1,5 +1,5 @@
 import random
-from .stats import Stat, StatBoard, sn, GAUGE_STATS
+from .stats import STAT_TYPES, Stat, StatBoard, sn, GAUGE_STATS
 from .alteration import Alteration
 from enum import Enum, auto
 from .damage import Damage
@@ -30,7 +30,7 @@ class BattlePeep():
     def __repr__(self):
         return f"{self.key_name}, team={self.team}, stats_dict={self.stats.__dict__}, )"
     
-    def get_gauge_info_str(self):
+    def get_gauge_info_str(self, past_self:BattlePeep=None):
         '''
         Returns a string of the status of all gauge stats of the peep
         '''
@@ -40,19 +40,43 @@ class BattlePeep():
         Hunger: 75/75         Stress: 50/50        Fear: 100/100
         Health: 100/100       Energy: 10/10        
         '''
+        if past_self != None and self.name != past_self.name:
+            raise Exception("This function is only used for comparing the stats of the same peep")
         
         info = []
+        resource_row = [[],[]]
         count = 0
         for s_name in GAUGE_STATS:
             stat = self.get_stat(s_name)
             name_str = f"{stat.abreviation.upper()}:"
-            info.append(f"{name_str:<5} {stat.resource_str():^2}".ljust(20) )
+            
+            # change row
+            if past_self != None:
+                past_stat = past_self.get_stat(s_name)
+                chng = stat.val_resource - past_stat.val_resource
+                if chng != 0:
+                    if chng > 0:
+                        chng = f"+{chng}"
+                    chng = f"[{chng}]".rjust(len(name_str) + 1)
+                else:
+                    chng = ''
+                resource_row[0].append(f'{chng}'.ljust(20 + len(stat.resource_str()) ) )
+            
+            # info row
+            resource_row[1].append(f"{name_str:<5} {stat.resource_str():^2}".ljust(20) )
             
             count += 1
             
             if count == 3:
-                info.append("\n")
+                for r in resource_row:
+                    info.append("".join(r))
+                    info.append("\n")
                 count = 0
+                resource_row = [[],[]]
+        
+        for r in resource_row:
+            info.append("".join(r))
+            info.append("\n")
         
         info.append("\n")
         return "".join(info)
@@ -89,8 +113,10 @@ class BattlePeep():
         stats_per_row = 0
         stat_row_str: list[list[str]] = [[],[],[],[],[]]
         
-        for stat in list(self.stats.cur_stats.values()):
+        # grab from Stat Types to ensure proper order of stat display
+        for s in list(STAT_TYPES.keys()):
             # grab info
+            stat = self.get_stat(s)
             s_name = stat.abreviation.upper()
             mem_stat = self.get_stat_growth(s_name)
             
@@ -120,7 +146,7 @@ class BattlePeep():
                     stat_did_change = True
                     if diff > 0:
                         changes[c] = f"+{diff}"
-                    changes[c] = f"`[{changes[c]}]"
+                    changes[c] = f"[{changes[c]}]"
                     
             # convert rows into string
             if stats_per_row == MAX_STATS_PER_ROW:
@@ -155,7 +181,7 @@ class BattlePeep():
         if stats_per_row != 0:
             for line in stat_row_str:
                 str_info.append("".join(line))
-            str_info.append('')
+            str_info.append(''.ljust(adjust * MAX_STATS_PER_ROW, '-'))
         
         # convert into final string with proper line breaks
         return '\n'.join(str_info)
