@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 from activity_mechanics.resources import Resource as ReS, ResourcesType as RT
 from activity_mechanics.time_management import PIPS_PER_HR, TimeKeeper
-from battle.stats import StatChange
+from battle.stats import StatChange, sn
 
 class Tag(Enum):
     WORK = auto()
@@ -31,7 +31,7 @@ class Activity():
     
     def __init__(self, name:str, 
                  stat_changes:list[StatChange],  
-                 tres_cost:int, # how much stress used
+                 gauge_costs:list[StatChange],
                  location:str,
                  ex_pip_cost:int=0, 
                  cost:list[ReS] = [],
@@ -45,20 +45,16 @@ class Activity():
         How many pips it takes to complete the activity
         At least one hour's worth is required
         '''
-        self.stress_cost = tres_cost
+        self.gauge_costs = gauge_costs
         self.location = location
         self.rescource_cost = cost
         self.produced_resc = production
         
-        
-        self.active_peeps: dict[str,int] = {}
-        '''
-        Dictionary of peep names who are doing the activity and their pip progress
-        '''
+
         
     def __str__(self):
         return (f"{self.name} {self.stat_chnges_as_str()}"
-            + f" [Takes: {TimeKeeper.pips_to_hrs_str(self.time_pip_cost)}] | [Stress: {self.stress_cost}]")
+            + f" [Takes: {TimeKeeper.pips_to_hrs_str(self.time_pip_cost)}] | [Costs: {self.gauge_costs_as_str()}]")
     
     def stat_chnges_as_str(self):
         str = []
@@ -66,18 +62,34 @@ class Activity():
         for s in self.stat_changes:
             val_sign = '+' if s.val_amount > 0 else ''
             apt_sign = '+' if s.apt_xp_amount > 0 else ''
-            str.append(f"| {s.name} ({val_sign}{s.val_amount}val {apt_sign}{s.val_amount}xp) ")
+            name = s.name[0].upper() + s.name[1:]
+            str.append(f"| {name} ({val_sign}{s.val_amount}val {apt_sign}{s.val_amount}xp) ")
         return "".join(str)
+    
+    def gauge_costs_as_str(self):
+        str = []
+        
+        for s in self.gauge_costs:
+            val_sign = '+' if s.val_amount > 0 else ''
+            name = s.name[0].upper() + s.name[1:]
+            str.append(f"{name} ({val_sign}{s.val_amount}), ")
+        return "".join(str)[:-2]
+    
+    def get_stress_cost(self):
+        return [c.val_amount for c in self.gauge_costs if c.name == sn("tres")][0]
     
 ACTIVITIES = [        
     Activity(
         "Workout", tags=[],
         stat_changes=[
-            StatChange("str", 3, 1),
+            StatChange("str", val_amount=3, apt_xp_amount=1),
             StatChange("hun",-1, 0),
             StatChange("int", -1, -1),
         ],
-        tres_cost=15,
+        gauge_costs=[
+            StatChange("tres",-15),
+            StatChange("hun",-10),
+            ],
         location='Gym'),
     
     Activity(
@@ -87,7 +99,9 @@ ACTIVITIES = [
             StatChange("str",-1, 0),
         ],
         ex_pip_cost=1,
-        tres_cost=15,
+        gauge_costs=[
+            StatChange("tres",-15),
+            ],
         location='Foyer'),
     
     Activity(
@@ -96,7 +110,9 @@ ACTIVITIES = [
             StatChange("tres", 1, 2),
         ],
         ex_pip_cost=2,
-        tres_cost=-20,
+        gauge_costs=[
+            StatChange("tres",20),
+            ],
         location='Outside'),
     
     Activity(
@@ -105,7 +121,10 @@ ACTIVITIES = [
             StatChange("eva", 3, 2),
         ],
         ex_pip_cost=1,
-        tres_cost=20,
+        gauge_costs=[
+            StatChange("tres",-20),
+            StatChange("fear",-10),
+            ],
         location='Outside'
         ),
     
@@ -115,7 +134,9 @@ ACTIVITIES = [
             StatChange("tres", 3, 0),
             StatChange("cha",-2, -2),
         ],
-        tres_cost=-15,
+        gauge_costs=[
+            StatChange("tres",-15),
+            ],
         location='Locker Room'),
     
     Activity(
@@ -125,7 +146,9 @@ ACTIVITIES = [
             StatChange("tres", 1, 0),
             StatChange("ap", -1, 0),
         ],
-        tres_cost=-10,
+        gauge_costs=[
+            StatChange("tres",-10),
+            ],
         location='Living Room'),
     
     Activity(
@@ -136,7 +159,9 @@ ACTIVITIES = [
             StatChange("rec", -1, -1),
         ],
         ex_pip_cost=2,
-        tres_cost=-5,
+        gauge_costs=[
+            StatChange("tres",-5),
+            ],
         location='Locker Room'),
 
     Activity(
@@ -147,7 +172,10 @@ ACTIVITIES = [
             StatChange("cha", -1, -1),
         ],
         ex_pip_cost=2,
-        tres_cost=-10,
+        gauge_costs=[
+            StatChange("tres",-10),
+            StatChange("fear", 5),
+            ],
         location='Locker Room'),
 
 ]

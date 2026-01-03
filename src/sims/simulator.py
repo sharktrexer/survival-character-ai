@@ -933,8 +933,8 @@ class LodgeSimulator(Simulator):
 
     def choose_activity(self):
         # print current info and store it
-        print("Current Stats: ")
-        print(self.player.get_stat_info_pretty_str(past_self=past_peep))
+        #print("Current Stats: ")
+        #self.print_peep_stat_info()
 
         past_peep = copy.deepcopy(self.player)
         
@@ -944,7 +944,7 @@ class LodgeSimulator(Simulator):
         
         # can the peep take the stress hit!?   
         if not self.lodge.check_stress(self.player, a_choice):
-            print(f"You are too stressed to do that! {a_choice.stress_cost} > {self.player.points_of('tres')}")
+            print(f"You are too stressed to do that! {a_choice.get_stress_cost()} > {self.player.points_of('tres')}")
             return
         
         # commence changes
@@ -952,7 +952,7 @@ class LodgeSimulator(Simulator):
         
         # display changed data
         print("Changed Stats: ")
-        print(self.player.get_stat_info_pretty_str(past_self=past_peep))
+        self.print_peep_stat_info(past_peep)
 
         
         print("Gauge Changes: ")

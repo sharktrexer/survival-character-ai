@@ -36,7 +36,7 @@ class BattlePeep():
         '''
         '''
         FORMATTING EXAMPLE:
-        
+                                      [+10]
         Hunger: 75/75         Stress: 50/50        Fear: 100/100
         Health: 100/100       Energy: 10/10        
         '''

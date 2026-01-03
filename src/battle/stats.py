@@ -379,8 +379,10 @@ class Stat:
 class StatChange():
     '''
     Simple class to represent a permanent stat change
+    
+    Also useful for representing stat resource val changes
     '''
-    def __init__(self, stat_name:str, val_amount:int, apt_xp_amount:int):
+    def __init__(self, stat_name:str, val_amount:int, apt_xp_amount:int=0):
         self.name = sn(stat_name)
         self.val_amount = val_amount
         self.apt_xp_amount = apt_xp_amount

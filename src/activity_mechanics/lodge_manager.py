@@ -43,6 +43,7 @@ class Lodge:
         self.resourcer = resourcer
         self.time_keeper = TimeKeeper()
         self.rooms = {r.name:r for r in deepcopy(ROOMS)}
+        self.cleanliness = 0
         self.update_cleanliness()
         self.peep_time_awake = {p.name:0 for p in PEEPS}
     
@@ -85,8 +86,9 @@ class Lodge:
         for chng in activity.stat_changes:
             peep.stats.grow_stat(chng.name, chng.val_amount, chng.apt_xp_amount)
             
-        # stress resource effect
-        peep.stats.resource_change("stress", -activity.stress_cost)
+        # all resource effects
+        for cost in activity.gauge_costs:
+            peep.stats.resource_change(cost.name, cost.val_amount)
         
         #TODO: hunger resource affect
         
