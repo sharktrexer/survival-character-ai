@@ -68,7 +68,7 @@ class Lodge:
         '''
         if the peep is calm enough to do the activity
         '''
-        return peep.points_of('tres') - activity.stress_cost >= 0
+        return peep.points_of('tres') - activity.get_stress_cost() >= 0
     
     def exchange_resources(self, cost:list[Resource]):
         self.resourcer.exchange(cost)

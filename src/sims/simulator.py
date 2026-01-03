@@ -889,7 +889,8 @@ class LodgeSimulator(Simulator):
         self.player:BattlePeep = None
         self.activity_q: list[Activity] = []
         self.funcs = [self.choose_activity, 
-                      self.print_peep_info, self.print_time_info,
+                      self.print_peep_stat_info, self.print_peep_gauge_info,
+                      self.print_time_info,
                       self.reset,]
         self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
         
@@ -956,13 +957,19 @@ class LodgeSimulator(Simulator):
 
         
         print("Gauge Changes: ")
-        print(self.player.get_gauge_info_str(past_self=past_peep))
+        self.print_peep_gauge_info(past_peep)
         
         self.print_time_info()
 
     
     def print_time_info(self):
         print( f"{self.lodge.time_keeper} ")
+        
+    def print_peep_stat_info(self, past_peep:BattlePeep = None):
+        print(self.player.get_stat_info_pretty_str(past_peep))
+        
+    def print_peep_gauge_info(self, past_peep:BattlePeep = None):
+        print(self.player.get_gauge_info_str(past_peep))
     
     '''
     Specific Activity Functions
