@@ -1,4 +1,7 @@
-class Meal():
+from activity_mechanics.activities import Objective
+
+
+class Meal(Objective):
     def __init__(self, name:str, req_ingr:int, req_cre:int, hun_rest:int, serves:int=1):
         self.name = name
         self.req_ingr = req_ingr

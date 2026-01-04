@@ -1,17 +1,17 @@
 from copy import deepcopy
 import math
 import random
-from activity_mechanics.activities import Activity
+
+from activity_mechanics.activities import Activity, ACTIVITIES
 from activity_mechanics.cooking import Meal, MEALS
 from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
 from activity_mechanics.time_management import TimeKeeper
-from peep_data.data_reader import PEEPS
-
 from activity_mechanics.farming import PLANTS, Plant
 from activity_mechanics.barricading import BARRICADES, Barricade
 
 from battle.battle_peep import BattlePeep
 from utils.helpers import Calcs
+from peep_data.data_reader import PEEPS
 
 class Room:
     def __init__(self, name, exits:list[Room]=[], cleanliness=100):
@@ -42,17 +42,18 @@ class Lodge:
         self.name = name
         self.resourcer = resourcer
         self.time_keeper = TimeKeeper()
+        self.active_activities: dict[str,Activity] = {}
+        self.peep_time_awake: dict[str,int] = {p.name:0 for p in PEEPS}
         self.rooms = {r.name:r for r in deepcopy(ROOMS)}
         self.cleanliness = 0
         self.update_cleanliness()
-        self.peep_time_awake = {p.name:0 for p in PEEPS}
     
     def reset(self):
         self.time_keeper = TimeKeeper()
         self.resourcer = ResourceManager()
         self.rooms = {r.name:r for r in deepcopy(ROOMS)}
         self.update_cleanliness()
-        self.peep_time_awake = {p.name:0 for p in PEEPS}
+        self.active_activities = {}
     
     def creep_grime(self):
         '''

@@ -1,4 +1,7 @@
-class Barricade():
+from activity_mechanics.activities import Objective
+
+
+class Barricade(Objective):
     def __init__(self, name, req_mats:int, def_yield:int):
         self.name = name
         self.req_mat = req_mats

@@ -142,13 +142,16 @@ class TimeKeeper:
         self.cur_min = self.cur_min % MINS_PER_HR
         
         # check for a new day
+        #TODO: alert that day has changed
         if self.cur_hr >= HRS_IN_DAY:
             self.cur_min -= HRS_IN_DAY * MINS_PER_HR
             self.cur_hr = self.cur_min % MINS_PER_HR
             self.days_passed += 1
         
+        #TODO: alert season has changed
         self.update_season()
-            
+        
+        #TODO: alert time of day has changed    
         self.calc_time_of_day()
         
     

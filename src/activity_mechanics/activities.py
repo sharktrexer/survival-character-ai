@@ -22,6 +22,13 @@ class Tag(Enum):
     EMOTIONAL = auto()
     MIXED = auto()
 
+class Objective():
+    '''
+    Class that defines the result of an activity
+    '''
+    def __init__(self, name:str):
+        self.name = name
+
 class Activity():
     '''
     Class that defines the details of an activity
@@ -33,7 +40,8 @@ class Activity():
                  stat_changes:list[StatChange],  
                  gauge_costs:list[StatChange],
                  location:str,
-                 ex_pip_cost:int=0, 
+                 ex_pip_cost:int=0,
+                 objective:Objective = None, 
                  cost:list[ReS] = [],
                  production:list[ReS] = [],
                  tags:list[Tag] = []):
@@ -47,6 +55,7 @@ class Activity():
         '''
         self.gauge_costs = gauge_costs
         self.location = location
+        self.objective = objective
         self.rescource_cost = cost
         self.produced_resc = production
         

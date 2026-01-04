@@ -1,3 +1,6 @@
+from activity_mechanics.activities import Objective
+
+
 class Plant():
     def __init__(self, name:str, req_seeds:int, ingr_yield:int, days_to_grow:int, req_rec:int):
         self.name = name
@@ -5,6 +8,11 @@ class Plant():
         self.ingr_yield = ingr_yield
         self.growth_time = days_to_grow
         self.req_rec = req_rec
+
+class PlantCare(Objective):
+    def __init__(self, name:str, Plant:Plant):
+        self.name = name
+        self.plant = Plant
 
 '''
 Relationship between seeds to yield to time to grow to recovery stat required

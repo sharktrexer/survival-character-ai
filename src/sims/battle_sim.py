@@ -420,8 +420,12 @@ class BattleSimulator(Simulator):
                   "You should add some peeps using the modify battle option.")
         return no_peeps
     
-
-        
+    def save_fight(self):
+        pass
+    
+    def load_fight(self):
+        pass
+    
 
 '''
 class InitiativeSimulator(BattleSimulator):
