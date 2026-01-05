@@ -2,7 +2,8 @@ from copy import deepcopy
 import math
 import random
 
-from activity_mechanics.activities import Activity, ACTIVITIES
+from activity_mechanics.activities import Activity, ACTIVITIES, Objective
+from activity_mechanics.activity_manager import ActivityManager
 from activity_mechanics.cooking import Meal, MEALS
 from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
 from activity_mechanics.time_management import TimeKeeper
@@ -42,9 +43,12 @@ class Lodge:
         self.name = name
         self.resourcer = resourcer
         self.time_keeper = TimeKeeper()
-        self.active_activities: dict[str,Activity] = {}
+        
+        self.activity_man = ActivityManager()
         self.peep_time_awake: dict[str,int] = {p.name:0 for p in PEEPS}
         self.rooms = {r.name:r for r in deepcopy(ROOMS)}
+        self.made_stuff: list[Objective] = []
+        
         self.cleanliness = 0
         self.update_cleanliness()
     
@@ -53,7 +57,6 @@ class Lodge:
         self.resourcer = ResourceManager()
         self.rooms = {r.name:r for r in deepcopy(ROOMS)}
         self.update_cleanliness()
-        self.active_activities = {}
     
     def creep_grime(self):
         '''
@@ -76,12 +79,22 @@ class Lodge:
     
     def obtain_resources(self, gain:list[Resource]):
         self.resourcer.obtain(gain)
+    
+    def tick_lodge(self):
+        self.time_keeper.tick()
         
-    def do_activity(self, peep:BattlePeep, activity:Activity):
+        # track how long peeps are awake
+        for peep in self.peep_time_awake.keys():
+            self.peep_time_awake[peep] += 1
+            
+        '''
+        Tick everyone's hunger down
+        '''
         
-        # time goes by
-        #TODO: what happens if ambushed!?
-        self.time_keeper.tick_by_pip(activity.time_pip_cost)
+
+                    
+        
+    def finish_activity(self, peep:BattlePeep, activity:Activity):
         
         # stat effects
         for chng in activity.stat_changes:
@@ -90,8 +103,11 @@ class Lodge:
         # all resource effects
         for cost in activity.gauge_costs:
             peep.stats.resource_change(cost.name, cost.val_amount)
+            
+        # deal with objective
+        if activity.objective != None:
+            self.made_stuff.append(activity.objective)
         
-        #TODO: hunger resource affect
         
     def cook(self, peep:BattlePeep, meal:Meal):
         dirtiness = -10
@@ -114,4 +130,5 @@ class Lodge:
     def end_day(self):
         self.creep_grime()
     
+
         

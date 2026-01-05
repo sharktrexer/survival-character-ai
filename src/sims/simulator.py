@@ -1,14 +1,7 @@
 from activity_mechanics.activities import Activity, ACTIVITIES
 from activity_mechanics.lodge_manager import Lodge
+from activity_mechanics.progress import ActivityProgress
 from activity_mechanics.resources import ResourceManager
-import visualization.graph_data as gd
-import time as t
-import copy
-import peep_data.combo_db as cdb
-
-from abc import ABC, abstractmethod
-from typing import Callable
-
 from peep_data.data_reader import SIMPLE_PEEPS, PEEPS
 from battle.stats import Stat, STAT_TYPES
 from battle.battle_peep import BattlePeep
@@ -17,6 +10,16 @@ from battle.alteration import (Alteration,
                                AlterationFactory,
                                get_grade_info_as_str_lst, 
                                )
+
+import visualization.graph_data as gd
+import time as t
+import copy
+import peep_data.combo_db as cdb
+
+from abc import ABC, abstractmethod
+from typing import Callable
+
+
 
 STAT_CHOICES = list(STAT_TYPES.keys())
 
@@ -888,10 +891,12 @@ class LodgeSimulator(Simulator):
         self.peeps = copy.deepcopy(PEEPS)
         self.player:BattlePeep = None
         self.activity_q: list[Activity] = []
-        self.funcs = [self.choose_activity, 
-                      self.print_peep_stat_info, self.print_peep_gauge_info,
-                      self.print_time_info,
-                      self.reset,]
+        self.funcs = [
+                    self.march_time_forward,
+                    self.choose_activity, 
+                    self.print_peep_stat_info, self.print_peep_gauge_info,
+                    self.print_time_info,
+                    self.reset,]
         self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
         
     def welcome(self):
@@ -923,9 +928,41 @@ class LodgeSimulator(Simulator):
             - room dirtiness when completing a non-cleaning activity
         '''
         
+        self.tick_activities()
+        self.lodge.tick_lodge()
+
         
+    def tick_activities(self):
+        # loop thru activities to tick using activity manager
+        for a in self.lodge.activity_man.in_prog_activities:
+            #get potential player input lol
+            choices = self.lodge.activity_man.start_tick(a)
+            choice_ind = -1
+            if choices != None:
+                prompt = 'CHOOSE UR FATE'
+                choice_ind = self.get_choice(choices, prompt=prompt)
+            
+            # give back choice ind    
+            self.lodge.activity_man.finish_tick(a, choice_ind)
+            
+        finished_acts = [a for a in self.lodge.activity_man.in_prog_activities if a.is_finished()]
+        self.lodge.activity_man.clean_activity_list()
         
-        self.lodge.time_keeper.tick()
+        past_peep = copy.deepcopy(self.player)
+        
+        # APPLY FINISHED ACTIVITY STUFF
+        for f_act in finished_acts:
+            self.lodge.finish_activity(self.player, f_act.activity)
+            
+            # display changed data
+            print("Changed Stats: ")
+            self.print_peep_stat_info(past_peep)
+
+            
+            print("Gauge Changes: ")
+            self.print_peep_gauge_info(past_peep)
+        
+            
     
     def reset(self):
         print(f"\n{self.player.get_info_as_str}")
@@ -937,8 +974,6 @@ class LodgeSimulator(Simulator):
         #print("Current Stats: ")
         #self.print_peep_stat_info()
 
-        past_peep = copy.deepcopy(self.player)
-        
         # get player choice
         prompt = 'Please select an activity to perform.'
         a_choice:Activity = self.get_choice(copy.deepcopy(ACTIVITIES), get_index=False, prompt=prompt)
@@ -949,17 +984,7 @@ class LodgeSimulator(Simulator):
             return
         
         # commence changes
-        self.lodge.do_activity(self.player, a_choice)
-        
-        # display changed data
-        print("Changed Stats: ")
-        self.print_peep_stat_info(past_peep)
-
-        
-        print("Gauge Changes: ")
-        self.print_peep_gauge_info(past_peep)
-        
-        self.print_time_info()
+        self.lodge.activity_man.add_activity(self.player.name, a_choice)
 
     
     def print_time_info(self):

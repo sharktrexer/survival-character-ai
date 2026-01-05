@@ -3,7 +3,6 @@ from enum import Enum, auto
 from typing import Callable
 from .battle_peep import BattlePeep, Damage, Peep_State
 from .damage import create_dmg_preset, create_specific_phys_dmg
-from .status_effects import StatusEffect
 from .alteration import Alteration
 
 class Behavior:
