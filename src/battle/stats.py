@@ -341,6 +341,8 @@ class Stat:
             if the resource of this stat has been depleted
         '''
         
+        # TODO: reduce negatives and increase positives with pos apt 
+        # and vise versa with neg apt
         self.val_resource += amount
         
         # cap

@@ -7,6 +7,12 @@ class ActivityManager:
     def __init__(self):
         self.in_prog_activities: list[ActivityProgress] = []
     
+    def get_activites_by_name(self, name:str):
+        return [a for a in self.in_prog_activities if a.activity.name == name]
+    
+    def get_activites_by_room(self, room_name:str):
+        return [a for a in self.in_prog_activities if a.activity.location == room_name]
+    
     def add_activity(self, peep_name:str, activity:Activity):
         self.in_prog_activities.append(
             ActivityProgress(
@@ -44,5 +50,8 @@ class ActivityManager:
             act_progress.activity.gauge_costs.append(StatChange("tres", 5))
             
     def clean_activity_list(self):
+        '''
+        Removes finished activities from list
+        '''
         self.in_prog_activities = [a for a in self.in_prog_activities if not a.is_finished()]
         

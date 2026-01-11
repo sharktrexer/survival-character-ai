@@ -58,12 +58,16 @@ class Activity():
         self.objective = objective
         self.rescource_cost = cost
         self.produced_resc = production
+        '''The resources that are produced by the activity'''
         
 
         
     def __str__(self):
         return (f"{self.name} {self.stat_chnges_as_str()}"
             + f" [Takes: {TimeKeeper.pips_to_hrs_str(self.time_pip_cost)}] | [Costs: {self.gauge_costs_as_str()}]")
+    
+    def __repr__(self):
+        return self.__str__()
     
     def stat_chnges_as_str(self):
         str = []

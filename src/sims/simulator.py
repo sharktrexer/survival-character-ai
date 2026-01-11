@@ -888,9 +888,9 @@ class LodgeSimulator(Simulator):
     
     def __init__(self):
         self.name = "Lodge Simulator"
-        self.peeps = copy.deepcopy(PEEPS)
+        self.peeps = {p.name:p for p in copy.deepcopy(PEEPS)}
         self.player:BattlePeep = None
-        self.activity_q: list[Activity] = []
+        self.player_in_activity = False
         self.funcs = [
                     self.march_time_forward,
                     self.choose_activity, 
@@ -905,11 +905,12 @@ class LodgeSimulator(Simulator):
               "These activities will increase their stats over time.",
               "As days pass, seasons will change and with it, the duration of night and day.") 
         t.sleep(0.2) 
+        self.lodge.activity_man.add_activity('Jayce', ACTIVITIES[0])
         self.choose_peep()
         
     def choose_peep(self):
         prompt = 'Please select a character to control.'
-        self.player = self.get_choice(self.peeps, get_index=False, prompt=prompt)
+        self.player = self.get_choice(list(self.peeps.values()), get_index=False, prompt=prompt)
         
     def march_time_forward(self):
         '''
@@ -928,7 +929,11 @@ class LodgeSimulator(Simulator):
             - room dirtiness when completing a non-cleaning activity
         '''
         
+        # handle activity ticking
+        # done here to allow for player input
         self.tick_activities()
+        
+        # let lodge know time has passed
         self.lodge.tick_lodge()
 
         
@@ -947,20 +952,29 @@ class LodgeSimulator(Simulator):
             
         finished_acts = [a for a in self.lodge.activity_man.in_prog_activities if a.is_finished()]
         self.lodge.activity_man.clean_activity_list()
-        
-        past_peep = copy.deepcopy(self.player)
-        
+                
         # APPLY FINISHED ACTIVITY STUFF
         for f_act in finished_acts:
-            self.lodge.finish_activity(self.player, f_act.activity)
-            
-            # display changed data
-            print("Changed Stats: ")
-            self.print_peep_stat_info(past_peep)
-
-            
-            print("Gauge Changes: ")
-            self.print_peep_gauge_info(past_peep)
+            # for all peeps in group
+            for p_name in f_act.get_all_peep_names():
+                peep = self.peeps[p_name]
+                past_peep = copy.deepcopy(peep)
+                
+                if peep.name == self.player.name:
+                    self.player_in_activity = False
+                
+                # affect rewards based on group bonus
+                # and individual peep progress vs starting progress
+                self.lodge.finish_activity(peep, f_act.activity)
+                
+                # display changed data
+                print(f'{peep.name} finished {f_act.activity.name}!')
+                print("\nChanged Stats: ")
+                print(peep.get_stat_info_pretty_str(past_peep))
+                
+                print("Gauge Changes: ")
+                print(peep.get_gauge_info_str(past_peep))
+                
         
             
     
@@ -974,6 +988,8 @@ class LodgeSimulator(Simulator):
         #print("Current Stats: ")
         #self.print_peep_stat_info()
 
+        act_man = self.lodge.activity_man
+        
         # get player choice
         prompt = 'Please select an activity to perform.'
         a_choice:Activity = self.get_choice(copy.deepcopy(ACTIVITIES), get_index=False, prompt=prompt)
@@ -983,8 +999,26 @@ class LodgeSimulator(Simulator):
             print(f"You are too stressed to do that! {a_choice.get_stress_cost()} > {self.player.points_of('tres')}")
             return
         
-        # commence changes
-        self.lodge.activity_man.add_activity(self.player.name, a_choice)
+        self.player_in_activity = True
+        
+        # check if that activity is already being done
+        # does player want to join or go solo?
+        same_acts_bein_done = act_man.get_activites_by_name(a_choice.name)
+        
+        if len(same_acts_bein_done) > 0:
+            prompt = 'Join someone, or go solo?'
+            choices = [act for act in same_acts_bein_done]
+            choices.append('Go Solo')
+            
+            join_ind:Activity = self.get_choice(copy.deepcopy(choices), prompt=prompt)
+            # join existing activity group
+            if join_ind < len(same_acts_bein_done):
+                act_man.add_peep_to_activity(self.player.name, 
+                                         same_acts_bein_done[join_ind])
+            return
+        
+        # add to activity list to tick
+        act_man.add_activity(self.player.name, a_choice)
 
     
     def print_time_info(self):
