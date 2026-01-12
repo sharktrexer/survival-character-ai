@@ -26,6 +26,9 @@ class ActivityProgress():
     
     def get_all_peep_names(self):
         return [peep.name for peep in self.peep_progs]
+    
+    def get_group_size(self):
+        return len(self.peep_progs)
         
     def is_solo(self):
         return len(self.peep_progs) == 1

@@ -892,8 +892,8 @@ class LodgeSimulator(Simulator):
         self.player:BattlePeep = None
         self.player_in_activity = False
         self.funcs = [
-                    self.march_time_forward,
                     self.choose_activity, 
+                    self.march_time_forward,
                     self.print_peep_stat_info, self.print_peep_gauge_info,
                     self.print_time_info,
                     self.reset,]
@@ -965,10 +965,18 @@ class LodgeSimulator(Simulator):
                 
                 # affect rewards based on group bonus
                 # and individual peep progress vs starting progress
-                self.lodge.finish_activity(peep, f_act.activity)
+                self.lodge.finish_activity(peep, f_act)
+                
+                # get group info
+                group_members = f_act.get_all_peep_names()[:]
+                group_members.remove(peep.name)
+                if f_act.is_group():
+                    g_mems_str = (' with ' 
+                                     + ", ".join(group_members)
+                                 )
                 
                 # display changed data
-                print(f'{peep.name} finished {f_act.activity.name}!')
+                print(f'{peep.name} finished {f_act.activity.name}{g_mems_str}!')
                 print("\nChanged Stats: ")
                 print(peep.get_stat_info_pretty_str(past_peep))
                 
@@ -979,8 +987,7 @@ class LodgeSimulator(Simulator):
             
     
     def reset(self):
-        print(f"\n{self.player.get_info_as_str}")
-        self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
+        print('\nNOT YET IMPLEMENTED')
         pass
 
     def choose_activity(self):
@@ -1005,6 +1012,7 @@ class LodgeSimulator(Simulator):
         # does player want to join or go solo?
         same_acts_bein_done = act_man.get_activites_by_name(a_choice.name)
         
+        # join an existing activity
         if len(same_acts_bein_done) > 0:
             prompt = 'Join someone, or go solo?'
             choices = [act for act in same_acts_bein_done]
@@ -1015,10 +1023,14 @@ class LodgeSimulator(Simulator):
             if join_ind < len(same_acts_bein_done):
                 act_man.add_peep_to_activity(self.player.name, 
                                          same_acts_bein_done[join_ind])
-            return
+        else:
+            # add to activity list to tick
+            act_man.add_activity(self.player.name, a_choice)
         
-        # add to activity list to tick
-        act_man.add_activity(self.player.name, a_choice)
+        # speed thru time
+        ''' prob should instead let game run ticks and check when activity is done'''
+        while(self.player_in_activity):
+            self.march_time_forward()
 
     
     def print_time_info(self):
