@@ -1,4 +1,5 @@
 from activity_mechanics.activities import Activity, ACTIVITIES
+from activity_mechanics.house_keeping import Clean
 from activity_mechanics.lodge_manager import Lodge
 from activity_mechanics.progress import ActivityProgress
 from activity_mechanics.resources import ResourceManager
@@ -895,8 +896,8 @@ class LodgeSimulator(Simulator):
                     self.choose_activity, 
                     self.march_time_forward,
                     self.print_peep_stat_info, self.print_peep_gauge_info,
-                    self.print_time_info,
-                    self.reset,]
+                    self.print_time_info,]
+        self.debug_funcs = [self.dirty_rooms, self.reset]
         self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
         
     def welcome(self):
@@ -911,6 +912,10 @@ class LodgeSimulator(Simulator):
     def choose_peep(self):
         prompt = 'Please select a character to control.'
         self.player = self.get_choice(list(self.peeps.values()), get_index=False, prompt=prompt)
+    
+    def debug(self):
+        prompt = 'Choose a debug function to run.'
+        self.mini_sim(func_list=self.debug_funcs, args=[], prompt=prompt)
         
     def march_time_forward(self):
         '''
@@ -940,8 +945,16 @@ class LodgeSimulator(Simulator):
     def tick_activities(self):
         # loop thru activities to tick using activity manager
         for a in self.lodge.activity_man.in_prog_activities:
-            #get potential player input lol
+            
+            past_prog = a.pip_prog
+            
             choices = self.lodge.activity_man.start_tick(a)
+            
+            # notify of a progress jump greater than 1
+            if a.pip_prog - 1 != past_prog:
+                print(f"{a.name} has advanced extra due to group bonus! [{past_prog} -> {a.pip_prog}]")
+            
+            #get potential player input lol
             choice_ind = -1
             if choices != None:
                 prompt = 'CHOOSE UR FATE'
@@ -955,6 +968,7 @@ class LodgeSimulator(Simulator):
                 
         # APPLY FINISHED ACTIVITY STUFF
         for f_act in finished_acts:
+            self.handle_finishing_cool_activity(f_act)
             # for all peeps in group
             for p_name in f_act.get_all_peep_names():
                 peep = self.peeps[p_name]
@@ -984,7 +998,13 @@ class LodgeSimulator(Simulator):
                 print(peep.get_gauge_info_str(past_peep))
                 
         
-            
+    def handle_finishing_cool_activity(self, act:Activity):
+        if act.name == 'Clean':
+            cleaned = Clean(act)
+            past_clean = self.lodge.rooms[cleaned.room].cleanliness
+            self.lodge.clean_from_act(act)
+            print(f'Cleaned {cleaned.clean_yield} in {cleaned.room.name}!')
+            print(f'{past_clean} -> {self.lodge.rooms[cleaned.room].cleanliness}')       
     
     def reset(self):
         print('\nNOT YET IMPLEMENTED')
@@ -1025,6 +1045,7 @@ class LodgeSimulator(Simulator):
                                          same_acts_bein_done[join_ind])
         else:
             # add to activity list to tick
+            self.handle_cool_acts(a_choice)
             act_man.add_activity(self.player.name, a_choice)
         
         # speed thru time
@@ -1032,6 +1053,13 @@ class LodgeSimulator(Simulator):
         while(self.player_in_activity):
             self.march_time_forward()
 
+    def handle_cool_acts(self, peep:BattlePeep, activity:Activity):
+        if activity.activity.name == 'Clean':
+            prompt = 'Which room would you like to clean?'
+            choices = [r for r in self.lodge.rooms.keys()]
+            room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
+            
+            self.lodge.update_clean_act(peep, room_chosen, activity)
     
     def print_time_info(self):
         print( f"{self.lodge.time_keeper} ")
@@ -1041,6 +1069,13 @@ class LodgeSimulator(Simulator):
         
     def print_peep_gauge_info(self, past_peep:BattlePeep = None):
         print(self.player.get_gauge_info_str(past_peep))
+        
+    def get_peep_by_name(self, name:str):
+        return self.peeps[name]
+    
+    def dirty_rooms(self):
+        for r in self.lodge.rooms.keys():
+            self.lodge.rooms[r].cleanliness -= 25
     
     '''
     Specific Activity Functions

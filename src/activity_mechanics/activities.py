@@ -190,5 +190,25 @@ ACTIVITIES = [
             StatChange("fear", 5),
             ],
         location='Locker Room'),
+    
+    Activity(
+        "Clean", tags=[],
+        stat_changes=[
+            StatChange("dex", 3, 1),
+        ],
+        gauge_costs=[
+            StatChange("tres",-15),
+            ],
+        location='Kitchen'),
+    
+    Activity(
+        "Cook", tags=[],
+        stat_changes=[
+            StatChange("cre", 1, 1),
+        ],
+        gauge_costs=[
+            StatChange("tres",-5),
+            ],
+        location='Kitchen'),
 
 ]

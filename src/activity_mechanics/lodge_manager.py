@@ -9,7 +9,7 @@ from activity_mechanics.progress import ActivityProgress
 from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
 from activity_mechanics.time_management import TimeKeeper
 from activity_mechanics.farming import PLANTS, Plant
-from activity_mechanics.barricading import BARRICADES, Barricade
+from activity_mechanics.house_keeping import BARRICADES, Barricade, Clean
 
 from battle.battle_peep import BattlePeep
 from utils.helpers import Calcs
@@ -142,9 +142,22 @@ class Lodge:
     def sleep(self, peep:BattlePeep):
         pass
     
-    def clean(self, peep:BattlePeep, room:Room):
+    def clean_from_act(self, act:Activity):
+        clean_targ = Clean(act.objective)
+        self.rooms[clean_targ.room].clean(clean_targ.clean_yield)
         self.update_cleanliness()
-        pass
+    
+    def update_clean_act(self, peep:BattlePeep, room:Room, act:Activity):
+        dex_apt = peep.stats.get_apt('dex')
+        
+        # change amount based on aptitude
+        clean_amnt = 4
+        if dex_apt > 1:
+            clean_amnt *= dex_apt 
+        elif dex_apt < 0:
+            clean_amnt += dex_apt * 2
+            
+        act.objective = Clean(f'Cleaning {room.name}', clean_amnt, room.name)
     
     def game(self, peep:BattlePeep, game):
         pass

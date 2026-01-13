@@ -1,6 +1,12 @@
 from activity_mechanics.activities import Objective
 
 
+class Clean(Objective):
+    def __init__(self, name, clean_yield:int, room:'str'):
+        self.name = name
+        self.clean_yield = clean_yield
+        self.room = room
+
 class Barricade(Objective):
     def __init__(self, name, req_mats:int, def_yield:int):
         self.name = name
