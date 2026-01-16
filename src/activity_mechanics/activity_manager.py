@@ -28,8 +28,8 @@ class ActivityManager:
         act_progress.tick()
         
         # test random event
-        if act_progress.pip_prog == 5:
-            return test_choices
+        # if act_progress.pip_prog == 5:
+        #     return test_choices
         #TODO: grab even list based on the activity or other conditions
         
     

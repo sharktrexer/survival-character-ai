@@ -86,6 +86,7 @@ class Lodge:
         
         # track how long peeps are awake
         for peep in self.peep_time_awake.keys():
+            # tick up ones who are not sleeping
             self.peep_time_awake[peep] += 1
             
         '''
@@ -124,11 +125,16 @@ class Lodge:
             peep.stats.resource_change(cost.name, cgb(cost.val_amount))
             
         # deal with objective
+        #TODO: don't store barricade or cleanliness objs
         if activity.objective != None:
             self.made_stuff.append(activity.objective)
         
-        # dirty the room from use    
-        self.rooms[activity.location].clean(-5)
+        # hurt peep if room cleanliness is == 0
+        # +50% stress if cleanliness is <= 25
+        
+        # dirty the room from use
+        if activity.name != 'Clean':   
+            self.rooms[activity.location].clean(-5)
         
         
     def cook(self, peep:BattlePeep, meal:Meal):
@@ -142,22 +148,22 @@ class Lodge:
     def sleep(self, peep:BattlePeep):
         pass
     
-    def clean_from_act(self, act:Activity):
-        clean_targ = Clean(act.objective)
-        self.rooms[clean_targ.room].clean(clean_targ.clean_yield)
+    def clean_from_objective(self, clean_obj:Clean):
+        self.rooms[clean_obj.room].clean(clean_obj.clean_yield)
         self.update_cleanliness()
     
     def update_clean_act(self, peep:BattlePeep, room:Room, act:Activity):
-        dex_apt = peep.stats.get_apt('dex')
+        dex_apt = peep.stats.get_stat_apt('dex')
         
         # change amount based on aptitude
-        clean_amnt = 4
+        clean_amnt = 5
         if dex_apt > 1:
             clean_amnt *= dex_apt 
         elif dex_apt < 0:
             clean_amnt += dex_apt * 2
             
         act.objective = Clean(f'Cleaning {room.name}', clean_amnt, room.name)
+        act.location = room.name
     
     def game(self, peep:BattlePeep, game):
         pass
