@@ -199,7 +199,7 @@ ACTIVITIES = [
         gauge_costs=[
             StatChange("tres",-15),
             ],
-        location='Kitchen'),
+        location=''),
     
     Activity(
         "Cook", tags=[],

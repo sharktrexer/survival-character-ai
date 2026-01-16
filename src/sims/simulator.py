@@ -103,7 +103,7 @@ class Simulator(ABC):
         else:
             return choices[choice]
     
-    def get_choice_with_exit(self, choices:list, prompt: str = ""):
+    def get_choice_with_exit(self, choices:list, prompt: str = "", get_index: bool = False):
         '''
         calls get_choice but adds an exit option where None can be returned
         Will always return a copy of the object in provided list and not the index
@@ -113,7 +113,7 @@ class Simulator(ABC):
         '''
         choices = copy.deepcopy(choices)
         choices.append(self.EXIT_KEY)
-        choice = self.get_choice(choices=choices, get_index = False, prompt=prompt)
+        choice = self.get_choice(choices=choices, get_index = get_index, prompt=prompt)
         
         if choice == self.EXIT_KEY:
             return None
@@ -221,22 +221,24 @@ class Simulator(ABC):
         Run a mini simulation where the user is given a list of functions
         to choose from. The chosen function is then called with the provided
         arguments. If the user chooses to exit, the function returns None.
+        DOES NOT use copies of the functions or objects attached to them.
         
         Parameters:
             func_list (list[function]): list of functions to choose from
             args (list): arguments to pass to the chosen function
             prompt (str, optional): prompt to display when asking for user input. Defaults to "".
         """
-
+        func_list_copy = copy.deepcopy(func_list)
+        
         while True:
             # choose different funcs to pass args to
             print(prompt)
-            chosen_func = self.get_choice_with_exit(func_list, prompt) 
+            chosen_func_ind = self.get_choice_with_exit(func_list_copy, prompt, get_index=True) 
             
-            if chosen_func is None:
+            if chosen_func_ind == len(func_list):
                 return
                 
-            chosen_func(*args)     
+            func_list[chosen_func_ind](*args)     
  
 '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -896,7 +898,8 @@ class LodgeSimulator(Simulator):
                     self.choose_activity, 
                     self.march_time_forward,
                     self.print_peep_stat_info, self.print_peep_gauge_info,
-                    self.print_time_info,]
+                    self.print_time_info,
+                    self.debug]
         self.debug_funcs = [self.dirty_rooms, self.reset]
         self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
         
@@ -968,7 +971,7 @@ class LodgeSimulator(Simulator):
                 
         # APPLY FINISHED ACTIVITY STUFF
         for f_act in finished_acts:
-            self.handle_finishing_cool_activity(f_act)
+            self.handle_finishing_cool_activity(f_act.activity)
             # for all peeps in group
             for p_name in f_act.get_all_peep_names():
                 peep = self.peeps[p_name]
@@ -984,6 +987,7 @@ class LodgeSimulator(Simulator):
                 # get group info
                 group_members = f_act.get_all_peep_names()[:]
                 group_members.remove(peep.name)
+                g_mems_str = ''
                 if f_act.is_group():
                     g_mems_str = (' with ' 
                                      + ", ".join(group_members)
@@ -1000,10 +1004,10 @@ class LodgeSimulator(Simulator):
         
     def handle_finishing_cool_activity(self, act:Activity):
         if act.name == 'Clean':
-            cleaned = Clean(act)
+            cleaned:Clean = act.objective
             past_clean = self.lodge.rooms[cleaned.room].cleanliness
-            self.lodge.clean_from_act(act)
-            print(f'Cleaned {cleaned.clean_yield} in {cleaned.room.name}!')
+            self.lodge.clean_from_objective(cleaned)
+            print(f'Cleaned {cleaned.clean_yield} in {cleaned.room}!')
             print(f'{past_clean} -> {self.lodge.rooms[cleaned.room].cleanliness}')       
     
     def reset(self):
@@ -1045,7 +1049,7 @@ class LodgeSimulator(Simulator):
                                          same_acts_bein_done[join_ind])
         else:
             # add to activity list to tick
-            self.handle_cool_acts(a_choice)
+            self.handle_cool_acts(self.player, a_choice)
             act_man.add_activity(self.player.name, a_choice)
         
         # speed thru time
@@ -1054,12 +1058,12 @@ class LodgeSimulator(Simulator):
             self.march_time_forward()
 
     def handle_cool_acts(self, peep:BattlePeep, activity:Activity):
-        if activity.activity.name == 'Clean':
+        if activity.name == 'Clean':
             prompt = 'Which room would you like to clean?'
             choices = [r for r in self.lodge.rooms.keys()]
             room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
             
-            self.lodge.update_clean_act(peep, room_chosen, activity)
+            self.lodge.update_clean_act(peep, self.lodge.rooms[room_chosen], activity)
     
     def print_time_info(self):
         print( f"{self.lodge.time_keeper} ")
@@ -1074,8 +1078,11 @@ class LodgeSimulator(Simulator):
         return self.peeps[name]
     
     def dirty_rooms(self):
+        dirt = -25
+        print(f'Dirtying all rooms by {dirt}')
         for r in self.lodge.rooms.keys():
-            self.lodge.rooms[r].cleanliness -= 25
+            self.lodge.rooms[r].clean(dirt)
+        
     
     '''
     Specific Activity Functions
