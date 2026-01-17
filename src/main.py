@@ -10,7 +10,7 @@ def main():
         
     print("\n\nWelcome to the peep simulator!\n" +
           "Here you can choose different simulations to run," 
-          "from displaying data, or controlling a battle.")
+          " from displaying data, to controlling a battle.")
     
     while True:
         valid = False

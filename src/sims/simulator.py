@@ -1,8 +1,8 @@
 from activity_mechanics.activities import Activity, ACTIVITIES
-from activity_mechanics.house_keeping import Clean
+from activity_mechanics.house_keeping import Barricade, Clean
 from activity_mechanics.lodge_manager import Lodge
 from activity_mechanics.progress import ActivityProgress
-from activity_mechanics.resources import ResourceManager
+from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
 from peep_data.data_reader import SIMPLE_PEEPS, PEEPS
 from battle.stats import Stat, STAT_TYPES
 from battle.battle_peep import BattlePeep
@@ -159,17 +159,16 @@ class Simulator(ABC):
         
         """
         Asks user to enter a certain number of numbers separated by spaces. Can specify 
-        conditions for each input number. If user enters self.EXIT_KEY, ends the input process 
-        and returns False. If user enters an invalid number of inputs, or if any of the inputs 
-        do not meet the associated condition, asks user again. If user enters valid inputs, 
-        updates the input_form_dict with the inputs.
+        conditions for each input number. 
+        If user enters self.EXIT_KEY, function is aborted.
+        If user enters an invalid number of inputs, or if any of the inputs 
+        do not meet the associated condition, asks user again. 
+        If user enters valid inputs, updates the input_form_dict with the inputs.
         
         Parameters:
             input_form_dict (dict): dictionary to store the inputs. Keys are the names of the inputs
             conds (list[function]): list of functions to check the inputs against. The i-th function takes
                 the i-th input as an argument and returns a boolean
-        Returns:
-            bool: True if inputs are valid, False if user wants to exit
         """
         
         if len(input_form_dict.keys()) != len(conds):
@@ -186,9 +185,9 @@ class Simulator(ABC):
                 continue
             
             if user_nums[0] == self.EXIT_KEY:
-                return False
+                return
                         
-            if len(user_nums) < req_num_of_ins or len(user_nums) > req_num_of_ins:
+            if len(user_nums) != req_num_of_ins:
                 print("Incorrect number of inputs received: " + str(len(user_nums)) + " instead of " + str(req_num_of_ins))
                 continue
             
@@ -214,7 +213,7 @@ class Simulator(ABC):
             if not valid:
                 continue
                 
-            return True
+            return
     
     def mini_sim(self, *, func_list:list[Callable], args:list, prompt: str = ""):    
         """
@@ -897,11 +896,11 @@ class LodgeSimulator(Simulator):
         self.funcs = [
                     self.choose_activity, 
                     self.march_time_forward,
-                    self.print_peep_stat_info, self.print_peep_gauge_info,
+                    self.print_player_stat_info, self.print_player_gauge_info,
                     self.print_time_info,
                     self.debug]
-        self.debug_funcs = [self.dirty_rooms, self.reset]
-        self.lodge = Lodge(name='Lodge Simulator', resourcer=ResourceManager())
+        self.debug_funcs = [self.dirty_rooms, self.obtain_resources, self.reset]
+        self.lodge = None
         
     def welcome(self):
         print(f"Welcome to the {self.name}!\n",
@@ -909,8 +908,18 @@ class LodgeSimulator(Simulator):
               "These activities will increase their stats over time.",
               "As days pass, seasons will change and with it, the duration of night and day.") 
         t.sleep(0.2) 
-        self.lodge.activity_man.add_activity('Jayce', ACTIVITIES[0])
         self.choose_peep()
+        self.choose_starting_resources()
+        self.lodge.activity_man.add_activity('Jayce', ACTIVITIES[0])
+        self.print_time_info()
+    
+    def choose_starting_resources(self):
+        print('Please input how many of every resource you would like to start with.')
+        startin = { "resources": 0}
+        conditions = [None]
+        self.obtain_number_inputs(input_form_dict=startin, conds=conditions)
+        self.lodge = Lodge(name='Lodge Simulator', 
+                           resourcer=ResourceManager(starting_resc=int(startin['resources'])))
         
     def choose_peep(self):
         prompt = 'Please select a character to control.'
@@ -1001,6 +1010,7 @@ class LodgeSimulator(Simulator):
                 print("Gauge Changes: ")
                 print(peep.get_gauge_info_str(past_peep))
                 
+        self.print_time_info()
         
     def handle_finishing_cool_activity(self, act:Activity):
         if act.name == 'Clean':
@@ -1008,7 +1018,14 @@ class LodgeSimulator(Simulator):
             past_clean = self.lodge.rooms[cleaned.room].cleanliness
             self.lodge.clean_from_objective(cleaned)
             print(f'Cleaned {cleaned.clean_yield} in {cleaned.room}!')
-            print(f'{past_clean} -> {self.lodge.rooms[cleaned.room].cleanliness}')       
+            print(f'{past_clean} -> {self.lodge.rooms[cleaned.room].cleanliness}')
+            
+        elif act.name == 'Barricade':
+            barricaded:Barricade = act.objective
+            past_def = self.lodge.rooms[barricaded.room].defense
+            self.lodge.barricade_from_objective(barricaded)
+            print(f'Barricaded {barricaded.def_yield} in {barricaded.room}!')
+            print(f'{past_def} -> {self.lodge.rooms[barricaded.room].defense}')       
     
     def reset(self):
         print('\nNOT YET IMPLEMENTED')
@@ -1030,6 +1047,12 @@ class LodgeSimulator(Simulator):
             print(f"You are too stressed to do that! {a_choice.get_stress_cost()} > {self.player.points_of('tres')}")
             return
         
+        # can the lodge's resources sustain the activity?
+        if a_choice.name == 'Barricade' and self.lodge.resourcer.resources[ResourcesType.MATERIALS].amount < 10:
+            print('You need more materials to do a barricade!')
+            return
+        
+        '''  '''
         self.player_in_activity = True
         
         # check if that activity is already being done
@@ -1047,6 +1070,10 @@ class LodgeSimulator(Simulator):
             if join_ind < len(same_acts_bein_done):
                 act_man.add_peep_to_activity(self.player.name, 
                                          same_acts_bein_done[join_ind])
+            else:
+                # add to activity list to tick
+                self.handle_cool_acts(self.player, a_choice)
+                act_man.add_activity(self.player.name, a_choice)
         else:
             # add to activity list to tick
             self.handle_cool_acts(self.player, a_choice)
@@ -1064,14 +1091,23 @@ class LodgeSimulator(Simulator):
             room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
             
             self.lodge.update_clean_act(peep, self.lodge.rooms[room_chosen], activity)
+        
+        elif activity.name == 'Barricade':
+            prompt = 'Which room would you like to barricade?'
+            choices = [r for r in self.lodge.rooms.keys()]
+            room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
+            
+            self.lodge.update_barricade_act(peep, self.lodge.rooms[room_chosen], activity)
+            self.lodge.resourcer.exchange([Resource(ResourcesType.MATERIALS, 10)])
+
     
     def print_time_info(self):
         print( f"{self.lodge.time_keeper} ")
         
-    def print_peep_stat_info(self, past_peep:BattlePeep = None):
+    def print_player_stat_info(self, past_peep:BattlePeep = None):
         print(self.player.get_stat_info_pretty_str(past_peep))
         
-    def print_peep_gauge_info(self, past_peep:BattlePeep = None):
+    def print_player_gauge_info(self, past_peep:BattlePeep = None):
         print(self.player.get_gauge_info_str(past_peep))
         
     def get_peep_by_name(self, name:str):
@@ -1083,6 +1119,11 @@ class LodgeSimulator(Simulator):
         for r in self.lodge.rooms.keys():
             self.lodge.rooms[r].clean(dirt)
         
+    def obtain_resources(self):
+        amnt = 25
+        print(f'Obtained {amnt} of all resources')
+        for r in self.lodge.resourcer.resources.keys():
+            self.lodge.resourcer.resources[r].amount += amnt
     
     '''
     Specific Activity Functions
@@ -1130,13 +1171,5 @@ class LodgeSimulator(Simulator):
             Pull Weeds
             Kill Pests
         Harvest fully grown crops to gain ingredients, based on plant and how it was cared for
-        
-    Barricade
-        Choose where to reinforce
-        And by how much 
-            Better barricades require more materials but give better conversion to defense
-            Defense helps resist against injuries or accidents
-            Strength increases efficacy of construction
-            1 barricade can be put up per enterance
             
     '''

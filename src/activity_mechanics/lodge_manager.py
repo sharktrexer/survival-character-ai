@@ -9,9 +9,10 @@ from activity_mechanics.progress import ActivityProgress
 from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
 from activity_mechanics.time_management import TimeKeeper
 from activity_mechanics.farming import PLANTS, Plant
-from activity_mechanics.house_keeping import BARRICADES, Barricade, Clean
+from activity_mechanics.house_keeping import Barricade, Clean
 
 from battle.battle_peep import BattlePeep
+from battle.stats import get_mult_of_aptitude
 from utils.helpers import Calcs
 from peep_data.data_reader import PEEPS
 
@@ -19,10 +20,16 @@ class Room:
     def __init__(self, name:str, exits:list[Room]=[], cleanliness=100):
         self.name = name
         self.cleanliness = cleanliness
+        self.defense = 0
+        self.max_defense = 50
         
     def clean(self, amount):
         self.cleanliness += amount
         self.cleanliness = Calcs.clamp_100(self.cleanliness)
+        
+    def barricade(self, amount):
+        self.defense += amount
+        self.defense = Calcs.clamp_int(self.defense, min_v=0, max_v=self.max_defense)
         
 
 ROOMS = [
@@ -125,8 +132,8 @@ class Lodge:
             peep.stats.resource_change(cost.name, cgb(cost.val_amount))
             
         # deal with objective
-        #TODO: don't store barricade or cleanliness objs
-        if activity.objective != None:
+        # don't store barricade or cleanliness objs
+        if activity.objective != None and not isinstance(activity.objective, Clean) and not isinstance(activity.objective, Barricade):
             self.made_stuff.append(activity.objective)
         
         # hurt peep if room cleanliness is == 0
@@ -151,18 +158,26 @@ class Lodge:
     def clean_from_objective(self, clean_obj:Clean):
         self.rooms[clean_obj.room].clean(clean_obj.clean_yield)
         self.update_cleanliness()
+        
+    def barricade_from_objective(self, barricade_obj:Barricade):
+        self.rooms[barricade_obj.room].barricade(barricade_obj.def_yield)
     
     def update_clean_act(self, peep:BattlePeep, room:Room, act:Activity):
         dex_apt = peep.stats.get_stat_apt('dex')
         
         # change amount based on aptitude
-        clean_amnt = 5
-        if dex_apt > 1:
-            clean_amnt *= dex_apt 
-        elif dex_apt < 0:
-            clean_amnt += dex_apt * 2
+        clean_amnt = round(5 * get_mult_of_aptitude(dex_apt))
             
         act.objective = Clean(f'Cleaning {room.name}', clean_amnt, room.name)
+        act.location = room.name
+        
+    def update_barricade_act(self, peep:BattlePeep, room:Room, act:Activity):
+        def_apt = peep.stats.get_stat_apt('def')
+        
+        # change barricade amount based on apt
+        barricade_amnt = round(10 * get_mult_of_aptitude(def_apt))
+            
+        act.objective = Barricade(f'Barricading {room.name}', barricade_amnt, room.name)
         act.location = room.name
     
     def game(self, peep:BattlePeep, game):

@@ -8,7 +8,6 @@ class ResourcesType(Enum):
     FOOD = auto()
     
     MATERIALS = auto()
-    DEFENSE = auto()
     
     
 class Resource():
@@ -26,12 +25,13 @@ class ResourceManager:
     '''
     Manages the resources owned by the lodge.
     '''
-    def __init__(self, resources:list[Resource] = []):
+    def __init__(self, resources:list[Resource] = [], starting_resc:int=0):
         '''
         Constructor
         
         Creates a resource list with the given resources
         If none is provided, default resource with each starting at 0 is created
+        Provide starting_resc to change from 0
         '''
         if len(resources) != 0 and len(resources) != len(ResourcesType):
             raise Exception((f"Incorrect number of resources provided:" 
@@ -39,17 +39,16 @@ class ResourceManager:
                              f" {len(ResourcesType)} types of resources!"))
         
         if resources != []:
-            self.resources = {r.type: r for r in resources}
+            self.resources:dict[ResourcesType, Resource] = {r.type: r for r in resources}
         else:
             self.resources = {r.type: r for r in EMPTY_RESOURCE_LIST}
+            for r in self.resources.values():
+                r.amount = starting_resc
             
     
     def obtain(self, gain:list[Resource]):
         for r in gain:
-            self.resources[r.type].amount += r.amount
-            
-        self.cap_grime()
-         
+            self.resources[r.type].amount += r.amount         
     
     def can_cover_the_cost(self, cost:list[Resource]): 
         for r in cost:
@@ -69,16 +68,13 @@ class ResourceManager:
         
         temp_resources = deepcopy(self.resources)
         
-        for r in cost:
-            if self.resources[r.type].amount < r.amount:
-                raise Exception(f"Not enough resources to cover the cost! {self.resources[r.type].amount} < {r.amount}")
-            temp_resources[r.type].amount -= r.amount
-            temp_resources[r.type].amount = max(0, temp_resources[r.type].amount)
+        for r_cost in cost:
+            if self.resources[r_cost.type].amount < r_cost.amount:
+                raise Exception(f"Not enough resources to cover the cost! {self.resources[r_cost.type].amount} < {r_cost.amount}")
+            temp_resources[r_cost.type].amount -= r_cost.amount
         
         self.update_resources(temp_resources)
 
     
     def update_resources(self, resources:list[Resource]):
-        self.resources = deepcopy(resources)
-        self.cap_grime()
-            
+        self.resources = deepcopy(resources)            

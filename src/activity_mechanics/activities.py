@@ -4,24 +4,6 @@ from activity_mechanics.resources import Resource as ReS, ResourcesType as RT
 from activity_mechanics.time_management import PIPS_PER_HR, TimeKeeper
 from battle.stats import StatChange, sn
 
-class Tag(Enum):
-    WORK = auto()
-    LEISURE = auto()   
-    
-    RESOURCE_PRODUCING = auto()
-    RESOURCE_USING = auto()
-    RESOURCE_PROCESSING = auto()
-    
-    INDOORS = auto()
-    OUTDOORS = auto()
-    
-    FLOOR1 = auto()
-    FLOOR2 = auto()
-    
-    PHYSICAL = auto()
-    EMOTIONAL = auto()
-    MIXED = auto()
-
 class Objective():
     '''
     Class that defines the result of an activity
@@ -43,10 +25,8 @@ class Activity():
                  ex_pip_cost:int=0,
                  objective:Objective = None, 
                  cost:list[ReS] = [],
-                 production:list[ReS] = [],
-                 tags:list[Tag] = []):
+                 production:list[ReS] = []):
         self.name = name
-        self.tags = tags
         self.stat_changes = stat_changes
         self.time_pip_cost = ex_pip_cost + PIPS_PER_HR
         '''
@@ -55,11 +35,7 @@ class Activity():
         '''
         self.gauge_costs = gauge_costs
         self.location = location
-        self.objective = objective
-        self.rescource_cost = cost
-        self.produced_resc = production
-        '''The resources that are produced by the activity'''
-        
+        self.objective = objective       
 
         
     def __str__(self):
@@ -93,7 +69,7 @@ class Activity():
     
 ACTIVITIES = [        
     Activity(
-        "Workout", tags=[],
+        "Workout", 
         stat_changes=[
             StatChange("str", val_amount=3, apt_xp_amount=1),
             StatChange("hun",-1, 0),
@@ -106,7 +82,7 @@ ACTIVITIES = [
         location='Gym'),
     
     Activity(
-        "Study", tags=[],
+        "Study", 
         stat_changes=[
             StatChange("int", 3, 2),
             StatChange("str",-1, 0),
@@ -118,7 +94,7 @@ ACTIVITIES = [
         location='Foyer'),
     
     Activity(
-        "Meditate", tags=[],
+        "Meditate", 
         stat_changes=[
             StatChange("tres", 1, 2),
         ],
@@ -129,7 +105,7 @@ ACTIVITIES = [
         location='Outside'),
     
     Activity(
-        "Patrol", tags=[],
+        "Patrol", 
         stat_changes=[
             StatChange("eva", 3, 2),
         ],
@@ -142,7 +118,7 @@ ACTIVITIES = [
         ),
     
     Activity(
-        "Relieve Yourself", tags=[],
+        "Relieve Yourself", 
         stat_changes=[
             StatChange("tres", 3, 0),
             StatChange("cha",-2, -2),
@@ -153,7 +129,7 @@ ACTIVITIES = [
         location='Locker Room'),
     
     Activity(
-        "Game", tags=[],
+        "Game", 
         stat_changes=[
             StatChange("dex", 2, 3),
             StatChange("tres", 1, 0),
@@ -165,7 +141,7 @@ ACTIVITIES = [
         location='Living Room'),
     
     Activity(
-        "Gaze Upon Your Visage", tags=[],
+        "Gaze Upon Your Visage", 
         stat_changes=[
             StatChange("cha", 2, 1),
             StatChange("tres", 1, 0),
@@ -178,7 +154,7 @@ ACTIVITIES = [
         location='Locker Room'),
 
     Activity(
-        "Practice Your Mean Face", tags=[],
+        "Practice Your Mean Face", 
         stat_changes=[
             StatChange("itmd", 2, 1),
             StatChange("fear", 1, 0),
@@ -192,7 +168,7 @@ ACTIVITIES = [
         location='Locker Room'),
     
     Activity(
-        "Clean", tags=[],
+        "Clean", 
         stat_changes=[
             StatChange("dex", 3, 1),
         ],
@@ -202,13 +178,13 @@ ACTIVITIES = [
         location=''),
     
     Activity(
-        "Cook", tags=[],
+        "Barricade", 
         stat_changes=[
-            StatChange("cre", 1, 1),
+            StatChange("def", 3, 1),
         ],
         gauge_costs=[
-            StatChange("tres",-5),
+            StatChange("tres",-15),
             ],
-        location='Kitchen'),
+        location=''),
 
 ]
