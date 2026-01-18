@@ -1,5 +1,4 @@
-from activity_mechanics.activities import Activity, ACTIVITIES
-from activity_mechanics.house_keeping import Barricade, Clean
+from activity_mechanics.activities import Activity, ACTIVITIES, SimpleResult
 from activity_mechanics.lodge_manager import Lodge
 from activity_mechanics.progress import ActivityProgress
 from activity_mechanics.resources import Resource, ResourceManager, ResourcesType
@@ -1010,22 +1009,15 @@ class LodgeSimulator(Simulator):
                 print("Gauge Changes: ")
                 print(peep.get_gauge_info_str(past_peep))
                 
-        self.print_time_info()
+        #self.print_time_info()
         
     def handle_finishing_cool_activity(self, act:Activity):
-        if act.name == 'Clean':
-            cleaned:Clean = act.objective
-            past_clean = self.lodge.rooms[cleaned.room].cleanliness
-            self.lodge.clean_from_objective(cleaned)
-            print(f'Cleaned {cleaned.clean_yield} in {cleaned.room}!')
-            print(f'{past_clean} -> {self.lodge.rooms[cleaned.room].cleanliness}')
-            
-        elif act.name == 'Barricade':
-            barricaded:Barricade = act.objective
-            past_def = self.lodge.rooms[barricaded.room].defense
-            self.lodge.barricade_from_objective(barricaded)
-            print(f'Barricaded {barricaded.def_yield} in {barricaded.room}!')
-            print(f'{past_def} -> {self.lodge.rooms[barricaded.room].defense}')       
+        if act.objective == None:
+            return
+        
+        change = self.lodge.apply_simple_act_rslt(act)
+        verb = f'{act.name}ed' if act.name[-1] != 'e' else f'{act.name}d'
+        print(f'{verb} the {act.location}! {change[0]} -> {change[1]}')    
     
     def reset(self):
         print('\nNOT YET IMPLEMENTED')
@@ -1085,20 +1077,14 @@ class LodgeSimulator(Simulator):
             self.march_time_forward()
 
     def handle_cool_acts(self, peep:BattlePeep, activity:Activity):
-        if activity.name == 'Clean':
-            prompt = 'Which room would you like to clean?'
-            choices = [r for r in self.lodge.rooms.keys()]
-            room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
-            
-            self.lodge.update_clean_act(peep, self.lodge.rooms[room_chosen], activity)
+        if activity.objective == None:
+            return
         
-        elif activity.name == 'Barricade':
-            prompt = 'Which room would you like to barricade?'
-            choices = [r for r in self.lodge.rooms.keys()]
-            room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
-            
-            self.lodge.update_barricade_act(peep, self.lodge.rooms[room_chosen], activity)
-            self.lodge.resourcer.exchange([Resource(ResourcesType.MATERIALS, 10)])
+        prompt = f'Which room would you like to {activity.name.lower()}?'
+        choices = [r for r in self.lodge.rooms.keys()]
+        room_chosen = self.get_choice(choices, get_index=False, prompt=prompt)
+        
+        self.lodge.update_simple_result(peep, self.lodge.rooms[room_chosen], activity)
 
     
     def print_time_info(self):

@@ -1,15 +1,21 @@
 from enum import Enum, auto
 
-from activity_mechanics.resources import Resource as ReS, ResourcesType as RT
 from activity_mechanics.time_management import PIPS_PER_HR, TimeKeeper
 from battle.stats import StatChange, sn
 
-class Objective():
+class ActResult():
     '''
     Class that defines the result of an activity
     '''
     def __init__(self, name:str):
         self.name = name
+        
+class SimpleResult(ActResult):
+    def __init__(self, name:str, change:int, room:str):
+        super().__init__(name)
+        self.change = change
+        self.room = room
+        
 
 class Activity():
     '''
@@ -23,9 +29,8 @@ class Activity():
                  gauge_costs:list[StatChange],
                  location:str,
                  ex_pip_cost:int=0,
-                 objective:Objective = None, 
-                 cost:list[ReS] = [],
-                 production:list[ReS] = []):
+                 objective:ActResult = None, 
+                 ):
         self.name = name
         self.stat_changes = stat_changes
         self.time_pip_cost = ex_pip_cost + PIPS_PER_HR
@@ -175,7 +180,8 @@ ACTIVITIES = [
         gauge_costs=[
             StatChange("tres",-15),
             ],
-        location=''),
+        location='',
+        objective=SimpleResult('', 0, '')),
     
     Activity(
         "Barricade", 
@@ -185,6 +191,7 @@ ACTIVITIES = [
         gauge_costs=[
             StatChange("tres",-15),
             ],
-        location=''),
+        location='',
+        objective=SimpleResult('', 0, '')),
 
 ]

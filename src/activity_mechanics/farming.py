@@ -1,4 +1,4 @@
-from activity_mechanics.activities import Objective
+from activity_mechanics.activities import ActResult
 
 
 class Plant():
@@ -9,7 +9,7 @@ class Plant():
         self.growth_time = days_to_grow
         self.req_rec = req_rec
 
-class PlantCare(Objective):
+class PlantCare(ActResult):
     def __init__(self, name:str, Plant:Plant):
         self.name = name
         self.plant = Plant

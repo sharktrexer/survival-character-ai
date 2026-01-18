@@ -1,7 +1,7 @@
-from activity_mechanics.activities import Objective
+from activity_mechanics.activities import ActResult
 
 
-class Meal(Objective):
+class Meal(ActResult):
     def __init__(self, name:str, req_ingr:int, req_cre:int, hun_rest:int, serves:int=1):
         self.name = name
         self.req_ingr = req_ingr
@@ -33,3 +33,21 @@ MEALS = [
 
     
 ]
+
+'''
+activity list, choose Cook:
+    -can the player pass basic activity conditions? not stressed out etc-
+    if joining group:
+        join it
+    if creating new activity progress:
+        which meal to do? only show valid choices. 
+            -player meets correct stats, and lodge has the resources-
+            can exit to activity menu
+        create activity progress using meal objective chosen
+            add pip cost based on meal 
+            take away resource from lodge based on meal
+        
+finishing activity:
+    give stat bonuses based on difficulty of meal completed
+    provide resource to lodge
+'''
